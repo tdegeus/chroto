@@ -13,46 +13,48 @@
 #include <vector>
 #include <string>
 
+#include "easyexif/exif.h"
+
 // ============================================================================
 
-class Files
-{
-private:
-  std::vector<std::string> _src;
-  std::vector<std::string> _dest;
-  std::vector<std::string> _path;
-  std::vector<int>         _set;
+//class Files
+//{
+//private:
+//  std::vector<std::string> _src;
+//  std::vector<std::string> _dest;
+//  std::vector<std::string> _path;
+//  std::vector<int>         _set;
 
-public:
+//public:
 
-  Files (const Files &) = default;
+//  Files (const Files &) = default;
 
-  Files& operator=(const Files &) = default;
+//  Files& operator=(const Files &) = default;
 
-  Files(){};
+//  Files(){};
 
-  size_t size ( void ) { return _src.size(); };
+//  size_t size ( void ) { return _src.size(); };
 
-  void push_back ( QString fileName, int set )
-  {
-    QFile f(fileName);
-    QFileInfo fileInfo(f.fileName());
-    _src .push_back(fileInfo.fileName().toStdString());
-    _path.push_back(fileInfo.absoluteDir().dirName().toStdString());
-//    _dest.push_back(""   );
-    _set .push_back(set  );
-  };
+//  void push_back ( QString fileName, int set )
+//  {
+//    QFile f(fileName);
+//    QFileInfo fileInfo(f.fileName());
+//    _src .push_back(fileInfo.fileName().toStdString());
+//    _path.push_back(fileInfo.absoluteDir().dirName().toStdString());
+////    _dest.push_back(""   );
+//    _set .push_back(set  );
+//  };
 
-  QString src_short ( size_t idx )
-  {
-    QString out;
+//  QString src_short ( size_t idx )
+//  {
+//    QString out;
 
-//    if ( std::abs(_set[idx])==1 )
-//      out = QString::fromStdString(content)
+////    if ( std::abs(_set[idx])==1 )
+////      out = QString::fromStdString(content)
 
-  };
+//  };
 
-};
+//};
 
 // ============================================================================
 
@@ -76,7 +78,6 @@ private slots:
 
 private:
   Ui::MainWindow *ui;
-  Files           data;
 };
 
 #endif // MAINWINDOW_H
