@@ -1,0 +1,3 @@
+[submodule "src/easyexif"]
+	path = src/easyexif
+	url = https://github.com/mayanklahiri/easyexif.git
