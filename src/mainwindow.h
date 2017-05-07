@@ -18,6 +18,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 
 #include "easyexif/exif.h"
 
@@ -62,6 +63,8 @@ private slots:
   void on_later_pushButton_clicked();
   void on_later_all_pushButton_clicked();
   void on_del_pushButton_clicked();
+
+  void on_write_pushButton_clicked();
 
 private:
   Ui::MainWindow     *ui;

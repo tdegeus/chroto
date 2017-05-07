@@ -86,32 +86,36 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(I2v,SIGNAL(valueChanged(int)),I1v,SLOT(setValue(int)));
 
   // update image counter
-  connect(ui->next_pushButton,&QPushButton::clicked,[=](){if (idx+1<data.size()) ++idx; });
-  connect(ui->prev_pushButton,&QPushButton::clicked,[=](){if (idx>0            ) --idx; });
+  connect(ui->first_pushButton,&QPushButton::clicked,[=](){idx=0; });
+  connect(ui->last_pushButton ,&QPushButton::clicked,[=](){idx=data.size()-1; while ( !data[idx-1].include ) { --idx; if ( idx==0 ) break; } });
+  connect(ui->next_pushButton ,&QPushButton::clicked,[=](){if (idx+1<data.size()) ++idx; });
+  connect(ui->prev_pushButton ,&QPushButton::clicked,[=](){if (idx>0            ) --idx; });
 
-  // update file display
-  connect(ui->folder_pushButton   ,SIGNAL(clicked(bool)),this,SLOT(updateFiles()));
-  connect(ui->add_pushButton      ,SIGNAL(clicked(bool)),this,SLOT(updateFiles()));
-  connect(ui->folder_rm_pushButton,SIGNAL(clicked(bool)),this,SLOT(updateFiles()));
-  connect(ui->add_rm_pushButton   ,SIGNAL(clicked(bool)),this,SLOT(updateFiles()));
-  // resort data / update file-list / display image
-  connect(ui->folder_pushButton     ,&QPushButton::clicked      ,[=](){this->dataSort();    });
-  connect(ui->add_pushButton        ,&QPushButton::clicked      ,[=](){this->dataSort();    });
-  connect(ui->earlier_pushButton    ,&QPushButton::clicked      ,[=](){this->dataSort();    });
-  connect(ui->earlier_all_pushButton,&QPushButton::clicked      ,[=](){this->dataSort();    });
-  connect(ui->later_pushButton      ,&QPushButton::clicked      ,[=](){this->dataSort();    });
-  connect(ui->later_all_pushButton  ,&QPushButton::clicked      ,[=](){this->dataSort();    });
-  connect(ui->del_pushButton        ,&QPushButton::clicked      ,[=](){this->dataSort();    });
-  connect(ui->tabWidget             ,&QTabWidget::currentChanged,[=](){this->dataSort();    });
-  connect(ui->tabWidget             ,&QTabWidget::currentChanged,[=](){this->updateFiles(); });
-  connect(ui->tabWidget             ,&QTabWidget::currentChanged,[=](){this->displayImage();});
-  connect(ui->earlier_pushButton    ,&QPushButton::clicked      ,[=](){this->displayImage();});
-  connect(ui->earlier_all_pushButton,&QPushButton::clicked      ,[=](){this->displayImage();});
-  connect(ui->later_pushButton      ,&QPushButton::clicked      ,[=](){this->displayImage();});
-  connect(ui->later_all_pushButton  ,&QPushButton::clicked      ,[=](){this->displayImage();});
-  connect(ui->del_pushButton        ,&QPushButton::clicked      ,[=](){this->displayImage();});
-  connect(ui->prev_pushButton       ,&QPushButton::clicked      ,[=](){this->displayImage();});
-  connect(ui->next_pushButton       ,&QPushButton::clicked      ,[=](){this->displayImage();});
+  // re-sort data / update file-list / display image
+  connect(ui->folder_pushButton     ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
+  connect(ui->add_pushButton        ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
+  connect(ui->earlier_pushButton    ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
+  connect(ui->earlier_all_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
+  connect(ui->later_pushButton      ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
+  connect(ui->later_all_pushButton  ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
+  connect(ui->del_pushButton        ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
+  connect(ui->folder_pushButton     ,SIGNAL(clicked(bool)),this,SLOT(updateFiles() ));
+  connect(ui->add_pushButton        ,SIGNAL(clicked(bool)),this,SLOT(updateFiles() ));
+  connect(ui->folder_rm_pushButton  ,SIGNAL(clicked(bool)),this,SLOT(updateFiles() ));
+  connect(ui->add_rm_pushButton     ,SIGNAL(clicked(bool)),this,SLOT(updateFiles() ));
+  connect(ui->earlier_pushButton    ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->earlier_all_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->later_pushButton      ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->later_all_pushButton  ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->del_pushButton        ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->prev_pushButton       ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->next_pushButton       ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->first_pushButton      ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->last_pushButton       ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  // re-sort data / update file-list / display image
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->dataSort();    });
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->updateFiles(); });
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->displayImage();});
 }
 
 // ============================================================================
@@ -138,49 +142,48 @@ void MainWindow::promptWarning ( QString msg )
 
 void MainWindow::updateFiles ( void )
 {
-  // Empty list widgets
-  // ------------------
-
+  // empty list widgets
   while(ui->folder_listWidget->count()>0)
     ui->folder_listWidget->takeItem(0);
   while(ui->add_listWidget->count()>0)
     ui->add_listWidget->takeItem(0);
 
+  // empty list -> exit
   if ( data.size()==0 )
     return;
 
-  // Read the time, if it was not read before
-  // ----------------------------------------
+  // suggest output
+  int N = 0;
+  QString tmp;
+  for ( size_t i = 0; i < data.size(); ++i ) {
+    tmp = QString::number(i);
+    N   = std::max(N,tmp.length());
+  }
+  tmp = "-%0"+QString::number(N);
 
-  // Sort based on time
-  // ------------------
-
-  this->dataSort();
-
-  // Display in listWidgets
-  // ----------------------
+  ui->name_comboBox->clear();
+  ui->name_comboBox->addItem(tmp);
 
   // get common file-path from files to add
+  // - allocate temp. variables
   std::vector<std::string> lst;
   std::string path;
-
+  // - collect paths
   for ( size_t i = 0; i < data.size(); ++i ) {
     if ( data[i].add ) {
       lst.push_back(data[i].path.toStdString());
     }
   }
-
+  // - strip common file-path in display name
   if ( lst.size()>0 ){
     path = longestPath(lst,QDir::separator().toLatin1());
     QDir dir(QString::fromStdString(path));
-
     for ( size_t i = 0; i < data.size(); ++i ) {
       if ( data[i].add ) {
         data[i].disp = dir.relativeFilePath(data[i].path);
       }
     }
   }
-
   // add to listWidgets
   for ( size_t i = 0; i < data.size(); ++i ) {
     if ( !data[i].add ) {
@@ -262,6 +265,7 @@ void MainWindow::on_folder_pushButton_clicked()
   QString dirName = dir.absolutePath();
 
   ui->folder_lineEdit->setText(dirName);
+  path = dirName;
 
   QFileInfoList list = dir.entryInfoList(filters,QDir::Files);
   std::time_t t;
@@ -320,6 +324,16 @@ void MainWindow::on_add_pushButton_clicked()
 
 void MainWindow::displayImage(void)
 {
+  ui->prev_pushButton       ->setEnabled(false);
+  ui->next_pushButton       ->setEnabled(false);
+  ui->first_pushButton      ->setEnabled(false);
+  ui->last_pushButton       ->setEnabled(false);
+  ui->earlier_pushButton    ->setEnabled(false);
+  ui->earlier_all_pushButton->setEnabled(false);
+  ui->later_pushButton      ->setEnabled(false);
+  ui->later_all_pushButton  ->setEnabled(false);
+  ui->del_pushButton        ->setEnabled(false);
+
   if ( data.size()==0 )
     return;
 
@@ -328,7 +342,7 @@ void MainWindow::displayImage(void)
     init = false;
   }
 
-  ui->view_Label->clear();
+  ui->view_Label     ->clear();
   ui->view_prev_label->clear();
   ui->view_next_label->clear();
 
@@ -339,6 +353,8 @@ void MainWindow::displayImage(void)
   QTransform trans = transform.rotate(orientation2angle(data[idx].orientation));
   ui->view_Label->setPixmap(p.scaled(w,h,Qt::KeepAspectRatio).transformed(trans));
 
+  ui->del_pushButton->setEnabled(true);
+
   if ( idx+1 < data.size() )
   {
     QPixmap pn(data[idx+1].path);
@@ -347,6 +363,11 @@ void MainWindow::displayImage(void)
     QTransform transform;
     QTransform trans = transform.rotate(orientation2angle(data[idx+1].orientation));
     ui->view_next_label->setPixmap(pn.scaled(w,h,Qt::KeepAspectRatio).transformed(trans));
+    ui->next_pushButton       ->setEnabled(true);
+    ui->last_pushButton       ->setEnabled(true);
+    ui->later_pushButton      ->setEnabled(true);
+    if ( data[idx].add!=data[idx+1].add )
+      ui->later_all_pushButton  ->setEnabled(true);
   }
 
   if ( idx > 0 )
@@ -357,6 +378,11 @@ void MainWindow::displayImage(void)
     QTransform transform;
     QTransform trans = transform.rotate(orientation2angle(data[idx-1].orientation));
     ui->view_prev_label->setPixmap(pp.scaled(w,h,Qt::KeepAspectRatio).transformed(trans));
+    ui->prev_pushButton       ->setEnabled(true);
+    ui->first_pushButton      ->setEnabled(true);
+    ui->earlier_pushButton    ->setEnabled(true);
+    if ( data[idx].add!=data[idx-1].add )
+      ui->earlier_all_pushButton->setEnabled(true);
   }
 
 }
@@ -428,3 +454,19 @@ void MainWindow::on_del_pushButton_clicked()
 }
 
 // ============================================================================
+
+void MainWindow::on_write_pushButton_clicked()
+{
+  int N = 0;
+  QString tmp;
+  for ( size_t i = 0; i < data.size(); ++i ) {
+    tmp = QString::number(i);
+    N   = std::max(N,tmp.length());
+  }
+
+  for ( int i=0 ; i<static_cast<int>(data.size()) ; ++i ) {
+    QString name = ui->name_lineEdit->text() + QString("-") + QString("%1.jpg").arg(i,N,10,QChar('0'));
+    std::cout << data[i].path.toStdString() << " -> " << name.toStdString() << std::endl;
+  }
+
+}

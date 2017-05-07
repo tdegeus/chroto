@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -108,8 +108,21 @@
           </item>
           <item>
            <widget class="QPushButton" name="prev_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Previous</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="first_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>First</string>
             </property>
            </widget>
           </item>
@@ -128,6 +141,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="earlier_all_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Earlier (all)</string>
             </property>
@@ -135,6 +151,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="earlier_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Earlier</string>
             </property>
@@ -167,13 +186,19 @@
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
              <widget class="QPushButton" name="undo_pushButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Undo</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="time_pushButton">
+             <widget class="QPushButton" name="jump_pushButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Time jump</string>
               </property>
@@ -181,6 +206,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="del_pushButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="text">
                <string>Delete</string>
               </property>
@@ -223,8 +251,21 @@
           </item>
           <item>
            <widget class="QPushButton" name="next_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Next</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="last_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Last</string>
             </property>
            </widget>
           </item>
@@ -243,6 +284,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="later_all_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Later (all)</string>
             </property>
@@ -250,6 +294,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="later_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Later</string>
             </property>
@@ -304,7 +351,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="folder_lineEdit"/>
+         <widget class="QLineEdit" name="folder_lineEdit">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_2">
@@ -316,7 +367,11 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QLineEdit" name="name_lineEdit"/>
+           <widget class="QLineEdit" name="name_lineEdit">
+            <property name="text">
+             <string>sorted</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QComboBox" name="name_comboBox"/>
@@ -341,6 +396,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="clean_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Clean up</string>
             </property>
