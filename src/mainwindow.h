@@ -13,28 +13,33 @@
 #include <QListWidget>
 
 #include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <cstdlib>
 #include <vector>
 #include <string>
 #include <ctime>
-#include <iomanip>
 #include <sstream>
 #include <algorithm>
 
 #include "easyexif/exif.h"
+#include "json/json.hpp"
+
+using json = nlohmann::json;
 
 // ============================================================================
 
 class Files
 {
 public:
-  QString     path = "";
-  QString     disp = "";
-  bool        add;
-  int         rotation;
-  int         orientation;
-  bool        include = true;
-  size_t      index = 0;
-  std::time_t time;
+  QString     dir      = "";
+  QString     path     = "";
+  QString     disp     = "";
+  bool        rm       = false;
+  size_t      index    = 0;
+  size_t      camera   = 0;
+  int         rotation = 0;
+  std::time_t time     = 0;
 };
 
 // ============================================================================
@@ -52,28 +57,33 @@ public:
   ~MainWindow();
 
 private slots:
+  void selectFolder(size_t camera);
+  void filesRm(QListWidget *list);
   void updateFiles(void);
   void dataSort(void);
+  void view( QLabel *, size_t );
   void displayImage(void);
-  void filesRm(QListWidget *list);
-  void on_folder_pushButton_clicked();
-  void on_add_pushButton_clicked();
   void on_earlier_pushButton_clicked();
   void on_earlier_all_pushButton_clicked();
   void on_later_pushButton_clicked();
   void on_later_all_pushButton_clicked();
   void on_del_pushButton_clicked();
-
   void on_write_pushButton_clicked();
+  void on_output_pushButton_clicked();
+  void on_output_lineEdit_editingFinished();
 
 private:
-  Ui::MainWindow     *ui;
-  std::vector<Files> data;
-  size_t             idx  = 0;
-  bool               init = true;
-  QString            path = "";
+  Ui::MainWindow *ui;
+  size_t         idx  = 0;
+  bool           init = true;
+  std::vector<Files>        data;
+  std::vector<QListWidget*> listWidgets;
+  std::vector<QLineEdit*>   lineEdits;
+  std::vector<QPushButton*> add_pushButtons;
+  std::vector<QPushButton*> rmv_pushButtons;
   void promptWarning(QString msg);
   void dataReadTime(void);
+  void resizeEvent(QResizeEvent* event);
 };
 
 #endif // MAINWINDOW_H

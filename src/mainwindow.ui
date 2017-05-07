@@ -28,23 +28,26 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QPushButton" name="folder_pushButton">
+           <widget class="QPushButton" name="cam0_pushButton">
             <property name="text">
-             <string>Select Folder</string>
+             <string>Select folder</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="folder_listWidget">
+           <widget class="QLineEdit" name="cam0_lineEdit"/>
+          </item>
+          <item>
+           <widget class="QListWidget" name="cam0_listWidget">
             <property name="selectionMode">
              <enum>QAbstractItemView::ExtendedSelection</enum>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="folder_rm_pushButton">
+           <widget class="QPushButton" name="cam0_rm_pushButton">
             <property name="text">
-             <string>Remove selected file(s)</string>
+             <string>Remove selection</string>
             </property>
            </widget>
           </item>
@@ -53,14 +56,17 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QPushButton" name="add_pushButton">
+           <widget class="QPushButton" name="cam1_pushButton">
             <property name="text">
-             <string>Add files</string>
+             <string>Select folder</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="add_listWidget">
+           <widget class="QLineEdit" name="cam1_lineEdit"/>
+          </item>
+          <item>
+           <widget class="QListWidget" name="cam1_listWidget">
             <property name="dragEnabled">
              <bool>true</bool>
             </property>
@@ -73,9 +79,81 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="add_rm_pushButton">
+           <widget class="QPushButton" name="cam1_rm_pushButton">
             <property name="text">
-             <string>Remove selected file(s)</string>
+             <string>Remove selection</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QPushButton" name="cam2_pushButton">
+            <property name="text">
+             <string>Select folder</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="cam2_lineEdit"/>
+          </item>
+          <item>
+           <widget class="QListWidget" name="cam2_listWidget"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="cam2_rm_pushButton">
+            <property name="text">
+             <string>Remove selection</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_8">
+          <item>
+           <widget class="QPushButton" name="cam3_pushButton">
+            <property name="text">
+             <string>Select folder</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="cam3_lineEdit"/>
+          </item>
+          <item>
+           <widget class="QListWidget" name="cam3_listWidget"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="cam3_rm_pushButton">
+            <property name="text">
+             <string>Remove selection</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QPushButton" name="cam4_pushButton">
+            <property name="text">
+             <string>Select folder</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="cam4_lineEdit"/>
+          </item>
+          <item>
+           <widget class="QListWidget" name="cam4_listWidget"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="cam4_rm_pushButton">
+            <property name="text">
+             <string>Remove selection</string>
             </property>
            </widget>
           </item>
@@ -105,6 +183,16 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="prev_bnd_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Previous boundary</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="prev_pushButton">
@@ -250,6 +338,16 @@
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="next_bnd_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Next boundary</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="next_pushButton">
             <property name="enabled">
              <bool>false</bool>
@@ -344,14 +442,14 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QPushButton" name="output_pushButton">
           <property name="text">
-           <string>Folder:</string>
+           <string>Select output folder</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="folder_lineEdit">
+         <widget class="QLineEdit" name="output_lineEdit">
           <property name="text">
            <string/>
           </property>
@@ -374,7 +472,16 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="name_comboBox"/>
+           <widget class="QComboBox" name="name_comboBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <item>
+             <property name="text">
+              <string>-%0Xd</string>
+             </property>
+            </item>
+           </widget>
           </item>
           <item>
            <widget class="QLabel" name="label_3">
@@ -389,6 +496,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
            <widget class="QPushButton" name="write_pushButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Write</string>
             </property>
@@ -405,6 +515,13 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cp_checkBox">
+          <property name="text">
+           <string>Keep orginals</string>
+          </property>
+         </widget>
         </item>
         <item>
          <spacer name="verticalSpacer_3">

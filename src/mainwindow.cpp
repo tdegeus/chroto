@@ -3,15 +3,6 @@
 
 // ============================================================================
 
-int orientation2angle ( int orientation )
-{
-  if ( orientation==8 ) return -90;
-  if ( orientation==6 ) return  90;
-  return 0;
-}
-
-// ============================================================================
-
 std::tuple<std::time_t,int> jpg2info ( std::string fname )
 {
   // read ".jpg" file into a buffer
@@ -44,27 +35,12 @@ std::tuple<std::time_t,int> jpg2info ( std::string fname )
   iss >> std::get_time(&tm,"%Y:%m:%d %H:%M:%S");
   std::time_t t = mktime(&tm);
 
-  return std::make_tuple(t,orientation2angle(result.Orientation));
-}
+  // convert orientation to ratation
+  int rot = 0;
+  if      ( result.Orientation==8 ) rot = -90;
+  else if ( result.Orientation==6 ) rot =  90;
 
-// ============================================================================
-
-std::string longestPath( const std::vector<std::string> &dirs, char separator )
-{
-  std::vector<std::string>::const_iterator vsi = dirs.begin();
-  int maxCharactersCommon = vsi->length();
-
-  std::string compareString = *vsi;
-
-  for ( vsi = dirs.begin()+1 ; vsi != dirs.end() ; vsi++ ) {
-    std::pair<std::string::const_iterator,std::string::const_iterator> p = std::mismatch(compareString.begin(),compareString.end(),vsi->begin());
-    if ( ( p.first-compareString.begin() ) < maxCharactersCommon )
-      maxCharactersCommon = p.first-compareString.begin();
-  }
-
-  std::string::size_type found = compareString.rfind(separator,maxCharactersCommon);
-
-  return compareString.substr(0,found);
+  return std::make_tuple(t,rot);
 }
 
 // ============================================================================
@@ -75,34 +51,57 @@ MainWindow::MainWindow(QWidget *parent) :
 {
   ui->setupUi(this);
 
-  // remove selected files
-  connect(ui->folder_rm_pushButton,&QPushButton::clicked,[=](){this->filesRm(ui->folder_listWidget);});
-  connect(ui->add_rm_pushButton   ,&QPushButton::clicked,[=](){this->filesRm(ui->add_listWidget   );});
+  listWidgets.push_back(ui->cam0_listWidget);
+  listWidgets.push_back(ui->cam1_listWidget);
+  listWidgets.push_back(ui->cam2_listWidget);
+  listWidgets.push_back(ui->cam3_listWidget);
+  listWidgets.push_back(ui->cam4_listWidget);
+  lineEdits.push_back(ui->cam0_lineEdit);
+  lineEdits.push_back(ui->cam1_lineEdit);
+  lineEdits.push_back(ui->cam2_lineEdit);
+  lineEdits.push_back(ui->cam3_lineEdit);
+  lineEdits.push_back(ui->cam4_lineEdit);
+  add_pushButtons.push_back(ui->cam0_pushButton);
+  add_pushButtons.push_back(ui->cam1_pushButton);
+  add_pushButtons.push_back(ui->cam2_pushButton);
+  add_pushButtons.push_back(ui->cam3_pushButton);
+  add_pushButtons.push_back(ui->cam4_pushButton);
+  rmv_pushButtons.push_back(ui->cam0_rm_pushButton);
+  rmv_pushButtons.push_back(ui->cam1_rm_pushButton);
+  rmv_pushButtons.push_back(ui->cam2_rm_pushButton);
+  rmv_pushButtons.push_back(ui->cam3_rm_pushButton);
+  rmv_pushButtons.push_back(ui->cam4_rm_pushButton);
 
-  // listWidgets: link scroll position
-  QScrollBar *I1v = ui->folder_listWidget->verticalScrollBar();
-  QScrollBar *I2v = ui->add_listWidget   ->verticalScrollBar();
-  connect(I1v,SIGNAL(valueChanged(int)),I2v,SLOT(setValue(int)));
-  connect(I2v,SIGNAL(valueChanged(int)),I1v,SLOT(setValue(int)));
+
+  // select folder / remove selected files / sort files / view files
+  for ( size_t i=0 ; i<add_pushButtons.size() ; ++i ) {
+    connect(add_pushButtons[i],&QPushButton::clicked,[=](){this->selectFolder(i);});
+    connect(rmv_pushButtons[i],&QPushButton::clicked,[=](){this->filesRm(listWidgets[i]);});
+    connect(add_pushButtons[i],SIGNAL(clicked(bool)),this,SLOT(dataSort()));
+    connect(rmv_pushButtons[i],SIGNAL(clicked(bool)),this,SLOT(dataSort()));
+    connect(add_pushButtons[i],SIGNAL(clicked(bool)),this,SLOT(updateFiles()));
+    connect(rmv_pushButtons[i],SIGNAL(clicked(bool)),this,SLOT(updateFiles()));
+  }
+  // link scroll position listWidgets
+  for ( size_t i=0 ; i<listWidgets.size() ; ++i )
+    for ( size_t j=0 ; j<listWidgets.size() ; ++j )
+      if ( i!=j )
+        connect(listWidgets[i]->verticalScrollBar(),SIGNAL(valueChanged(int)),listWidgets[j]->verticalScrollBar(),SLOT(setValue(int)));
 
   // update image counter
-  connect(ui->first_pushButton,&QPushButton::clicked,[=](){idx=0; });
-  connect(ui->last_pushButton ,&QPushButton::clicked,[=](){idx=data.size()-1; while ( !data[idx-1].include ) { --idx; if ( idx==0 ) break; } });
-  connect(ui->next_pushButton ,&QPushButton::clicked,[=](){if (idx+1<data.size()) ++idx; });
-  connect(ui->prev_pushButton ,&QPushButton::clicked,[=](){if (idx>0            ) --idx; });
+  connect(ui->first_pushButton   ,&QPushButton::clicked,[=](){idx=0; });
+  connect(ui->last_pushButton    ,&QPushButton::clicked,[=](){idx=data.size()-1; while ( data[idx-1].rm ) { --idx; if ( idx==0 ) break; } });
+  connect(ui->next_pushButton    ,&QPushButton::clicked,[=](){if (idx+1<data.size()) ++idx; });
+  connect(ui->prev_pushButton    ,&QPushButton::clicked,[=](){if (idx>0            ) --idx; });
+  connect(ui->next_bnd_pushButton,&QPushButton::clicked,[=](){while ( data[idx+1].camera==data[idx].camera && !data[idx+1].rm ){++idx; if ( idx==data.size()-1) break; } });
+  connect(ui->prev_bnd_pushButton,&QPushButton::clicked,[=](){while ( data[idx-1].camera==data[idx].camera && !data[idx-1].rm ){--idx; if ( idx==0            ) break; } });
 
   // re-sort data / update file-list / display image
-  connect(ui->folder_pushButton     ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
-  connect(ui->add_pushButton        ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
   connect(ui->earlier_pushButton    ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
   connect(ui->earlier_all_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
   connect(ui->later_pushButton      ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
   connect(ui->later_all_pushButton  ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
   connect(ui->del_pushButton        ,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
-  connect(ui->folder_pushButton     ,SIGNAL(clicked(bool)),this,SLOT(updateFiles() ));
-  connect(ui->add_pushButton        ,SIGNAL(clicked(bool)),this,SLOT(updateFiles() ));
-  connect(ui->folder_rm_pushButton  ,SIGNAL(clicked(bool)),this,SLOT(updateFiles() ));
-  connect(ui->add_rm_pushButton     ,SIGNAL(clicked(bool)),this,SLOT(updateFiles() ));
   connect(ui->earlier_pushButton    ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->earlier_all_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->later_pushButton      ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
@@ -112,10 +111,14 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->next_pushButton       ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->first_pushButton      ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->last_pushButton       ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->next_bnd_pushButton   ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->prev_bnd_pushButton   ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   // re-sort data / update file-list / display image
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->dataSort();    });
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->updateFiles(); });
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->displayImage();});
+
+  connect(ui->output_pushButton,SIGNAL(clicked(bool)),this,SLOT(on_output_lineEdit_editingFinished()));
 }
 
 // ============================================================================
@@ -123,6 +126,14 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
   delete ui;
+}
+
+// ============================================================================
+
+void MainWindow::resizeEvent(QResizeEvent* event)
+{
+   QMainWindow::resizeEvent(event);
+   this->displayImage();
 }
 
 // ============================================================================
@@ -142,57 +153,25 @@ void MainWindow::promptWarning ( QString msg )
 
 void MainWindow::updateFiles ( void )
 {
-  // empty list widgets
-  while(ui->folder_listWidget->count()>0)
-    ui->folder_listWidget->takeItem(0);
-  while(ui->add_listWidget->count()>0)
-    ui->add_listWidget->takeItem(0);
+  // empty listWidgets
+  for ( size_t l=0 ; l<listWidgets.size() ; ++l )
+    while(listWidgets[l]->count()>0)
+      listWidgets[l]->takeItem(0);
 
   // empty list -> exit
   if ( data.size()==0 )
     return;
 
-  // suggest output
-  int N = 0;
-  QString tmp;
-  for ( size_t i = 0; i < data.size(); ++i ) {
-    tmp = QString::number(i);
-    N   = std::max(N,tmp.length());
-  }
-  tmp = "-%0"+QString::number(N);
-
-  ui->name_comboBox->clear();
-  ui->name_comboBox->addItem(tmp);
-
-  // get common file-path from files to add
-  // - allocate temp. variables
-  std::vector<std::string> lst;
-  std::string path;
-  // - collect paths
-  for ( size_t i = 0; i < data.size(); ++i ) {
-    if ( data[i].add ) {
-      lst.push_back(data[i].path.toStdString());
-    }
-  }
-  // - strip common file-path in display name
-  if ( lst.size()>0 ){
-    path = longestPath(lst,QDir::separator().toLatin1());
-    QDir dir(QString::fromStdString(path));
-    for ( size_t i = 0; i < data.size(); ++i ) {
-      if ( data[i].add ) {
-        data[i].disp = dir.relativeFilePath(data[i].path);
+  // fill listWidgets
+  for ( size_t i=0 ; i<data.size() ; ++i ) {
+    for ( size_t l=0 ; l<listWidgets.size() ; ++l ) {
+      if ( data[i].camera==l ) {
+        listWidgets[l]->addItem(data[i].disp);
+        lineEdits  [l]->setText(data[i].dir);
       }
-    }
-  }
-  // add to listWidgets
-  for ( size_t i = 0; i < data.size(); ++i ) {
-    if ( !data[i].add ) {
-      ui->folder_listWidget->addItem(data[i].disp);
-      ui->add_listWidget   ->addItem("");
-    }
-    else {
-      ui->folder_listWidget->addItem("");
-      ui->add_listWidget   ->addItem(data[i].disp);
+      else {
+        listWidgets[l]->addItem("");
+      }
     }
   }
 }
@@ -207,8 +186,8 @@ void MainWindow::dataSort(void)
 
   std::sort(data.begin(),data.end(),
     [](Files i,Files j){
-      if ( !i.include ) return false;
-      if ( !j.include ) return true;
+      if ( i.rm && !j.rm  ) return false;
+      if ( j.rm && !i.rm  ) return true;
       if ( i.time==j.time ) return i.index<j.index;
       return i.time<j.time;
   });
@@ -248,10 +227,13 @@ void MainWindow::filesRm(QListWidget *list)
 
 // ============================================================================
 
-void MainWindow::on_folder_pushButton_clicked()
+void MainWindow::selectFolder(size_t camera)
 {
-  QStringList filters;
-  filters << "*.jpg" << "*.jpeg" << "*.JPG" << "*.JPEG";
+  QStringList filter_jpeg;
+  filter_jpeg << "*.jpg" << "*.jpeg" << "*.JPG" << "*.JPEG";
+
+  QStringList filter_json;
+  filter_json << "chroto.json";
 
   QFileDialog dialog(this);
   dialog.setFileMode (QFileDialog::Directory);
@@ -264,60 +246,46 @@ void MainWindow::on_folder_pushButton_clicked()
     dir = dialog.directory();
   QString dirName = dir.absolutePath();
 
-  ui->folder_lineEdit->setText(dirName);
-  path = dirName;
+  QFileInfoList lst_json = dir.entryInfoList(filter_json,QDir::Files);
+  QFileInfoList lst_jpeg = dir.entryInfoList(filter_jpeg,QDir::Files);
 
-  QFileInfoList list = dir.entryInfoList(filters,QDir::Files);
+  json j;
+  if ( lst_json.size()==1 ) {
+    QFileInfo finfo = lst_json.at(0);
+    std::ifstream inp(finfo.absoluteFilePath().toStdString());
+    inp >> j;
+  }
+
   std::time_t t;
   int rot;
 
-  for ( int i = 0; i < list.size(); ++i ) {
-    QFileInfo finfo = list.at(i);
+  for ( int i = 0; i < lst_jpeg.size(); ++i ) {
+    QFileInfo finfo = lst_jpeg.at(i);
     try         { std::tie(t,rot) = jpg2info(finfo.absoluteFilePath().toStdString()); }
     catch (...) { continue; }
     Files file;
-    file.add      = false;
-    file.disp     = finfo.fileName();
-    file.path     = finfo.absoluteFilePath();
-    file.time     = t;
-    file.rotation = rot;
+    file.camera    = camera;
+    file.disp      = finfo.fileName();
+    file.path      = finfo.absoluteFilePath();
+    file.dir       = finfo.absolutePath();
+    file.time      = t;
+    file.rotation  = rot;
+    if ( lst_json.size()==1 )
+      file.time = static_cast<std::time_t>(j[finfo.fileName().toStdString()]);
     data.push_back(file);
   }
 }
 
 // ============================================================================
 
-void MainWindow::on_add_pushButton_clicked()
+void MainWindow::view ( QLabel *lab, size_t i )
 {
-  QStringList filters;
-    filters << "Image files (*.jpg *.jpeg *.JPG *.JPEG)"
-            << "Any files (*)";
-
-  QFileDialog dialog(this);
-  dialog.setFileMode   (QFileDialog::ExistingFiles);
-  dialog.setOption     (QFileDialog::HideNameFilterDetails,false);
-  dialog.setDirectory  (QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
-  dialog.setNameFilters(filters);
-  dialog.setViewMode   (QFileDialog::List);
-
-  QStringList fileNames;
-  if (dialog.exec())
-    fileNames = dialog.selectedFiles();
-
-  std::time_t t;
-  int rot;
-
-  for ( int i = 0; i < fileNames.size(); ++i ) {
-    try         { std::tie(t,rot) = jpg2info(fileNames[i].toStdString()); }
-    catch (...) { continue; }
-    Files file;
-    file.add      = true;
-    file.disp     = fileNames[i];
-    file.path     = fileNames[i];
-    file.time     = t;
-    file.rotation = rot;
-    data.push_back(file);
-  }
+  QPixmap p(data[i].path);
+  int w = lab->width();
+  int h = lab->height();
+  QTransform transform;
+  QTransform trans = transform.rotate(data[i].rotation);
+  lab->setPixmap(p.scaled(w,h,Qt::KeepAspectRatio).transformed(trans));
 }
 
 // ============================================================================
@@ -333,55 +301,50 @@ void MainWindow::displayImage(void)
   ui->later_pushButton      ->setEnabled(false);
   ui->later_all_pushButton  ->setEnabled(false);
   ui->del_pushButton        ->setEnabled(false);
-
-  if ( data.size()==0 )
-    return;
-
-  if ( init ) {
-    idx = 0;
-    init = false;
-  }
+  ui->next_bnd_pushButton   ->setEnabled(false);
+  ui->prev_bnd_pushButton   ->setEnabled(false);
 
   ui->view_Label     ->clear();
   ui->view_prev_label->clear();
   ui->view_next_label->clear();
 
-  QPixmap p(data[idx].path);
-  int w = ui->view_Label->width();
-  int h = ui->view_Label->height();
-  QTransform transform;
-  QTransform trans = transform.rotate(orientation2angle(data[idx].orientation));
-  ui->view_Label->setPixmap(p.scaled(w,h,Qt::KeepAspectRatio).transformed(trans));
+  if ( data.size()==0 )
+    return;
+
+  if ( init ) {
+    idx  = 0;
+    init = false;
+  }
 
   ui->del_pushButton->setEnabled(true);
 
+  for ( size_t i=1 ; i<data.size() ; ++i ) {
+    if ( data[i-1].camera!=data[i].camera ) {
+      ui->next_bnd_pushButton->setEnabled(true);
+      ui->prev_bnd_pushButton->setEnabled(true);
+      break;
+    }
+  }
+
+  this->view(ui->view_Label,idx);
+
   if ( idx+1 < data.size() )
   {
-    QPixmap pn(data[idx+1].path);
-    int w = ui->view_next_label->width();
-    int h = ui->view_next_label->height();
-    QTransform transform;
-    QTransform trans = transform.rotate(orientation2angle(data[idx+1].orientation));
-    ui->view_next_label->setPixmap(pn.scaled(w,h,Qt::KeepAspectRatio).transformed(trans));
-    ui->next_pushButton       ->setEnabled(true);
-    ui->last_pushButton       ->setEnabled(true);
-    ui->later_pushButton      ->setEnabled(true);
-    if ( data[idx].add!=data[idx+1].add )
+    this->view(ui->view_next_label,idx+1);
+    ui->next_pushButton ->setEnabled(true);
+    ui->last_pushButton ->setEnabled(true);
+    ui->later_pushButton->setEnabled(true);
+    if ( data[idx].camera!=data[idx+1].camera )
       ui->later_all_pushButton  ->setEnabled(true);
   }
 
   if ( idx > 0 )
   {
-    QPixmap pp(data[idx-1].path);
-    int w = ui->view_prev_label->width();
-    int h = ui->view_prev_label->height();
-    QTransform transform;
-    QTransform trans = transform.rotate(orientation2angle(data[idx-1].orientation));
-    ui->view_prev_label->setPixmap(pp.scaled(w,h,Qt::KeepAspectRatio).transformed(trans));
-    ui->prev_pushButton       ->setEnabled(true);
-    ui->first_pushButton      ->setEnabled(true);
-    ui->earlier_pushButton    ->setEnabled(true);
-    if ( data[idx].add!=data[idx-1].add )
+    this->view(ui->view_prev_label,idx-1);
+    ui->prev_pushButton   ->setEnabled(true);
+    ui->first_pushButton  ->setEnabled(true);
+    ui->earlier_pushButton->setEnabled(true);
+    if ( data[idx].camera!=data[idx-1].camera )
       ui->earlier_all_pushButton->setEnabled(true);
   }
 
@@ -411,7 +374,7 @@ void MainWindow::on_earlier_all_pushButton_clicked()
   this->on_earlier_pushButton_clicked();
 
   for ( size_t i = 0; i < data.size(); ++i )
-    if ( i!=idx && data[i].add==data[idx].add )
+    if ( i!=idx && data[i].camera==data[idx].camera )
       data[i].time -= t0-data[idx].time;
 }
 
@@ -421,13 +384,13 @@ void MainWindow::on_later_pushButton_clicked()
 {
   if ( idx==data.size()-1 )
     return;
-  if ( data[idx+1].include==false )
+  if ( data[idx+1].rm )
     return;
 
   data[idx].time += data[idx+1].time-data[idx].time+1;
 
   size_t i = idx+2;
-  while ( i<data.size() && data[i].include==true && data[i].time==data[idx].time ) {
+  while ( i<data.size() && !data[i].rm && data[i].time==data[idx].time ) {
     data[i].time += 1;
     ++i;
   }
@@ -441,7 +404,7 @@ void MainWindow::on_later_all_pushButton_clicked()
   this->on_later_pushButton_clicked();
 
   for ( size_t i = 0; i < data.size(); ++i )
-    if ( i!=idx && data[i].add==data[idx].add )
+    if ( i!=idx && data[i].camera==data[idx].camera )
       data[i].time += data[idx].time-t0;
 }
 
@@ -449,8 +412,37 @@ void MainWindow::on_later_all_pushButton_clicked()
 
 void MainWindow::on_del_pushButton_clicked()
 {
-  data[idx].include = false;
+  data[idx].rm = true;
   --idx;
+}
+
+// ============================================================================
+
+void MainWindow::on_output_pushButton_clicked()
+{
+  QFileDialog dialog(this);
+  dialog.setFileMode (QFileDialog::Directory);
+  dialog.setOption   (QFileDialog::HideNameFilterDetails,false);
+  dialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+  dialog.setViewMode (QFileDialog::List);
+
+  QDir dir;
+  if (dialog.exec())
+    dir = dialog.directory();
+
+  QString dirName = dir.absolutePath();
+
+  ui->output_lineEdit->setText(dirName);
+}
+
+// ============================================================================
+
+void MainWindow::on_output_lineEdit_editingFinished()
+{
+  if ( ui->output_lineEdit->text().length()>0 )
+    ui->write_pushButton->setEnabled(true);
+  else
+    ui->write_pushButton->setEnabled(false);
 }
 
 // ============================================================================
@@ -464,9 +456,25 @@ void MainWindow::on_write_pushButton_clicked()
     N   = std::max(N,tmp.length());
   }
 
+  json j;
+
   for ( int i=0 ; i<static_cast<int>(data.size()) ; ++i ) {
     QString name = ui->name_lineEdit->text() + QString("-") + QString("%1.jpg").arg(i,N,10,QChar('0'));
-    std::cout << data[i].path.toStdString() << " -> " << name.toStdString() << std::endl;
+
+    j[name.toStdString()] = static_cast<long>(data[i].time);
+
+    QString out = QDir(ui->output_lineEdit->text()).filePath(name);
+
+    if ( ui->cp_checkBox->isChecked() )
+      QFile::copy(data[i].path,out);
+    else
+      QFile::rename(data[i].path,out);
+
   }
 
+  QString out_json = QDir(ui->output_lineEdit->text()).filePath("chroto.json");
+  std::ofstream o(out_json.toStdString());
+  o << std::setw(4) << j << std::endl;
+
 }
+
