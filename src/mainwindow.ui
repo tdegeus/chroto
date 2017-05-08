@@ -18,27 +18,37 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
-        <string>Files</string>
+        <string>1. Select photos</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QPushButton" name="cam0_pushButton">
+            <property name="toolTip">
+             <string>Select a folder containing one set of photos</string>
+            </property>
             <property name="text">
              <string>Select folder</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="cam0_lineEdit"/>
+           <widget class="QLineEdit" name="cam0_lineEdit">
+            <property name="toolTip">
+             <string>Path of the selected folder</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QListWidget" name="cam0_listWidget">
+            <property name="toolTip">
+             <string>Photos in set</string>
+            </property>
             <property name="selectionMode">
              <enum>QAbstractItemView::ExtendedSelection</enum>
             </property>
@@ -46,6 +56,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="cam0_rm_pushButton">
+            <property name="toolTip">
+             <string>Remove selected photos (originals are not removed from disk)</string>
+            </property>
             <property name="text">
              <string>Remove selection</string>
             </property>
@@ -57,16 +70,26 @@
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
            <widget class="QPushButton" name="cam1_pushButton">
+            <property name="toolTip">
+             <string>Select a folder containing one set of photos</string>
+            </property>
             <property name="text">
              <string>Select folder</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="cam1_lineEdit"/>
+           <widget class="QLineEdit" name="cam1_lineEdit">
+            <property name="toolTip">
+             <string>Path of the selected folder</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QListWidget" name="cam1_listWidget">
+            <property name="toolTip">
+             <string>Photos in set</string>
+            </property>
             <property name="dragEnabled">
              <bool>true</bool>
             </property>
@@ -80,6 +103,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="cam1_rm_pushButton">
+            <property name="toolTip">
+             <string>Remove selected photos (originals are not removed from disk)</string>
+            </property>
             <property name="text">
              <string>Remove selection</string>
             </property>
@@ -91,19 +117,33 @@
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
            <widget class="QPushButton" name="cam2_pushButton">
+            <property name="toolTip">
+             <string>Select a folder containing one set of photos</string>
+            </property>
             <property name="text">
              <string>Select folder</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="cam2_lineEdit"/>
+           <widget class="QLineEdit" name="cam2_lineEdit">
+            <property name="toolTip">
+             <string>Path of the selected folder</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="cam2_listWidget"/>
+           <widget class="QListWidget" name="cam2_listWidget">
+            <property name="toolTip">
+             <string>Photos in set</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="cam2_rm_pushButton">
+            <property name="toolTip">
+             <string>Remove selected photos (originals are not removed from disk)</string>
+            </property>
             <property name="text">
              <string>Remove selection</string>
             </property>
@@ -115,19 +155,33 @@
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
            <widget class="QPushButton" name="cam3_pushButton">
+            <property name="toolTip">
+             <string>Select a folder containing one set of photos</string>
+            </property>
             <property name="text">
              <string>Select folder</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="cam3_lineEdit"/>
+           <widget class="QLineEdit" name="cam3_lineEdit">
+            <property name="toolTip">
+             <string>Path of the selected folder</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="cam3_listWidget"/>
+           <widget class="QListWidget" name="cam3_listWidget">
+            <property name="toolTip">
+             <string>Photos in set</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="cam3_rm_pushButton">
+            <property name="toolTip">
+             <string>Remove selected photos (originals are not removed from disk)</string>
+            </property>
             <property name="text">
              <string>Remove selection</string>
             </property>
@@ -139,19 +193,33 @@
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
            <widget class="QPushButton" name="cam4_pushButton">
+            <property name="toolTip">
+             <string>Select a folder containing one set of photos</string>
+            </property>
             <property name="text">
              <string>Select folder</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="cam4_lineEdit"/>
+           <widget class="QLineEdit" name="cam4_lineEdit">
+            <property name="toolTip">
+             <string>Path of the selected folder</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="cam4_listWidget"/>
+           <widget class="QListWidget" name="cam4_listWidget">
+            <property name="toolTip">
+             <string>Photos in set</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="cam4_rm_pushButton">
+            <property name="toolTip">
+             <string>Remove selected photos (originals are not removed from disk)</string>
+            </property>
             <property name="text">
              <string>Remove selection</string>
             </property>
@@ -163,7 +231,7 @@
       </widget>
       <widget class="QWidget" name="tab_sort">
        <attribute name="title">
-        <string>Sort</string>
+        <string>2. Sort</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
@@ -189,6 +257,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>Previous boundary between two sets of photos (two camera's)</string>
+            </property>
             <property name="text">
              <string>Previous boundary</string>
             </property>
@@ -199,8 +270,14 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>View previous image [left arrow]</string>
+            </property>
             <property name="text">
              <string>Previous</string>
+            </property>
+            <property name="shortcut">
+             <string/>
             </property>
            </widget>
           </item>
@@ -208,6 +285,9 @@
            <widget class="QPushButton" name="first_pushButton">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Jump to first image</string>
             </property>
             <property name="text">
              <string>First</string>
@@ -232,8 +312,14 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>Move image one images earlier, and apply the same time jump to all images in this set [shift + E]</string>
+            </property>
             <property name="text">
              <string>Earlier (all)</string>
+            </property>
+            <property name="shortcut">
+             <string>Shift+E</string>
             </property>
            </widget>
           </item>
@@ -242,8 +328,14 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>Move image one images earlier [E]</string>
+            </property>
             <property name="text">
              <string>Earlier</string>
+            </property>
+            <property name="shortcut">
+             <string>E</string>
             </property>
            </widget>
           </item>
@@ -273,39 +365,25 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QPushButton" name="undo_pushButton">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Undo</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="jump_pushButton">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Time jump</string>
-              </property>
-             </widget>
-            </item>
-            <item>
              <widget class="QPushButton" name="del_pushButton">
               <property name="enabled">
                <bool>false</bool>
               </property>
+              <property name="toolTip">
+               <string>Delete image (not deleted from disk) [del]</string>
+              </property>
               <property name="text">
                <string>Delete</string>
+              </property>
+              <property name="shortcut">
+               <string>Backspace</string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
           <item>
-           <widget class="QLabel" name="view_Label">
+           <widget class="QLabel" name="view_label">
             <property name="minimumSize">
              <size>
               <width>402</width>
@@ -342,6 +420,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>Next boundary between two sets of photos (two camera's)</string>
+            </property>
             <property name="text">
              <string>Next boundary</string>
             </property>
@@ -352,8 +433,14 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>View next image [right arrow]</string>
+            </property>
             <property name="text">
              <string>Next</string>
+            </property>
+            <property name="shortcut">
+             <string>Right</string>
             </property>
            </widget>
           </item>
@@ -361,6 +448,9 @@
            <widget class="QPushButton" name="last_pushButton">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Jump to last image</string>
             </property>
             <property name="text">
              <string>Last</string>
@@ -385,8 +475,14 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>Move image one images later, and apply the same time jump to all images in this set [shift + L]</string>
+            </property>
             <property name="text">
              <string>Later (all)</string>
+            </property>
+            <property name="shortcut">
+             <string>Shift+L</string>
             </property>
            </widget>
           </item>
@@ -395,8 +491,14 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>Move image one images later [shift + E]</string>
+            </property>
             <property name="text">
              <string>Later</string>
+            </property>
+            <property name="shortcut">
+             <string>L</string>
             </property>
            </widget>
           </item>
@@ -425,7 +527,7 @@
       </widget>
       <widget class="QWidget" name="tab_write">
        <attribute name="title">
-        <string>Write</string>
+        <string>3. Write</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
@@ -450,6 +552,9 @@
         </item>
         <item>
          <widget class="QLineEdit" name="output_lineEdit">
+          <property name="toolTip">
+           <string>Selected output folder (may be modified by typing)</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -466,6 +571,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <widget class="QLineEdit" name="name_lineEdit">
+            <property name="toolTip">
+             <string>Format used to write selected and sorted photos</string>
+            </property>
             <property name="text">
              <string>sorted</string>
             </property>
@@ -499,18 +607,11 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>Write selected and sorted photos to output directory</string>
+            </property>
             <property name="text">
              <string>Write</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="clean_pushButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Clean up</string>
             </property>
            </widget>
           </item>
@@ -518,6 +619,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="cp_checkBox">
+          <property name="toolTip">
+           <string>Keep originals (if not ticked the selected photos are moved to the output directory, all other files are left untouched)</string>
+          </property>
           <property name="text">
            <string>Keep orginals</string>
           </property>

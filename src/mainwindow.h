@@ -58,19 +58,25 @@ public:
 
 private slots:
   void selectFolder(size_t camera);
-  void filesRm(QListWidget *list);
-  void updateFiles(void);
+  void dataRm(QListWidget *list);
   void dataSort(void);
+  void fillListWidgets(void);
   void view( QLabel *, size_t );
   void displayImage(void);
+  void on_prev_pushButton_clicked();
+  void on_prev_bnd_pushButton_clicked();
+  void on_next_pushButton_clicked();
+  void on_next_bnd_pushButton_clicked();
+  void on_first_pushButton_clicked();
+  void on_last_pushButton_clicked();
   void on_earlier_pushButton_clicked();
   void on_earlier_all_pushButton_clicked();
   void on_later_pushButton_clicked();
   void on_later_all_pushButton_clicked();
   void on_del_pushButton_clicked();
-  void on_write_pushButton_clicked();
   void on_output_pushButton_clicked();
   void on_output_lineEdit_editingFinished();
+  void on_write_pushButton_clicked();
 
 private:
   Ui::MainWindow *ui;
