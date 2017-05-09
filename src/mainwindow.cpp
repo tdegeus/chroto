@@ -35,7 +35,7 @@ std::tuple<std::time_t,int> jpg2info ( std::string fname )
   iss >> std::get_time(&tm,"%Y:%m:%d %H:%M:%S");
   std::time_t t = mktime(&tm);
 
-  // convert orientation to ratation
+  // convert orientation to rotation
   int rot = 0;
   if      ( result.Orientation==8 ) rot = -90;
   else if ( result.Orientation==6 ) rot =  90;
@@ -50,8 +50,11 @@ MainWindow::MainWindow(QWidget *parent) :
   ui(new Ui::MainWindow)
 {
   ui->setupUi(this);
+
+  // enforce opening on the first tab
   ui->tabWidget->setCurrentIndex(0);
 
+  // fill arrays collecting the file-lists and related buttons
   fileView.push_back(ui->cam0_listWidget   );
   fileView.push_back(ui->cam1_listWidget   );
   fileView.push_back(ui->cam2_listWidget   );
@@ -80,15 +83,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
   // select folder / remove selected files / sort files / view files
   for ( size_t i=0 ; i<dirSelec.size() ; ++i ) {
-    connect(dirSelec[i],&QPushButton::clicked,[=](){this->selectFolder(i);    });
-    connect(nameSort[i],&QPushButton::clicked,[=](){this->dataNameSort(i);    });
-    connect(delSelec[i],&QPushButton::clicked,[=](){this->dataRm(fileView[i]);});
-    connect(dirSelec[i],SIGNAL(clicked(bool)),this,SLOT(dataSort       ()));
-    connect(delSelec[i],SIGNAL(clicked(bool)),this,SLOT(dataSort       ()));
-    connect(nameSort[i],SIGNAL(clicked(bool)),this,SLOT(dataSort       ()));
-    connect(dirSelec[i],SIGNAL(clicked(bool)),this,SLOT(fillListWidgets()));
-    connect(delSelec[i],SIGNAL(clicked(bool)),this,SLOT(fillListWidgets()));
-    connect(nameSort[i],SIGNAL(clicked(bool)),this,SLOT(fillListWidgets()));
+    connect(dirSelec[i],&QPushButton::clicked,[=](){this->selectFolder(         i );});
+    connect(nameSort[i],&QPushButton::clicked,[=](){this->dataNameSort(         i );});
+    connect(delSelec[i],&QPushButton::clicked,[=](){this->dataRmvSelec(fileView[i]);});
+    connect(dirSelec[i],SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+    connect(delSelec[i],SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+    connect(nameSort[i],SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+    connect(dirSelec[i],SIGNAL(clicked(bool)),this,SLOT(viewFileList()));
+    connect(delSelec[i],SIGNAL(clicked(bool)),this,SLOT(viewFileList()));
+    connect(nameSort[i],SIGNAL(clicked(bool)),this,SLOT(viewFileList()));
   }
   // link scroll position listWidgets
   for ( size_t i=0 ; i<fileView.size() ; ++i )
@@ -97,11 +100,11 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(fileView[i]->verticalScrollBar(),SIGNAL(valueChanged(int)),fileView[j]->verticalScrollBar(),SLOT(setValue(int)));
 
   // re-sort data / update file-list / display image
-  connect(ui->mvDwImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
-  connect(ui->mvDwSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
-  connect(ui->mvUpImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
-  connect(ui->mvUpSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
-  connect(ui->exclImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataSort()    ));
+  connect(ui->mvDwImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+  connect(ui->mvDwSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+  connect(ui->mvUpImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+  connect(ui->mvUpSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+  connect(ui->exclImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
   connect(ui->mvDwImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->mvDwSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->mvUpImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
@@ -114,9 +117,9 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->nextBnd_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->prevBnd_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   // re-sort data / update file-list / display image
-  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->dataSort       (); });
-  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->fillListWidgets(); });
-  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->displayImage   (); });
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->dataTimeSort();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->viewFileList();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->displayImage();});
 
   // select output folder
   connect(ui->outPath_pushButton,SIGNAL(clicked(bool)),this,SLOT(on_outPath_lineEdit_editingFinished()));
@@ -256,7 +259,7 @@ void MainWindow::dataNameSort(size_t camera)
 
 // ============================================================================
 
-void MainWindow::dataSort()
+void MainWindow::dataTimeSort()
 {
   for ( size_t i = 0; i < data.size(); ++i ) {
     data[i].index = i;
@@ -278,7 +281,7 @@ void MainWindow::dataSort()
 
 // ============================================================================
 
-void MainWindow::dataRm(QListWidget *list)
+void MainWindow::dataRmvSelec(QListWidget *list)
 {
   QList<QListWidgetItem*> items = list->selectedItems();
 
@@ -302,7 +305,7 @@ void MainWindow::dataRm(QListWidget *list)
 
 // ============================================================================
 
-void MainWindow::fillListWidgets()
+void MainWindow::viewFileList()
 {
   // empty listWidgets
   for ( size_t l=0 ; l<fileView.size() ; ++l )
@@ -329,7 +332,7 @@ void MainWindow::fillListWidgets()
 
 // ============================================================================
 
-void MainWindow::view(QLabel *lab, size_t i)
+void MainWindow::idxViewLabel(QLabel *lab, size_t i)
 {
   QPixmap    p(data[i].path);
   int        w = lab->width();
@@ -355,9 +358,9 @@ void MainWindow::displayImage()
   ui->nextBnd_pushButton->setEnabled(false);
   ui->prevBnd_pushButton->setEnabled(false);
 
-  ui->view_label     ->clear();
-  ui->view_prev_label->clear();
-  ui->view_next_label->clear();
+  ui->view_idx_label->clear();
+  ui->view_prv_label->clear();
+  ui->view_nxt_label->clear();
 
   if ( data.size()==0 )
     return;
@@ -385,11 +388,11 @@ void MainWindow::displayImage()
     }
   }
 
-  this->view(ui->view_label,idx);
+  this->idxViewLabel(ui->view_idx_label,idx);
 
   if ( idx+1 < data.size() )
   {
-    this->view(ui->view_next_label,idx+1);
+    this->idxViewLabel(ui->view_nxt_label,idx+1);
     ui->nextImg_pushButton->setEnabled(true);
     ui->lastImg_pushButton->setEnabled(true);
     ui->mvUpImg_pushButton->setEnabled(true);
@@ -399,7 +402,7 @@ void MainWindow::displayImage()
 
   if ( idx > 0 )
   {
-    this->view(ui->view_prev_label,idx-1);
+    this->idxViewLabel(ui->view_prv_label,idx-1);
     ui->prevImg_pushButton->setEnabled(true);
     ui->headImg_pushButton->setEnabled(true);
     ui->mvDwImg_pushButton->setEnabled(true);

@@ -390,7 +390,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="view_prev_label">
+           <widget class="QLabel" name="view_prv_label">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -433,7 +433,7 @@
            </layout>
           </item>
           <item>
-           <widget class="QLabel" name="view_label">
+           <widget class="QLabel" name="view_idx_label">
             <property name="minimumSize">
              <size>
               <width>402</width>
@@ -553,7 +553,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="view_next_label">
+           <widget class="QLabel" name="view_nxt_label">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>

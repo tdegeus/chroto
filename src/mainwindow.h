@@ -39,7 +39,7 @@ public:
   int         rotation = 0    ; // rotation in degrees
   std::time_t time     = 0    ; // time at which the photo was taken
   size_t      index    = 0    ; // position in list with all photos
-  bool        sort     = true ; // tempory variable to allow subset sort
+  bool        sort     = true ; // temporary variable to allow subset sort
 };
 
 // ============================================================================
@@ -57,13 +57,13 @@ public:
   ~MainWindow();
 
 private slots:
-  void selectFolder(size_t);
-  void dataRm(QListWidget *);
-  void dataNameSort(size_t);
-  void dataSort();
-  void fillListWidgets();
-  void view(QLabel *, size_t);
-  void displayImage();
+  void selectFolder(size_t);           // select+read folder for a specific camera
+  void dataRmvSelec(QListWidget*);     // remove items selected in one of the listWidgets
+  void dataNameSort(size_t);           // sort photos of a specific camera by name (time modified)
+  void dataTimeSort();                 // sort all photos by time
+  void viewFileList();                 // update listWidgets with current files/order
+  void idxViewLabel(QLabel*,size_t);   // view photo "i" in a supplied label
+  void displayImage();                 // display cur./prev./next images (selectively enables buttons)
   void on_prevImg_pushButton_clicked();
   void on_prevBnd_pushButton_clicked();
   void on_nextImg_pushButton_clicked();
@@ -81,17 +81,17 @@ private slots:
 
 private:
   Ui::MainWindow            *ui;
-  size_t                    idx  = 0;
-  bool                      init = true;
-  std::vector<File>         data;
-  std::vector<QListWidget*> fileView;
-  std::vector<QLineEdit*>   pathView;
-  std::vector<QPushButton*> dirSelec;
-  std::vector<QPushButton*> delSelec;
-  std::vector<QPushButton*> nameSort;
+  size_t                    idx  = 0;    // current photo (index in "data")
+  bool                      init = true; // re-initialize "idx" to zero, upon viewing
+  std::vector<File>         data;        // array with photos + information
+  std::vector<QListWidget*> fileView;    // list with widgets to show selected files
+  std::vector<QLineEdit*>   pathView;    // list with widgets to show selected paths
+  std::vector<QPushButton*> dirSelec;    // list with widgets to select a folder
+  std::vector<QPushButton*> delSelec;    // list with widgets to remover selects files in list
+  std::vector<QPushButton*> nameSort;    // list with widgets to sort by name for that camera
   void promptWarning(QString);
-  void dataReadTime();
   void resizeEvent(QResizeEvent*);
+  void dataReadTime();
 };
 
 #endif // MAINWINDOW_H
