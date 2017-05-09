@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -327,7 +327,7 @@
              <string>Previous</string>
             </property>
             <property name="shortcut">
-             <string/>
+             <string>Left</string>
             </property>
            </widget>
           </item>
@@ -594,6 +594,33 @@
          </spacer>
         </item>
         <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Earliest date:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="date_lineEdit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>80</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QPushButton" name="outPath_pushButton">
           <property name="text">
            <string>Select output folder</string>
@@ -662,6 +689,16 @@
             </property>
             <property name="text">
              <string>Write</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clean_pushButton">
+            <property name="toolTip">
+             <string>Remove all 'deleted' files from disk</string>
+            </property>
+            <property name="text">
+             <string>Clean-up</string>
             </property>
            </widget>
           </item>

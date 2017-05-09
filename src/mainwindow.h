@@ -64,6 +64,7 @@ private slots:
   void viewFileList();                 // update listWidgets with current files/order
   void idxViewLabel(QLabel*,size_t);   // view photo "i" in a supplied label
   void displayImage();                 // display cur./prev./next images (selectively enables buttons)
+  void showDate();                     // show date in output tab
   void on_prevImg_pushButton_clicked();
   void on_prevBnd_pushButton_clicked();
   void on_nextImg_pushButton_clicked();
@@ -79,16 +80,20 @@ private slots:
   void on_outPath_lineEdit_editingFinished();
   void on_write_pushButton_clicked();
 
+  void on_clean_pushButton_clicked();
+
 private:
   Ui::MainWindow            *ui;
   size_t                    idx  = 0;    // current photo (index in "data")
   bool                      init = true; // re-initialize "idx" to zero, upon viewing
   std::vector<File>         data;        // array with photos + information
+  std::vector<File>         delData;     // deleted images
   std::vector<QListWidget*> fileView;    // list with widgets to show selected files
   std::vector<QLineEdit*>   pathView;    // list with widgets to show selected paths
   std::vector<QPushButton*> dirSelec;    // list with widgets to select a folder
   std::vector<QPushButton*> delSelec;    // list with widgets to remover selects files in list
   std::vector<QPushButton*> nameSort;    // list with widgets to sort by name for that camera
+  QString                   workDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
   void promptWarning(QString);
   void resizeEvent(QResizeEvent*);
   void dataReadTime();

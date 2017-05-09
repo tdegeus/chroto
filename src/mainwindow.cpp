@@ -120,6 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->dataTimeSort();});
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->viewFileList();});
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->displayImage();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->showDate    ();});
 
   // select output folder
   connect(ui->outPath_pushButton,SIGNAL(clicked(bool)),this,SLOT(on_outPath_lineEdit_editingFinished()));
@@ -180,12 +181,15 @@ void MainWindow::selectFolder(size_t camera)
   QFileDialog dialog(this);
   dialog.setFileMode (QFileDialog::Directory);
   dialog.setOption   (QFileDialog::HideNameFilterDetails,false);
-  dialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+  dialog.setDirectory(workDir);
   dialog.setViewMode (QFileDialog::List);
 
   QDir dir;
   if (dialog.exec())
     dir = dialog.directory();
+
+  // store new suggested directory
+  workDir = dir.absolutePath();
 
   // set filters
   QStringList filter_jpeg;
@@ -542,10 +546,31 @@ void MainWindow::on_mvUpSet_pushButton_clicked()
 
 void MainWindow::on_exclImg_pushButton_clicked()
 {
+  File f;
+  f.dir      = data[idx].dir     ;
+  f.path     = data[idx].path    ;
+  f.disp     = data[idx].disp    ;
+  f.camera   = data[idx].camera  ;
+  f.rotation = data[idx].rotation;
+  f.time     = data[idx].time    ;
+  delData.push_back(f);
+
   data.erase(data.begin()+idx);
 
-  if ( idx>0 )
-    --idx;
+  if ( idx+1 >= data.size() )
+    idx = data.size()-1;
+}
+
+// ============================================================================
+
+void MainWindow::showDate()
+{
+  if ( data.size()<=0 )
+    return;
+
+  std::string str(std::ctime(&data[0].time));
+
+  ui->date_lineEdit->setText(QString::fromStdString(str));
 }
 
 // ============================================================================
@@ -555,12 +580,15 @@ void MainWindow::on_outPath_pushButton_clicked()
   QFileDialog dialog(this);
   dialog.setFileMode (QFileDialog::Directory);
   dialog.setOption   (QFileDialog::HideNameFilterDetails,false);
-  dialog.setDirectory(QStandardPaths::writableLocation(QStandardPaths::HomeLocation));
+  dialog.setDirectory(workDir);
   dialog.setViewMode (QFileDialog::List);
 
   QDir dir;
   if (dialog.exec())
     dir = dialog.directory();
+
+  // store new suggested directory
+  workDir = dir.absolutePath();
 
   ui->outPath_lineEdit->setText(dir.absolutePath());
 }
@@ -624,4 +652,20 @@ void MainWindow::on_write_pushButton_clicked()
   o << std::setw(4) << j << std::endl;
 }
 
+// ============================================================================
 
+void MainWindow::on_clean_pushButton_clicked()
+{
+  for ( size_t i=0 ; i<delData.size() ; ++i ) {
+    QFile::remove(delData[i].path);
+    QDir dir(delData[i].dir);
+    QFileInfoList dirInfo = dir.entryInfoList(QDir::AllEntries | QDir::System | QDir::NoDotAndDotDot | QDir::Hidden);
+    if ( dirInfo.isEmpty() )
+      dir.removeRecursively();
+  }
+
+  size_t N = delData.size();
+
+  for ( size_t i=0 ; i<N ; ++i )
+    delData.erase(delData.begin());
+}
