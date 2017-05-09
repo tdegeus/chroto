@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -61,6 +61,16 @@
             </property>
             <property name="text">
              <string>Remove selection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="cam0_nameSort_pushButton">
+            <property name="toolTip">
+             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+            </property>
+            <property name="text">
+             <string>Sort by name</string>
             </property>
            </widget>
           </item>
@@ -111,6 +121,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="cam1_nameSort_pushButton">
+            <property name="toolTip">
+             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+            </property>
+            <property name="text">
+             <string>Sort by name</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -146,6 +166,16 @@
             </property>
             <property name="text">
              <string>Remove selection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="cam2_nameSort_pushButton">
+            <property name="toolTip">
+             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+            </property>
+            <property name="text">
+             <string>Sort by name</string>
             </property>
            </widget>
           </item>
@@ -187,6 +217,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="cam3_nameSort_pushButton">
+            <property name="toolTip">
+             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+            </property>
+            <property name="text">
+             <string>Sort by name</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -225,6 +265,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="cam4_nameSort_pushButton">
+            <property name="toolTip">
+             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+            </property>
+            <property name="text">
+             <string>Sort by name</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -253,7 +303,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="prev_bnd_pushButton">
+           <widget class="QPushButton" name="prevBnd_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -266,7 +316,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="prev_pushButton">
+           <widget class="QPushButton" name="prevImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -282,7 +332,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="first_pushButton">
+           <widget class="QPushButton" name="headImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -308,7 +358,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="earlier_all_pushButton">
+           <widget class="QPushButton" name="mvDwSet_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -324,7 +374,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="earlier_pushButton">
+           <widget class="QPushButton" name="mvDwImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -365,7 +415,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QPushButton" name="del_pushButton">
+             <widget class="QPushButton" name="exclImg_pushButton">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -416,7 +466,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="next_bnd_pushButton">
+           <widget class="QPushButton" name="nextBnd_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -429,7 +479,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="next_pushButton">
+           <widget class="QPushButton" name="nextImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -445,7 +495,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="last_pushButton">
+           <widget class="QPushButton" name="lastImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -471,7 +521,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="later_all_pushButton">
+           <widget class="QPushButton" name="mvUpSet_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -487,7 +537,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="later_pushButton">
+           <widget class="QPushButton" name="mvUpImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -544,14 +594,14 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="output_pushButton">
+         <widget class="QPushButton" name="outPath_pushButton">
           <property name="text">
            <string>Select output folder</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="output_lineEdit">
+         <widget class="QLineEdit" name="outPath_lineEdit">
           <property name="toolTip">
            <string>Selected output folder (may be modified by typing)</string>
           </property>
