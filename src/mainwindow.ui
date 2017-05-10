@@ -18,264 +18,723 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
         <string>1. Select photos</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_12">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
-           <widget class="QPushButton" name="cam0_pushButton">
-            <property name="toolTip">
-             <string>Select a folder containing one set of photos</string>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Select folder</string>
+             <string>Number of camera's</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="cam0_lineEdit">
-            <property name="toolTip">
-             <string>Path of the selected folder</string>
+           <widget class="QComboBox" name="comboBox">
+            <property name="currentText">
+             <string>1</string>
             </property>
+            <item>
+             <property name="text">
+              <string>1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>5</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>6</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>7</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>8</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>9</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>10</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>11</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>12</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="cam0_listWidget">
-            <property name="toolTip">
-             <string>Photos in set</string>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::ExtendedSelection</enum>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam0_rm_pushButton">
-            <property name="toolTip">
-             <string>Remove selected photos (originals are not removed from disk)</string>
-            </property>
-            <property name="text">
-             <string>Remove selection</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam0_nameSort_pushButton">
-            <property name="toolTip">
-             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
-            </property>
-            <property name="text">
-             <string>Sort by name</string>
-            </property>
-           </widget>
+           </spacer>
           </item>
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QPushButton" name="cam1_pushButton">
-            <property name="toolTip">
-             <string>Select a folder containing one set of photos</string>
-            </property>
-            <property name="text">
-             <string>Select folder</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="cam1_lineEdit">
-            <property name="toolTip">
-             <string>Path of the selected folder</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QListWidget" name="cam1_listWidget">
-            <property name="toolTip">
-             <string>Photos in set</string>
-            </property>
-            <property name="dragEnabled">
-             <bool>true</bool>
-            </property>
-            <property name="dragDropMode">
-             <enum>QAbstractItemView::DropOnly</enum>
-            </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::ExtendedSelection</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam1_rm_pushButton">
-            <property name="toolTip">
-             <string>Remove selected photos (originals are not removed from disk)</string>
-            </property>
-            <property name="text">
-             <string>Remove selection</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam1_nameSort_pushButton">
-            <property name="toolTip">
-             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
-            </property>
-            <property name="text">
-             <string>Sort by name</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
-           <widget class="QPushButton" name="cam2_pushButton">
-            <property name="toolTip">
-             <string>Select a folder containing one set of photos</string>
-            </property>
-            <property name="text">
-             <string>Select folder</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="cam2_lineEdit">
-            <property name="toolTip">
-             <string>Path of the selected folder</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QListWidget" name="cam2_listWidget">
-            <property name="toolTip">
-             <string>Photos in set</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam2_rm_pushButton">
-            <property name="toolTip">
-             <string>Remove selected photos (originals are not removed from disk)</string>
-            </property>
-            <property name="text">
-             <string>Remove selection</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam2_nameSort_pushButton">
-            <property name="toolTip">
-             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
-            </property>
-            <property name="text">
-             <string>Sort by name</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_8">
-          <item>
-           <widget class="QPushButton" name="cam3_pushButton">
-            <property name="toolTip">
-             <string>Select a folder containing one set of photos</string>
-            </property>
-            <property name="text">
-             <string>Select folder</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="cam3_lineEdit">
-            <property name="toolTip">
-             <string>Path of the selected folder</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QListWidget" name="cam3_listWidget">
-            <property name="toolTip">
-             <string>Photos in set</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam3_rm_pushButton">
-            <property name="toolTip">
-             <string>Remove selected photos (originals are not removed from disk)</string>
-            </property>
-            <property name="text">
-             <string>Remove selection</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam3_nameSort_pushButton">
-            <property name="toolTip">
-             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
-            </property>
-            <property name="text">
-             <string>Sort by name</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_9">
-          <item>
-           <widget class="QPushButton" name="cam4_pushButton">
-            <property name="toolTip">
-             <string>Select a folder containing one set of photos</string>
-            </property>
-            <property name="text">
-             <string>Select folder</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="cam4_lineEdit">
-            <property name="toolTip">
-             <string>Path of the selected folder</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QListWidget" name="cam4_listWidget">
-            <property name="toolTip">
-             <string>Photos in set</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam4_rm_pushButton">
-            <property name="toolTip">
-             <string>Remove selected photos (originals are not removed from disk)</string>
-            </property>
-            <property name="text">
-             <string>Remove selection</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="cam4_nameSort_pushButton">
-            <property name="toolTip">
-             <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
-            </property>
-            <property name="text">
-             <string>Sort by name</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1934</width>
+             <height>409</height>
+            </rect>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_0">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_0">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_0">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_0">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_0">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_2">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_1">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_1">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_1">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+                <property name="dragEnabled">
+                 <bool>true</bool>
+                </property>
+                <property name="dragDropMode">
+                 <enum>QAbstractItemView::DropOnly</enum>
+                </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_1">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_1">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_2">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_2">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_2">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_2">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_2">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_8">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_3">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_3">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_3">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_3">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_3">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_9">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_4">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_4">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_4">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_4">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_4">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_10">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_5">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_5">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_5">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_5">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_5">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_6">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_6">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_6">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_6">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_6">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_13">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_7">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_7">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_7">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_7">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_7">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_14">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_8">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_8">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_8">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_8">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_8">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_15">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_9">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_9">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_9">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_9">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_9">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_16">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_10">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_10">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_10">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_10">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_10">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_17">
+              <item>
+               <widget class="QPushButton" name="cam_pushButton_11">
+                <property name="toolTip">
+                 <string>Select a folder containing one set of photos</string>
+                </property>
+                <property name="text">
+                 <string>Select folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="cam_lineEdit_11">
+                <property name="toolTip">
+                 <string>Path of the selected folder</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QListWidget" name="cam_listWidget_11">
+                <property name="toolTip">
+                 <string>Photos in set</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_rm_pushButton_11">
+                <property name="toolTip">
+                 <string>Remove selected photos (originals are not removed from disk)</string>
+                </property>
+                <property name="text">
+                 <string>Remove selection</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="cam_nameSort_pushButton_11">
+                <property name="toolTip">
+                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                </property>
+                <property name="text">
+                 <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -386,6 +845,16 @@
             </property>
             <property name="shortcut">
              <string>E</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="jump_Dw_spinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
             </property>
            </widget>
           </item>
@@ -549,6 +1018,16 @@
             </property>
             <property name="shortcut">
              <string>L</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="jump_Up_spinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
             </property>
            </widget>
           </item>

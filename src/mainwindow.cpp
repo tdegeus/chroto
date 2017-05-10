@@ -31,7 +31,10 @@ std::tuple<std::time_t,int> jpg2info ( std::string fname )
   // interpret time string
   struct std::tm tm;
   std::istringstream iss;
-  iss.str(result.DateTime);
+  if      ( result.DateTime         .size()==19 ) { iss.str(result.DateTime         ); }
+  else if ( result.DateTimeOriginal .size()==19 ) { iss.str(result.DateTimeOriginal ); }
+  else if ( result.DateTimeDigitized.size()==19 ) { iss.str(result.DateTimeDigitized); }
+  else    { throw std::runtime_error("No time string found"); }
   iss >> std::get_time(&tm,"%Y:%m:%d %H:%M:%S");
   std::time_t t = mktime(&tm);
 
@@ -54,32 +57,78 @@ MainWindow::MainWindow(QWidget *parent) :
   // enforce opening on the first tab
   ui->tabWidget->setCurrentIndex(0);
 
+  // assume two sets
+  ui->comboBox->setCurrentIndex(1);
+
   // fill arrays collecting the file-lists and related buttons
-  fileView.push_back(ui->cam0_listWidget   );
-  fileView.push_back(ui->cam1_listWidget   );
-  fileView.push_back(ui->cam2_listWidget   );
-  fileView.push_back(ui->cam3_listWidget   );
-  fileView.push_back(ui->cam4_listWidget   );
-  pathView.push_back(ui->cam0_lineEdit     );
-  pathView.push_back(ui->cam1_lineEdit     );
-  pathView.push_back(ui->cam2_lineEdit     );
-  pathView.push_back(ui->cam3_lineEdit     );
-  pathView.push_back(ui->cam4_lineEdit     );
-  dirSelec.push_back(ui->cam0_pushButton   );
-  dirSelec.push_back(ui->cam1_pushButton   );
-  dirSelec.push_back(ui->cam2_pushButton   );
-  dirSelec.push_back(ui->cam3_pushButton   );
-  dirSelec.push_back(ui->cam4_pushButton   );
-  delSelec.push_back(ui->cam0_rm_pushButton);
-  delSelec.push_back(ui->cam1_rm_pushButton);
-  delSelec.push_back(ui->cam2_rm_pushButton);
-  delSelec.push_back(ui->cam3_rm_pushButton);
-  delSelec.push_back(ui->cam4_rm_pushButton);
-  nameSort.push_back(ui->cam0_nameSort_pushButton);
-  nameSort.push_back(ui->cam1_nameSort_pushButton);
-  nameSort.push_back(ui->cam2_nameSort_pushButton);
-  nameSort.push_back(ui->cam3_nameSort_pushButton);
-  nameSort.push_back(ui->cam4_nameSort_pushButton);
+  fileView.push_back(ui->cam_listWidget_0          );
+  fileView.push_back(ui->cam_listWidget_1          );
+  fileView.push_back(ui->cam_listWidget_2          );
+  fileView.push_back(ui->cam_listWidget_3          );
+  fileView.push_back(ui->cam_listWidget_4          );
+  fileView.push_back(ui->cam_listWidget_5          );
+  fileView.push_back(ui->cam_listWidget_6          );
+  fileView.push_back(ui->cam_listWidget_7          );
+  fileView.push_back(ui->cam_listWidget_8          );
+  fileView.push_back(ui->cam_listWidget_9          );
+  fileView.push_back(ui->cam_listWidget_10         );
+  fileView.push_back(ui->cam_listWidget_11         );
+  pathView.push_back(ui->cam_lineEdit_0            );
+  pathView.push_back(ui->cam_lineEdit_1            );
+  pathView.push_back(ui->cam_lineEdit_2            );
+  pathView.push_back(ui->cam_lineEdit_3            );
+  pathView.push_back(ui->cam_lineEdit_4            );
+  pathView.push_back(ui->cam_lineEdit_5            );
+  pathView.push_back(ui->cam_lineEdit_6            );
+  pathView.push_back(ui->cam_lineEdit_7            );
+  pathView.push_back(ui->cam_lineEdit_8            );
+  pathView.push_back(ui->cam_lineEdit_9            );
+  pathView.push_back(ui->cam_lineEdit_10           );
+  pathView.push_back(ui->cam_lineEdit_11           );
+  dirSelec.push_back(ui->cam_pushButton_0          );
+  dirSelec.push_back(ui->cam_pushButton_1          );
+  dirSelec.push_back(ui->cam_pushButton_2          );
+  dirSelec.push_back(ui->cam_pushButton_3          );
+  dirSelec.push_back(ui->cam_pushButton_4          );
+  dirSelec.push_back(ui->cam_pushButton_5          );
+  dirSelec.push_back(ui->cam_pushButton_6          );
+  dirSelec.push_back(ui->cam_pushButton_7          );
+  dirSelec.push_back(ui->cam_pushButton_8          );
+  dirSelec.push_back(ui->cam_pushButton_9          );
+  dirSelec.push_back(ui->cam_pushButton_10         );
+  dirSelec.push_back(ui->cam_pushButton_11         );
+  delSelec.push_back(ui->cam_rm_pushButton_0       );
+  delSelec.push_back(ui->cam_rm_pushButton_1       );
+  delSelec.push_back(ui->cam_rm_pushButton_2       );
+  delSelec.push_back(ui->cam_rm_pushButton_3       );
+  delSelec.push_back(ui->cam_rm_pushButton_4       );
+  delSelec.push_back(ui->cam_rm_pushButton_5       );
+  delSelec.push_back(ui->cam_rm_pushButton_6       );
+  delSelec.push_back(ui->cam_rm_pushButton_7       );
+  delSelec.push_back(ui->cam_rm_pushButton_8       );
+  delSelec.push_back(ui->cam_rm_pushButton_9       );
+  delSelec.push_back(ui->cam_rm_pushButton_10      );
+  delSelec.push_back(ui->cam_rm_pushButton_11      );
+  nameSort.push_back(ui->cam_nameSort_pushButton_0 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_1 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_2 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_3 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_4 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_5 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_6 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_7 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_8 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_9 );
+  nameSort.push_back(ui->cam_nameSort_pushButton_10);
+  nameSort.push_back(ui->cam_nameSort_pushButton_11);
+
+  for ( size_t i=ui->comboBox->currentIndex()+1 ; i<nameSort.size() ; ++i ) {
+    fileView[i]->setVisible(false);
+    pathView[i]->setVisible(false);
+    dirSelec[i]->setVisible(false);
+    delSelec[i]->setVisible(false);
+    nameSort[i]->setVisible(false);
+  }
 
   // select folder / remove selected files / sort files / view files
   for ( size_t i=0 ; i<dirSelec.size() ; ++i ) {
@@ -156,7 +205,7 @@ void MainWindow::promptWarning ( QString msg )
 
 // ============================================================================
 
-void MainWindow::selectFolder(size_t camera)
+void MainWindow::selectFolder(size_t folder)
 {
   // if list is not empty: remove previous selection
   // -----------------------------------------------
@@ -164,7 +213,7 @@ void MainWindow::selectFolder(size_t camera)
   std::vector<int> rm(data.size(),0);
 
   for ( size_t i = 0; i < rm.size(); ++i )
-    if ( data[i].camera==camera )
+    if ( data[i].folder==folder )
       rm[i] = 1;
 
   size_t j = 0;
@@ -189,7 +238,8 @@ void MainWindow::selectFolder(size_t camera)
     dir = dialog.directory();
 
   // store new suggested directory
-  workDir = dir.absolutePath();
+  try { workDir = dir.filePath("../"); }
+  catch (...) { workDir = workDir; }
 
   // set filters
   QStringList filter_jpeg;
@@ -210,6 +260,10 @@ void MainWindow::selectFolder(size_t camera)
 
   std::time_t t;
   int rot;
+  size_t camera = 0;
+  for ( size_t i=0 ; i<data.size() ; ++i )
+    camera = std::max(camera,data[i].camera);
+  ++camera;
 
   // read all "*.jpg" files, optionally overwrite time with time from "chroto.json"
   for ( int i = 0; i < lst_jpeg.size(); ++i ) {
@@ -218,26 +272,29 @@ void MainWindow::selectFolder(size_t camera)
     catch (...) { continue; }
     File file;
     file.camera    = camera;
+    file.folder    = folder;
     file.disp      = finfo.fileName();
     file.path      = finfo.absoluteFilePath();
     file.dir       = finfo.absolutePath();
     file.time      = t;
     file.rotation  = rot;
-    if ( lst_json.size()==1 )
-      file.time = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"]);
+    if ( lst_json.size()==1 ) {
+      file.time    = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"  ]);
+      file.camera += static_cast<size_t>     (jdata[finfo.fileName().toStdString()]["camera"]);
+    }
     data.push_back(file);
   }
 }
 
 // ============================================================================
 
-void MainWindow::dataNameSort(size_t camera)
+void MainWindow::dataNameSort(size_t folder)
 {
   for ( size_t i = 0; i < data.size(); ++i )
     data[i].index = i;
 
   for ( size_t i = 0; i < data.size(); ++i ) {
-    if ( data[i].camera==camera )
+    if ( data[i].folder==folder )
       data[i].sort = true;
     else
       data[i].sort = false;
@@ -323,7 +380,7 @@ void MainWindow::viewFileList()
   // fill listWidgets
   for ( size_t i=0 ; i<data.size() ; ++i ) {
     for ( size_t l=0 ; l<fileView.size() ; ++l ) {
-      if ( data[i].camera==l ) {
+      if ( data[i].folder==l ) {
         fileView[l]->addItem(data[i].disp);
         pathView[l]->setText(data[i].dir);
       }
@@ -361,6 +418,8 @@ void MainWindow::displayImage()
   ui->exclImg_pushButton->setEnabled(false);
   ui->nextBnd_pushButton->setEnabled(false);
   ui->prevBnd_pushButton->setEnabled(false);
+  ui->jump_Dw_spinBox->setEnabled(false);
+  ui->jump_Up_spinBox->setEnabled(false);
 
   ui->view_idx_label->clear();
   ui->view_prv_label->clear();
@@ -376,22 +435,6 @@ void MainWindow::displayImage()
 
   ui->exclImg_pushButton->setEnabled(true);
 
-  if ( idx>0 ) {
-    for ( size_t i=0 ; i<idx ; ++i ) {
-      if ( data[i].camera!=data[i+1].camera ) {
-        ui->prevBnd_pushButton->setEnabled(true);
-        break;
-      }
-    }
-  }
-
-  for ( size_t i=idx+1 ; i<data.size()-1 ; ++i ) {
-    if ( data[i].camera!=data[i+1].camera ) {
-      ui->nextBnd_pushButton->setEnabled(true);
-      break;
-    }
-  }
-
   this->idxViewLabel(ui->view_idx_label,idx);
 
   if ( idx+1 < data.size() )
@@ -400,8 +443,8 @@ void MainWindow::displayImage()
     ui->nextImg_pushButton->setEnabled(true);
     ui->lastImg_pushButton->setEnabled(true);
     ui->mvUpImg_pushButton->setEnabled(true);
-    if ( data[idx].camera!=data[idx+1].camera )
-      ui->mvUpSet_pushButton->setEnabled(true);
+    ui->jump_Up_spinBox->setEnabled(true);
+    ui->jump_Up_spinBox->setMaximum(data.size()-1-idx);
   }
 
   if ( idx > 0 )
@@ -410,9 +453,28 @@ void MainWindow::displayImage()
     ui->prevImg_pushButton->setEnabled(true);
     ui->headImg_pushButton->setEnabled(true);
     ui->mvDwImg_pushButton->setEnabled(true);
-    if ( data[idx].camera!=data[idx-1].camera )
-      ui->mvDwSet_pushButton->setEnabled(true);
+    ui->jump_Dw_spinBox->setEnabled(true);
+    ui->jump_Dw_spinBox->setMaximum(idx);
   }
+
+  if ( idx>0 ) {
+    for ( size_t i=idx ; i>0 ; --i ) {
+      if ( data[i-1].camera!=data[idx].camera ) {
+        ui->prevBnd_pushButton->setEnabled(true);
+        ui->mvDwSet_pushButton->setEnabled(true);
+        break;
+      }
+    }
+  }
+
+  for ( size_t i=idx ; i<data.size()-1 ; ++i ) {
+    if ( data[i+1].camera!=data[idx].camera ) {
+      ui->nextBnd_pushButton->setEnabled(true);
+      ui->mvUpSet_pushButton->setEnabled(true);
+      break;
+    }
+  }
+
 
 }
 
@@ -493,9 +555,9 @@ void MainWindow::on_mvDwImg_pushButton_clicked()
   if ( idx==0 )
     return;
 
-  data[idx].time -= data[idx].time-data[idx-1].time+1;
+  data[idx].time -= data[idx].time-data[idx-ui->jump_Dw_spinBox->value()].time+1;
 
-  int i = static_cast<int>(idx)-2;
+  int i = static_cast<int>(idx)-ui->jump_Dw_spinBox->value()-1;
   while ( i>=0 &&  data[i].time==data[idx].time ) {
     data[i].time -= 1;
     --i;
@@ -506,12 +568,18 @@ void MainWindow::on_mvDwImg_pushButton_clicked()
 
 void MainWindow::on_mvDwSet_pushButton_clicked()
 {
-  size_t t0 = data[idx].time;
-  this->on_mvDwImg_pushButton_clicked();
+  size_t i;
 
-  for ( size_t i = 0; i < data.size(); ++i )
-    if ( i!=idx && data[i].camera==data[idx].camera )
-      data[i].time -= t0-data[idx].time;
+  for ( i=idx ; i>0 ; --i )
+    if ( data[i-1].camera!=data[idx].camera )
+      break;
+  --i;
+
+  std::time_t dt = data[idx].time-data[i].time-1;
+
+  for ( size_t j=0; j<data.size(); ++j )
+    if ( data[j].camera==data[idx].camera )
+      data[j].time -= dt;
 }
 
 // ============================================================================
@@ -521,9 +589,9 @@ void MainWindow::on_mvUpImg_pushButton_clicked()
   if ( idx==data.size()-1 )
     return;
 
-  data[idx].time += data[idx+1].time-data[idx].time+1;
+  data[idx].time += data[idx+ui->jump_Up_spinBox->value()].time-data[idx].time+1;
 
-  size_t i = idx+2;
+  size_t i = idx+ui->jump_Up_spinBox->value()+1;
   while ( i<data.size() && data[i].time==data[idx].time ) {
     data[i].time += 1;
     ++i;
@@ -534,12 +602,17 @@ void MainWindow::on_mvUpImg_pushButton_clicked()
 
 void MainWindow::on_mvUpSet_pushButton_clicked()
 {
-  size_t t0 = data[idx].time;
-  this->on_mvUpImg_pushButton_clicked();
+  size_t i;
 
-  for ( size_t i = 0; i < data.size(); ++i )
-    if ( i!=idx && data[i].camera==data[idx].camera )
-      data[i].time += data[idx].time-t0;
+  for ( i=idx+1 ; i<data.size() ; ++i )
+    if ( data[i].camera!=data[idx].camera )
+      break;
+
+  std::time_t dt = data[i].time-data[idx].time+1;
+
+  for ( size_t j=0; j<data.size(); ++j )
+    if ( data[j].camera==data[idx].camera )
+      data[j].time += dt;
 }
 
 // ============================================================================
@@ -551,6 +624,7 @@ void MainWindow::on_exclImg_pushButton_clicked()
   f.path     = data[idx].path    ;
   f.disp     = data[idx].disp    ;
   f.camera   = data[idx].camera  ;
+  f.folder   = data[idx].folder  ;
   f.rotation = data[idx].rotation;
   f.time     = data[idx].time    ;
   delData.push_back(f);
@@ -638,9 +712,10 @@ void MainWindow::on_write_pushButton_clicked()
     // - format -> filename
     QString fname = ui->name_lineEdit->text()+QString("-")+QString("%1.jpg").arg(i,N,10,QChar('0'));
     QString fpath = QDir(ui->outPath_lineEdit->text()).filePath(fname);
-    // - store infomration to JSON-structu
-    j[fname.toStdString()]["origin"] = data[i].path.toStdString();
+    // - store information to JSON-struct
+    j[fname.toStdString()]["camera"] = data[i].camera;
     j[fname.toStdString()]["time"  ] = static_cast<long>(data[i].time);
+    j["camera"][std::to_string(data[i].camera)] = data[i].dir.toStdString();
     // - copy or move
     if ( ui->cp_checkBox->isChecked() ) { QFile::copy(  data[i].path,fpath); }
     else                                { QFile::rename(data[i].path,fpath); }
@@ -668,4 +743,33 @@ void MainWindow::on_clean_pushButton_clicked()
 
   for ( size_t i=0 ; i<N ; ++i )
     delData.erase(delData.begin());
+}
+
+// ============================================================================
+
+void MainWindow::on_comboBox_currentIndexChanged(int index)
+{
+  for ( size_t i=0 ; i<nameSort.size() ; ++i ) {
+    fileView[i]->setVisible(false);
+    pathView[i]->setVisible(false);
+    dirSelec[i]->setVisible(false);
+    delSelec[i]->setVisible(false);
+    nameSort[i]->setVisible(false);
+  }
+
+  size_t folder = 0;
+  for ( size_t i=0 ; i<data.size() ; ++i )
+    folder = std::max(folder,data[i].folder);
+  if ( index<static_cast<int>(folder) ) {
+    index = static_cast<int>(folder);
+    ui->comboBox->setCurrentIndex(index);
+  }
+
+  for ( int i=0 ; i<std::min(index+1,static_cast<int>(nameSort.size())) ; ++i ) {
+    fileView[i]->setVisible(true);
+    pathView[i]->setVisible(true);
+    dirSelec[i]->setVisible(true);
+    delSelec[i]->setVisible(true);
+    nameSort[i]->setVisible(true);
+  }
 }

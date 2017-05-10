@@ -35,7 +35,8 @@ public:
   QString     dir      = ""   ; // directory in which the file is stored
   QString     path     = ""   ; // absolute file-path to the file
   QString     disp     = ""   ; // display name
-  size_t      camera   = 0    ; // camera-index (corresponds to "fileView")
+  size_t      folder   = 0    ; // folder-index (corresponds to "fileView")
+  size_t      camera   = 0    ; // camera-index
   int         rotation = 0    ; // rotation in degrees
   std::time_t time     = 0    ; // time at which the photo was taken
   size_t      index    = 0    ; // position in list with all photos
@@ -81,6 +82,8 @@ private slots:
   void on_write_pushButton_clicked();
 
   void on_clean_pushButton_clicked();
+
+  void on_comboBox_currentIndexChanged(int index);
 
 private:
   Ui::MainWindow            *ui;
