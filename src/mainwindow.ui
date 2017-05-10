@@ -48,7 +48,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBox">
+           <widget class="QComboBox" name="nfolder_comboBox">
             <property name="currentText">
              <string>1</string>
             </property>
