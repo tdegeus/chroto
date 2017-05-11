@@ -353,6 +353,12 @@ void MainWindow::dataTimeSort()
       return;
     }
   }
+
+  // make sure that all images are at least one second apart
+  // this is needed to allow image insertion between image
+  for ( size_t i=0 ; i<data.size()-1 ; ++i )
+    if ( data[i+1].time<=data[i].time )
+      data[i+1].time = data[i].time+1;
 }
 
 // =================================================================================================
@@ -401,6 +407,9 @@ void MainWindow::viewFileList()
       }
     }
   }
+
+  for ( size_t l=0 ; l<fileView.size() ; ++l )
+    fileView[l]->setCurrentRow(idx);
 }
 
 // =================================================================================================
@@ -577,13 +586,7 @@ void MainWindow::on_mvDwImg_pushButton_clicked()
   if ( idx==0 )
     return;
 
-  data[idx].time -= data[idx].time-data[idx-ui->jump_Dw_spinBox->value()].time+1;
-
-  int i = static_cast<int>(idx)-ui->jump_Dw_spinBox->value()-1;
-  while ( i>=0 &&  data[i].time==data[idx].time ) {
-    data[i].time -= 1;
-    --i;
-  }
+  data[idx].time -= (data[idx].time-data[idx-ui->jump_Dw_spinBox->value()].time+1);
 }
 
 // =================================================================================================
@@ -611,13 +614,7 @@ void MainWindow::on_mvUpImg_pushButton_clicked()
   if ( idx==data.size()-1 )
     return;
 
-  data[idx].time += data[idx+ui->jump_Up_spinBox->value()].time-data[idx].time+1;
-
-  size_t i = idx+ui->jump_Up_spinBox->value()+1;
-  while ( i<data.size() && data[i].time==data[idx].time ) {
-    data[i].time += 1;
-    ++i;
-  }
+  data[idx].time += (data[idx+ui->jump_Up_spinBox->value()].time-data[idx].time+1);
 }
 
 // =================================================================================================
@@ -767,10 +764,22 @@ void MainWindow::on_write_pushButton_clicked()
 
 void MainWindow::on_clean_pushButton_clicked()
 {
-  // remove delete photos
+
+  // remove deleted photos
   for ( size_t i=0 ; i<delData.size() ; ++i ) {
     // - remove photo
     QFile::remove(delData[i].path);
+    // - extract directory
+    QDir dir(delData[i].dir);
+    // - remove useless system files
+    QString   fname = dir.filePath(".DS_Store");
+    QFileInfo finfo(fname);
+    if ( finfo.exists() )
+      QFile::remove(fname);
+  }
+
+  // remove empty folders
+  for ( size_t i=0 ; i<delData.size() ; ++i ) {
     // - check if the directory contains any files
     QDir dir(delData[i].dir);
     QFileInfoList dirInfo = dir.entryInfoList(QDir::AllEntries | QDir::System | QDir::NoDotAndDotDot | QDir::Hidden);
