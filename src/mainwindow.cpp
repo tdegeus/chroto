@@ -213,6 +213,39 @@ void MainWindow::promptWarning ( QString msg )
 
 // =================================================================================================
 
+void MainWindow::on_nfolder_comboBox_currentIndexChanged(int index)
+{
+  // set all invisible
+  for ( size_t i=0; i<nameSort.size(); ++i ) {
+    fileView[i]->setVisible(false);
+    pathView[i]->setVisible(false);
+    dirSelec[i]->setVisible(false);
+    delSelec[i]->setVisible(false);
+    nameSort[i]->setVisible(false);
+  }
+
+  // find the number of folders containing selected photos
+  size_t folder = 0;
+  for ( auto &file : data )
+    folder = std::max(folder,file.folder);
+  // if request number of folders is too low -> correct
+  if ( index<static_cast<int>(folder) ) {
+    index = static_cast<int>(folder);
+    ui->nfolder_comboBox->setCurrentIndex(index);
+  }
+
+  // enable requested number of columns
+  for ( int i=0; i<std::min(index+1,static_cast<int>(nameSort.size())); ++i ) {
+    fileView[i]->setVisible(true);
+    pathView[i]->setVisible(true);
+    dirSelec[i]->setVisible(true);
+    delSelec[i]->setVisible(true);
+    nameSort[i]->setVisible(true);
+  }
+}
+
+// =================================================================================================
+
 void MainWindow::selectFolder(size_t folder)
 {
   // if list is not empty: remove previous selection
@@ -676,6 +709,49 @@ void MainWindow::on_mvUpSet_pushButton_clicked()
 
 // =================================================================================================
 
+void MainWindow::on_jumpSel_pushButton_clicked()
+{
+  // open pop-up dialog
+  ImageSelection *select = new ImageSelection(this);
+  // add all files to dialog
+  for ( auto &file : data ) {
+    select->files.push_back(file.path);
+    select->disp .push_back(file.disp);
+  }
+  // add images to thumbnails (was delayed because of the need to transfer data)
+  select->addThumbnails();
+  // show dialog (only continue when OK is pressed)
+  if ( !select->exec() )
+    return;
+
+  // compute time difference w.r.t. selected photo
+  long dt = static_cast<long>(data[idx].time)-static_cast<long>(data[select->idx].time);
+
+  // apply time difference
+  // - either to all images
+  if ( select->apply_to_all ) {
+    for ( auto &file : data )
+      if ( file.camera==data[idx].camera )
+        file.time = static_cast<std::time_t>(static_cast<long>(file.time)-dt);
+  }
+  // - or to one image
+  else {
+    data[idx].time -= static_cast<std::time_t>(dt);
+  }
+}
+
+// =================================================================================================
+
+void MainWindow::on_exclImg_pushButton_clicked()
+{
+  data.erase(data.begin()+idx);
+
+  if ( idx+1 >= data.size() )
+    idx = data.size()-1;
+}
+
+// =================================================================================================
+
 void MainWindow::on_deltImg_pushButton_clicked()
 {
   File f;
@@ -688,16 +764,6 @@ void MainWindow::on_deltImg_pushButton_clicked()
   f.time     = data[idx].time    ;
   delData.push_back(f);
 
-  data.erase(data.begin()+idx);
-
-  if ( idx+1 >= data.size() )
-    idx = data.size()-1;
-}
-
-// =================================================================================================
-
-void MainWindow::on_exclImg_pushButton_clicked()
-{
   data.erase(data.begin()+idx);
 
   if ( idx+1 >= data.size() )
@@ -841,68 +907,5 @@ void MainWindow::on_clean_pushButton_clicked()
 
   while ( delData.size()>0 )
     delData.erase(delData.begin());
-}
-
-// =================================================================================================
-
-void MainWindow::on_nfolder_comboBox_currentIndexChanged(int index)
-{
-  // set all invisible
-  for ( size_t i=0; i<nameSort.size(); ++i ) {
-    fileView[i]->setVisible(false);
-    pathView[i]->setVisible(false);
-    dirSelec[i]->setVisible(false);
-    delSelec[i]->setVisible(false);
-    nameSort[i]->setVisible(false);
-  }
-
-  // find the number of folders containing selected photos
-  size_t folder = 0;
-  for ( auto &file : data )
-    folder = std::max(folder,file.folder);
-  // if request number of folders is too low -> correct
-  if ( index<static_cast<int>(folder) ) {
-    index = static_cast<int>(folder);
-    ui->nfolder_comboBox->setCurrentIndex(index);
-  }
-
-  // enable requested number of columns
-  for ( int i=0; i<std::min(index+1,static_cast<int>(nameSort.size())); ++i ) {
-    fileView[i]->setVisible(true);
-    pathView[i]->setVisible(true);
-    dirSelec[i]->setVisible(true);
-    delSelec[i]->setVisible(true);
-    nameSort[i]->setVisible(true);
-  }
-}
-
-// =================================================================================================
-
-void MainWindow::on_jumpSel_pushButton_clicked()
-{
-  ImageSelection *select = new ImageSelection(this);
-
-  for ( auto &file : data ) {
-    select->files.push_back(file.path);
-    select->disp .push_back(file.disp);
-  }
-
-  select->display();
-
-  int accept = select->exec();
-
-  if ( !accept )
-    return;
-
-  long dt = static_cast<long>(data[idx].time)-static_cast<long>(data[select->idx].time);
-
-  if ( select->apply_to_all ) {
-    for ( auto &file : data )
-      if ( file.camera==data[idx].camera )
-        file.time = static_cast<std::time_t>(static_cast<long>(file.time)-dt);
-  }
-  else {
-    data[idx].time -= static_cast<std::time_t>(dt);
-  }
 }
 

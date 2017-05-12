@@ -65,6 +65,7 @@ public:
   ~MainWindow();
 
 private slots:
+  void on_nfolder_comboBox_currentIndexChanged(int index);// change the displayed number of folders
   void selectFolder(size_t folder);    // select+read folder
   void dataRmvSelec(QListWidget*);     // remove items selected in one of the listWidgets
   void dataNameSort(size_t folder);    // sort photos in a specific folder by name (time modified)
@@ -90,7 +91,6 @@ private slots:
   void on_outPath_lineEdit_editingFinished();// manually edit output path
   void on_write_pushButton_clicked();  // write sorted batch to output folder
   void on_clean_pushButton_clicked();  // remove all photos marked deleted, remove empty directories
-  void on_nfolder_comboBox_currentIndexChanged(int index);
 
 private:
   Ui::MainWindow            *ui;
