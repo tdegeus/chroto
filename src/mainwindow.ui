@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -139,7 +139,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1934</width>
+             <width>1910</width>
              <height>409</height>
             </rect>
            </property>
@@ -179,7 +179,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -236,7 +236,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -276,6 +276,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -284,7 +287,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -324,6 +327,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -332,7 +338,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -372,6 +378,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -380,7 +389,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -420,6 +429,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -428,7 +440,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -468,6 +480,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -476,7 +491,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -516,6 +531,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -524,7 +542,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -564,6 +582,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -572,7 +593,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -612,6 +633,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -620,7 +644,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -660,6 +684,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -668,7 +695,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>
@@ -708,6 +735,9 @@
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
+                <property name="selectionMode">
+                 <enum>QAbstractItemView::ExtendedSelection</enum>
+                </property>
                </widget>
               </item>
               <item>
@@ -716,7 +746,7 @@
                  <string>Remove selected photos (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
-                 <string>Remove selection</string>
+                 <string>Exclude selection</string>
                 </property>
                </widget>
               </item>

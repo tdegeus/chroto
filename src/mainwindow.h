@@ -105,6 +105,7 @@ private:
   std::vector<QPushButton*> dirSelec;    // list with widgets to select a folder
   std::vector<QPushButton*> delSelec;    // list with widgets to remover selects files in list
   std::vector<QPushButton*> nameSort;    // list with widgets to sort by name for that camera
+  std::list  <QString>      cleanPaths;  // list with input paths (checked to clean later on)
   QString                   workDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
   void promptWarning(QString);           // function to show pop-up warning
   void resizeEvent(QResizeEvent*);       // function used to actively resize the window

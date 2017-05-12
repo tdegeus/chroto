@@ -233,6 +233,18 @@ void MainWindow::selectFolder(size_t folder)
     }
   }
 
+  // set camera index to the lowest possible (not strictly needed, but elegant)
+  if ( data.size()>0 ) {
+    std::vector<int> camera(data.size(),0);
+    for ( size_t i=0 ; i<data.size() ; ++i )
+      camera[data[i].camera] = 1;
+    camera[0] -= 1;
+    for ( size_t i=1 ; i<data.size() ; ++i )
+      camera[i] += camera[i-1];
+    for ( size_t i=0 ; i<data.size() ; ++i )
+      data[i].camera = static_cast<size_t>(camera[data[i].camera]);
+  }
+
   // select folder -> read files
   // ---------------------------
 
@@ -401,10 +413,13 @@ void MainWindow::dataRmvSelec(QListWidget *list)
 
 void MainWindow::viewFileList()
 {
+  // empty storage paths
+  for ( auto i : pathView )
+    i->clear();
   // empty listWidgets
-  for ( size_t l=0 ; l<fileView.size() ; ++l )
-    while(fileView[l]->count()>0)
-      fileView[l]->takeItem(0);
+  for ( auto i : fileView )
+    while ( i->count()>0 )
+      i->takeItem(0);
 
   // no photos selected -> exit this function
   if ( data.size()==0 )
@@ -760,6 +775,12 @@ void MainWindow::on_write_pushButton_clicked()
     }
   }
 
+  // update list with paths
+  for ( size_t i=0 ; i<data.size() ; ++i )
+    cleanPaths.push_back(data[i].dir);
+  // convert to unique list
+  cleanPaths.unique();
+
   // write output
   // - allocate JSON-struct
   json j;
@@ -783,19 +804,20 @@ void MainWindow::on_write_pushButton_clicked()
   o << std::setw(4) << j << std::endl;
 
   // clear data-structure
-  // - store number
-  size_t n = data.size();
-  // - remove all from vector
-  for ( size_t i=0 ; i<n ; ++i )
-    data.erase(data.begin());
-  // - signal needed reintialization
   init = true;
+  while ( data.size()>0 )
+    data.erase(data.begin());
 }
 
 // =================================================================================================
 
 void MainWindow::on_clean_pushButton_clicked()
 {
+  // update list with paths
+  for ( size_t i=0 ; i<data.size() ; ++i )
+    cleanPaths.push_back(delData[i].dir);
+  // convert to unique list
+  cleanPaths.unique();
 
   // remove deleted photos
   for ( size_t i=0 ; i<delData.size() ; ++i ) {
@@ -811,14 +833,13 @@ void MainWindow::on_clean_pushButton_clicked()
   }
 
   // remove empty folders
-  for ( size_t i=0 ; i<delData.size() ; ++i ) {
-    // - check if the directory contains any files
-    QDir dir(delData[i].dir);
-    QFileInfoList dirInfo = dir.entryInfoList(QDir::AllEntries | QDir::System | QDir::NoDotAndDotDot | QDir::Hidden);
-    // - if the directory is empty -> remove directory also
-    if ( dirInfo.isEmpty() )
-      dir.removeRecursively();
-  }
+  // - visit all folders that had been selected
+  for ( QString i : cleanPaths )
+    if ( QDir(i).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).isEmpty() )
+      QDir(i).removeRecursively();
+  // - empty list
+  while ( cleanPaths.size()>0 )
+    cleanPaths.erase(cleanPaths.begin());
 
   // clean the "delData" entries
   // - store number

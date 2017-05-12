@@ -120,10 +120,6 @@ void ImageSelection::on_pushButton_clicked()
     row2idx[irow+i] = rows[i];
     ui->listWidget->insertItem(irow+i,new QListWidgetItem(QIcon(files[rows[i]]),disp[rows[i]]));
   }
-
-  for ( size_t i=1 ; i<row2idx.size() ; ++i )
-    std::cout << row2idx[i] << std::endl;
-
 }
 
 // =================================================================================================
