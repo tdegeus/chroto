@@ -72,9 +72,6 @@ void ImageSelection::display()
   while ( row2idx.size()<files.size() )
     row2idx.push_back(-1);
 
-  if ( files.size()!=disp.size() )
-    throw std::runtime_error("files/disp show have the same size: this should never happen");
-
   ui->listWidget->setViewMode  (QListWidget::IconMode);
   ui->listWidget->setIconSize  (QSize(200,200)       );
   ui->listWidget->setResizeMode(QListWidget::Adjust  );
