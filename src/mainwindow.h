@@ -83,16 +83,14 @@ private slots:
   void on_mvDwSet_pushButton_clicked();// move photo earlier than latest photo of another camera
   void on_mvUpImg_pushButton_clicked();// move photo one photo later
   void on_mvUpSet_pushButton_clicked();// move photo later than earliest photo of another camera
-  void on_delImg_pushButton_clicked();// remove photo (can be removed from disk using "clean")
+  void on_jumpSel_pushButton_clicked();// open dialog to select time-jump visually
+  void on_exclImg_pushButton_clicked();// exclude image from proceedings (never removed from disk)
+  void on_deltImg_pushButton_clicked();// remove photo (can be removed from disk using "clean")
   void on_outPath_pushButton_clicked();// select output path
   void on_outPath_lineEdit_editingFinished();// manually edit output path
-  void on_write_pushButton_clicked();  //
-  void on_clean_pushButton_clicked();
+  void on_write_pushButton_clicked();  // write sorted batch to output folder
+  void on_clean_pushButton_clicked();  // remove all photos marked deleted, remove empty directories
   void on_nfolder_comboBox_currentIndexChanged(int index);
-
-  void on_jumpSelect_pushButton_clicked();
-
-  void on_exclImg_pushButton_clicked();
 
 private:
   Ui::MainWindow            *ui;

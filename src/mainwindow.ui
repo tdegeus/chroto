@@ -914,7 +914,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
-             <widget class="QPushButton" name="jumpSelect_pushButton">
+             <widget class="QPushButton" name="jumpSel_pushButton">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -937,7 +937,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="delImg_pushButton">
+             <widget class="QPushButton" name="deltImg_pushButton">
               <property name="enabled">
                <bool>false</bool>
               </property>
