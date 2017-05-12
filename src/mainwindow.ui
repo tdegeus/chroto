@@ -884,7 +884,30 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
+             <widget class="QPushButton" name="jumpSelect_pushButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Time jump</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="exclImg_pushButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Exclude image from sorting, never delete from disk (also not on pressing &quot;clean-up&quot;)</string>
+              </property>
+              <property name="text">
+               <string>Exclude</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="delImg_pushButton">
               <property name="enabled">
                <bool>false</bool>
               </property>

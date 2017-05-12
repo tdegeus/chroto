@@ -23,8 +23,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 
-SOURCES += main.cpp mainwindow.cpp ./easyexif/exif.cpp
+SOURCES += main.cpp mainwindow.cpp ./easyexif/exif.cpp \
+    imageselection.cpp
 
-HEADERS += mainwindow.h ./easyexif/exif.h
+HEADERS += mainwindow.h ./easyexif/exif.h \
+    imageselection.h
 
-FORMS   += mainwindow.ui
+FORMS   += mainwindow.ui \
+    imageselection.ui

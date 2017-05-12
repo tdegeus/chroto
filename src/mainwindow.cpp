@@ -156,11 +156,13 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->mvDwSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
   connect(ui->mvUpImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
   connect(ui->mvUpSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-  connect(ui->exclImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+  connect(ui->delImg_pushButton ,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+  connect(ui->exclImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->mvDwImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->mvDwSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->mvUpImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->mvUpSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  connect(ui->delImg_pushButton ,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->exclImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->prevImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->nextImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
@@ -168,6 +170,9 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->lastImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->nextBnd_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   connect(ui->prevBnd_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+
+  connect(ui->jumpSelect_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
+  connect(ui->jumpSelect_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
   // re-sort data / update file-list / display image
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->dataTimeSort();});
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->viewFileList();});
@@ -268,13 +273,15 @@ void MainWindow::selectFolder(size_t folder)
   size_t      camera = 0;
 
   // find which camera index to use (one more than the current maximum)
-  for ( size_t i=0 ; i<data.size() ; ++i )
-    camera = std::max(camera,data[i].camera);
-  ++camera;
+  if ( data.size()>0 ) {
+    for ( size_t i=0 ; i<data.size() ; ++i )
+      camera = std::max(camera,data[i].camera);
+    ++camera;
+  }
 
   // read all JPG-files, if "chroto.json" exists: overwrite time from JPEG with stored values,
   // segment in the different cameras that were stored in "chroto.json"
-  for ( int i = 0; i < lst_jpeg.size(); ++i ) {
+  for ( int i=0 ; i<lst_jpeg.size(); ++i ) {
     QFileInfo finfo = lst_jpeg.at(i);
     try         { std::tie(t,rot) = jpg2info(finfo.absoluteFilePath().toStdString()); }
     catch (...) { continue; }
@@ -298,6 +305,10 @@ void MainWindow::selectFolder(size_t folder)
 
 void MainWindow::dataNameSort(size_t folder)
 {
+  // quit function if no files are present
+  if ( data.size()<=0 )
+    return;
+
   // store current order, to retrieve the new position of "idx"
   for ( size_t i = 0; i < data.size(); ++i )
     data[i].index = i;
@@ -335,6 +346,10 @@ void MainWindow::dataNameSort(size_t folder)
 
 void MainWindow::dataTimeSort()
 {
+  // quit function if no files are present
+  if ( data.size()<=0 )
+    return;
+
   // store current order, to retrieve the new position of "idx"
   for ( size_t i = 0; i < data.size(); ++i )
     data[i].index = i;
@@ -437,11 +452,13 @@ void MainWindow::displayImage()
   ui->mvDwSet_pushButton->setEnabled(false);
   ui->mvUpImg_pushButton->setEnabled(false);
   ui->mvUpSet_pushButton->setEnabled(false);
+  ui->delImg_pushButton ->setEnabled(false);
   ui->exclImg_pushButton->setEnabled(false);
   ui->nextBnd_pushButton->setEnabled(false);
   ui->prevBnd_pushButton->setEnabled(false);
   ui->jump_Dw_spinBox   ->setEnabled(false);
   ui->jump_Up_spinBox   ->setEnabled(false);
+  ui->jumpSelect_pushButton->setEnabled(false);
 
   // clear currently viewed photos
   ui->view_idx_label->clear();
@@ -459,7 +476,12 @@ void MainWindow::displayImage()
   }
 
   // enable deleting
+  ui->delImg_pushButton ->setEnabled(true);
   ui->exclImg_pushButton->setEnabled(true);
+
+  // enable time-jump
+  if ( data.size()>1 )
+    ui->jumpSelect_pushButton->setEnabled(true);
 
   // view current photo "idx"
   this->idxViewLabel(ui->view_idx_label,idx);
@@ -636,7 +658,7 @@ void MainWindow::on_mvUpSet_pushButton_clicked()
 
 // =================================================================================================
 
-void MainWindow::on_exclImg_pushButton_clicked()
+void MainWindow::on_delImg_pushButton_clicked()
 {
   File f;
   f.dir      = data[idx].dir     ;
@@ -648,6 +670,16 @@ void MainWindow::on_exclImg_pushButton_clicked()
   f.time     = data[idx].time    ;
   delData.push_back(f);
 
+  data.erase(data.begin()+idx);
+
+  if ( idx+1 >= data.size() )
+    idx = data.size()-1;
+}
+
+// =================================================================================================
+
+void MainWindow::on_exclImg_pushButton_clicked()
+{
   data.erase(data.begin()+idx);
 
   if ( idx+1 >= data.size() )
@@ -828,3 +860,34 @@ void MainWindow::on_nfolder_comboBox_currentIndexChanged(int index)
     nameSort[i]->setVisible(true);
   }
 }
+
+// =================================================================================================
+
+void MainWindow::on_jumpSelect_pushButton_clicked()
+{
+  ImageSelection *select = new ImageSelection(this);
+
+  for ( size_t i=0 ; i<data.size() ; ++i ) {
+    select->files.push_back(data[i].path);
+    select->disp .push_back(data[i].disp);
+  }
+
+  select->display();
+
+  int accept = select->exec();
+
+  if ( !accept )
+    return;
+
+  long dt = static_cast<long>(data[idx].time)-static_cast<long>(data[select->idx].time);
+
+  if ( select->apply_to_all ) {
+    for ( size_t i=0 ; i<data.size() ; ++i )
+      if ( data[i].camera==data[idx].camera )
+        data[i].time = static_cast<std::time_t>(static_cast<long>(data[i].time)-dt);
+  }
+  else {
+    data[idx].time -= static_cast<std::time_t>(dt);
+  }
+}
+
