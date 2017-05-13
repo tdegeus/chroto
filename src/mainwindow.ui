@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -821,6 +821,19 @@
            </widget>
           </item>
           <item>
+           <widget class="QSpinBox" name="prevImg_spinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="headImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
@@ -880,6 +893,12 @@
           </item>
           <item>
            <widget class="QSpinBox" name="jump_Dw_spinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Move invidiual photo N photos earlier</string>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>
@@ -1017,6 +1036,19 @@
            </widget>
           </item>
           <item>
+           <widget class="QSpinBox" name="nextImg_spinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="lastImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
@@ -1076,6 +1108,12 @@
           </item>
           <item>
            <widget class="QSpinBox" name="jump_Up_spinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Move invidiual photo N photos later</string>
+            </property>
             <property name="minimum">
              <number>1</number>
             </property>

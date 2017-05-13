@@ -507,6 +507,8 @@ void MainWindow::displayImage()
   ui->exclImg_pushButton->setEnabled(false);
   ui->nextBnd_pushButton->setEnabled(false);
   ui->prevBnd_pushButton->setEnabled(false);
+  ui->prevImg_spinBox   ->setEnabled(false);
+  ui->nextImg_spinBox   ->setEnabled(false);
   ui->jump_Dw_spinBox   ->setEnabled(false);
   ui->jump_Up_spinBox   ->setEnabled(false);
   ui->jumpSel_pushButton->setEnabled(false);
@@ -545,7 +547,7 @@ void MainWindow::displayImage()
     ui->lastImg_pushButton->setEnabled(true);
     ui->mvUpImg_pushButton->setEnabled(true);
     ui->jump_Up_spinBox   ->setEnabled(true);
-    ui->jump_Up_spinBox   ->setMaximum(data.size()-1-idx);
+    ui->nextImg_spinBox   ->setEnabled(true);
   }
 
   // view previous photo "idx-1", and enable navigation button right
@@ -556,7 +558,7 @@ void MainWindow::displayImage()
     ui->headImg_pushButton->setEnabled(true);
     ui->mvDwImg_pushButton->setEnabled(true);
     ui->jump_Dw_spinBox   ->setEnabled(true);
-    ui->jump_Dw_spinBox   ->setMaximum(idx);
+    ui->prevImg_spinBox   ->setEnabled(true);
   }
 
   // check if there if a different camera somewhere in the history, and enable navigation buttons
@@ -586,8 +588,14 @@ void MainWindow::displayImage()
 
 void MainWindow::on_prevImg_pushButton_clicked()
 {
-  if ( idx>0 )
-    --idx;
+  idx -= std::min(idx,static_cast<size_t>(ui->prevImg_spinBox->value()));
+}
+
+// =================================================================================================
+
+void MainWindow::on_nextImg_pushButton_clicked()
+{
+  idx += std::min(data.size()-1-idx,static_cast<size_t>(ui->nextImg_spinBox->value()));
 }
 
 // =================================================================================================
@@ -605,16 +613,6 @@ void MainWindow::on_prevBnd_pushButton_clicked()
 
   if ( idx>0 )
     --idx;
-}
-
-// =================================================================================================
-
-void MainWindow::on_nextImg_pushButton_clicked()
-{
-  if ( idx==data.size()-1 )
-    return;
-
-  ++idx;
 }
 
 // =================================================================================================
@@ -656,10 +654,20 @@ void MainWindow::on_lastImg_pushButton_clicked()
 
 void MainWindow::on_mvDwImg_pushButton_clicked()
 {
-  if ( idx==0 )
-    return;
+  size_t i = idx-std::min(idx,static_cast<size_t>(ui->jump_Dw_spinBox->value()));
 
-  data[idx].time -= (data[idx].time-data[idx-ui->jump_Dw_spinBox->value()].time+1);
+  if ( i!=idx )
+    data[idx].time -= data[idx].time-data[i].time+1;
+}
+
+// =================================================================================================
+
+void MainWindow::on_mvUpImg_pushButton_clicked()
+{
+  size_t i = idx+std::min(data.size()-1-idx,static_cast<size_t>(ui->jump_Up_spinBox->value()));
+
+  if ( i!=idx )
+    data[idx].time += data[i].time-data[idx].time+1;
 }
 
 // =================================================================================================
@@ -678,16 +686,6 @@ void MainWindow::on_mvDwSet_pushButton_clicked()
   for ( size_t j=0; j<data.size(); ++j )
     if ( data[j].camera==data[idx].camera )
       data[j].time -= dt;
-}
-
-// =================================================================================================
-
-void MainWindow::on_mvUpImg_pushButton_clicked()
-{
-  if ( idx==data.size()-1 )
-    return;
-
-  data[idx].time += (data[idx+ui->jump_Up_spinBox->value()].time-data[idx].time+1);
 }
 
 // =================================================================================================
@@ -890,12 +888,16 @@ void MainWindow::on_clean_pushButton_clicked()
   for ( auto &file : delData )
     QFile::remove(file.path);
 
+  // list with useless system files
+  std::vector<QString> sfiles;
+  sfiles.push_back(".DS_Store");
+  sfiles.push_back("Thumbs.db");
+
   // visit all folders that had been selected
   for ( auto dir : cleanPaths ) {
     // - remove useless system files
-    QString fname = QDir(dir).filePath(".DS_Store");
-    if ( QFileInfo(fname).exists() )
-      QFile::remove(fname);
+    for ( auto file : sfiles )
+      QFile::remove(QDir(dir).filePath(file));
     // - remove empty folders
     if ( QDir(dir).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).isEmpty() )
       QDir(dir).removeRecursively();
