@@ -47,21 +47,6 @@ std::tuple<std::time_t,int> jpg2info ( std::string fname )
   return std::make_tuple(t,rot);
 }
 
-//// =================================================================================================
-
-//std::vector<QPixmap> thumbnails(std::vector<QString> path) {
-
-//  std::vector<QPixmap> out;
-
-//  for ( auto &i : path ) {
-//    QPixmap pix(i);
-//    pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
-//    out.push_back(pix);
-//  }
-
-//  return out;
-//}
-
 // =================================================================================================
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -77,54 +62,32 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->nfolder_comboBox->setCurrentIndex(1);
 
   // fill arrays collecting the file-lists and related buttons
-  fileView.push_back(ui->cam_listWidget_0          );
-  fileView.push_back(ui->cam_listWidget_1          );
-  fileView.push_back(ui->cam_listWidget_2          );
-  fileView.push_back(ui->cam_listWidget_3          );
-  fileView.push_back(ui->cam_listWidget_4          );
-  fileView.push_back(ui->cam_listWidget_5          );
-  fileView.push_back(ui->cam_listWidget_6          );
-  fileView.push_back(ui->cam_listWidget_7          );
-  fileView.push_back(ui->cam_listWidget_8          );
-  fileView.push_back(ui->cam_listWidget_9          );
-  fileView.push_back(ui->cam_listWidget_10         );
-  fileView.push_back(ui->cam_listWidget_11         );
-  pathView.push_back(ui->cam_lineEdit_0            );
-  pathView.push_back(ui->cam_lineEdit_1            );
-  pathView.push_back(ui->cam_lineEdit_2            );
-  pathView.push_back(ui->cam_lineEdit_3            );
-  pathView.push_back(ui->cam_lineEdit_4            );
-  pathView.push_back(ui->cam_lineEdit_5            );
-  pathView.push_back(ui->cam_lineEdit_6            );
-  pathView.push_back(ui->cam_lineEdit_7            );
-  pathView.push_back(ui->cam_lineEdit_8            );
-  pathView.push_back(ui->cam_lineEdit_9            );
-  pathView.push_back(ui->cam_lineEdit_10           );
-  pathView.push_back(ui->cam_lineEdit_11           );
-  dirSelec.push_back(ui->cam_pushButton_0          );
-  dirSelec.push_back(ui->cam_pushButton_1          );
-  dirSelec.push_back(ui->cam_pushButton_2          );
-  dirSelec.push_back(ui->cam_pushButton_3          );
-  dirSelec.push_back(ui->cam_pushButton_4          );
-  dirSelec.push_back(ui->cam_pushButton_5          );
-  dirSelec.push_back(ui->cam_pushButton_6          );
-  dirSelec.push_back(ui->cam_pushButton_7          );
-  dirSelec.push_back(ui->cam_pushButton_8          );
-  dirSelec.push_back(ui->cam_pushButton_9          );
-  dirSelec.push_back(ui->cam_pushButton_10         );
-  dirSelec.push_back(ui->cam_pushButton_11         );
-  delSelec.push_back(ui->cam_rm_pushButton_0       );
-  delSelec.push_back(ui->cam_rm_pushButton_1       );
-  delSelec.push_back(ui->cam_rm_pushButton_2       );
-  delSelec.push_back(ui->cam_rm_pushButton_3       );
-  delSelec.push_back(ui->cam_rm_pushButton_4       );
-  delSelec.push_back(ui->cam_rm_pushButton_5       );
-  delSelec.push_back(ui->cam_rm_pushButton_6       );
-  delSelec.push_back(ui->cam_rm_pushButton_7       );
-  delSelec.push_back(ui->cam_rm_pushButton_8       );
-  delSelec.push_back(ui->cam_rm_pushButton_9       );
-  delSelec.push_back(ui->cam_rm_pushButton_10      );
-  delSelec.push_back(ui->cam_rm_pushButton_11      );
+  fileView.push_back(ui->cam_listWidget_0 ); pathView.push_back(ui->cam_lineEdit_0      );
+  fileView.push_back(ui->cam_listWidget_1 ); pathView.push_back(ui->cam_lineEdit_1      );
+  fileView.push_back(ui->cam_listWidget_2 ); pathView.push_back(ui->cam_lineEdit_2      );
+  fileView.push_back(ui->cam_listWidget_3 ); pathView.push_back(ui->cam_lineEdit_3      );
+  fileView.push_back(ui->cam_listWidget_4 ); pathView.push_back(ui->cam_lineEdit_4      );
+  fileView.push_back(ui->cam_listWidget_5 ); pathView.push_back(ui->cam_lineEdit_5      );
+  fileView.push_back(ui->cam_listWidget_6 ); pathView.push_back(ui->cam_lineEdit_6      );
+  fileView.push_back(ui->cam_listWidget_7 ); pathView.push_back(ui->cam_lineEdit_7      );
+  fileView.push_back(ui->cam_listWidget_8 ); pathView.push_back(ui->cam_lineEdit_8      );
+  fileView.push_back(ui->cam_listWidget_9 ); pathView.push_back(ui->cam_lineEdit_9      );
+  fileView.push_back(ui->cam_listWidget_10); pathView.push_back(ui->cam_lineEdit_10     );
+  fileView.push_back(ui->cam_listWidget_11); pathView.push_back(ui->cam_lineEdit_11     );
+  // -
+  dirSelec.push_back(ui->cam_pushButton_0 ); delSelec.push_back(ui->cam_rm_pushButton_0 );
+  dirSelec.push_back(ui->cam_pushButton_1 ); delSelec.push_back(ui->cam_rm_pushButton_1 );
+  dirSelec.push_back(ui->cam_pushButton_2 ); delSelec.push_back(ui->cam_rm_pushButton_2 );
+  dirSelec.push_back(ui->cam_pushButton_3 ); delSelec.push_back(ui->cam_rm_pushButton_3 );
+  dirSelec.push_back(ui->cam_pushButton_4 ); delSelec.push_back(ui->cam_rm_pushButton_4 );
+  dirSelec.push_back(ui->cam_pushButton_5 ); delSelec.push_back(ui->cam_rm_pushButton_5 );
+  dirSelec.push_back(ui->cam_pushButton_6 ); delSelec.push_back(ui->cam_rm_pushButton_6 );
+  dirSelec.push_back(ui->cam_pushButton_7 ); delSelec.push_back(ui->cam_rm_pushButton_7 );
+  dirSelec.push_back(ui->cam_pushButton_8 ); delSelec.push_back(ui->cam_rm_pushButton_8 );
+  dirSelec.push_back(ui->cam_pushButton_9 ); delSelec.push_back(ui->cam_rm_pushButton_9 );
+  dirSelec.push_back(ui->cam_pushButton_10); delSelec.push_back(ui->cam_rm_pushButton_10);
+  dirSelec.push_back(ui->cam_pushButton_11); delSelec.push_back(ui->cam_rm_pushButton_11);
+  // -
   nameSort.push_back(ui->cam_nameSort_pushButton_0 );
   nameSort.push_back(ui->cam_nameSort_pushButton_1 );
   nameSort.push_back(ui->cam_nameSort_pushButton_2 );
@@ -153,52 +116,59 @@ MainWindow::MainWindow(QWidget *parent) :
     nameSort[i]->setVisible(false);
   }
 
-  // select folder / remove selected files / sort by name -> sort by time -> view in listWidge
+  // T0: select folder / remove selected files / sort by name -> apply to specific "folder"
   for ( size_t i=0; i<dirSelec.size(); ++i ) {
     connect(dirSelec[i],&QPushButton::clicked,[=](){selectFolder(         i );});
     connect(nameSort[i],&QPushButton::clicked,[=](){dataNameSort(         i );});
     connect(delSelec[i],&QPushButton::clicked,[=](){dataRmvSelec(fileView[i]);});
-    connect(dirSelec[i],SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
-    connect(delSelec[i],SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
-    connect(nameSort[i],SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
-    connect(dirSelec[i],SIGNAL(clicked(bool)),SLOT(viewFileList()));
-    connect(delSelec[i],SIGNAL(clicked(bool)),SLOT(viewFileList()));
-    connect(nameSort[i],SIGNAL(clicked(bool)),SLOT(viewFileList()));
   }
+  // T0: sort by time
+  for ( auto &i : dirSelec ) connect(i,SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
+  for ( auto &i : delSelec ) connect(i,SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
+  for ( auto &i : nameSort ) connect(i,SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
+  // T1: update lists with files
+  for ( auto &i : dirSelec ) connect(i,SIGNAL(clicked(bool)),SLOT(viewFileList()));
+  for ( auto &i : delSelec ) connect(i,SIGNAL(clicked(bool)),SLOT(viewFileList()));
+  for ( auto &i : nameSort ) connect(i,SIGNAL(clicked(bool)),SLOT(viewFileList()));
 
+  // create list of thumbnails, and assign to worker thread
   thumbnail = new Thumbnails;
   thumbnail->moveToThread(&workerThread);
-  connect(&workerThread, &QThread::finished, thumbnail, &QObject::deleteLater);
+  // mark that list of thumbnails is deleted only when the worked thread is deleted
+  connect(&workerThread,&QThread::finished,thumbnail,&QObject::deleteLater);
+  // files read -> launch reading thumbnails
   for ( auto &i : dirSelec ) connect(i,&QPushButton::clicked,thumbnail,&Thumbnails::read);
+  // start worker thread
   workerThread.start();
 
   // any image manipulation button pressed -> (sort by time) -> display images
-  connect(ui->mvDwImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-  connect(ui->mvDwSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-  connect(ui->mvUpImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-  connect(ui->mvUpSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-  connect(ui->deltImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-  connect(ui->jumpSel_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-  connect(ui->exclImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->mvDwImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->mvDwSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->mvUpImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->mvUpSet_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->deltImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->exclImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->prevImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->nextImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->headImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->lastImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->nextBnd_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->prevBnd_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
-  connect(ui->jumpSel_pushButton,SIGNAL(clicked(bool)),this,SLOT(displayImage()));
+  // - collect buttons
+  std::vector<QPushButton*> btn;
+  // - collect buttons: those after which to sort, and to display images
+  btn.push_back(ui->mvDwImg_pushButton);
+  btn.push_back(ui->mvDwSet_pushButton);
+  btn.push_back(ui->mvUpImg_pushButton);
+  btn.push_back(ui->mvUpSet_pushButton);
+  btn.push_back(ui->jumpSel_pushButton);
+  // - apply sort
+  for ( auto &i : btn ) connect(i,SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
+  // - collect buttons: add navigation buttons
+  btn.push_back(ui->exclImg_pushButton);
+  btn.push_back(ui->deltImg_pushButton);
+  btn.push_back(ui->prevImg_pushButton);
+  btn.push_back(ui->nextImg_pushButton);
+  btn.push_back(ui->headImg_pushButton);
+  btn.push_back(ui->lastImg_pushButton);
+  btn.push_back(ui->nextBnd_pushButton);
+  btn.push_back(ui->prevBnd_pushButton);
+  // - update view
+  for ( auto &i : btn ) connect(i,SIGNAL(clicked(bool)),SLOT(displayImage()));
   // switch tabs: sort by time -> view list / display images / show data
-  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->dataTimeSort();});
-  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->viewFileList();});
-  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->displayImage();});
-  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->showDate    ();});
-  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->viewStream  ();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){dataTimeSort();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){viewFileList();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){displayImage();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){showDate    ();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){viewStream  ();});
 
   // couple outPath button to outPath line-edit
   connect(ui->outPath_pushButton,SIGNAL(clicked(bool)),this,
@@ -551,13 +521,6 @@ void MainWindow::viewStream(void)
 
   // define style of the widget
   ui->listWidgetT2->setIconSize(QSize(200,200));
-
-
-//  for ( auto &i : data ) {
-//    QPixmap pix(i.path);
-//    pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
-//    i.thumbnail = pix;
-//  }
 
   // empty the list
   while ( ui->listWidgetT2->count()>0 )
