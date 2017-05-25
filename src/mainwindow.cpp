@@ -47,6 +47,21 @@ std::tuple<std::time_t,int> jpg2info ( std::string fname )
   return std::make_tuple(t,rot);
 }
 
+//// =================================================================================================
+
+//std::vector<QPixmap> thumbnails(std::vector<QString> path) {
+
+//  std::vector<QPixmap> out;
+
+//  for ( auto &i : path ) {
+//    QPixmap pix(i);
+//    pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
+//    out.push_back(pix);
+//  }
+
+//  return out;
+//}
+
 // =================================================================================================
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -140,16 +155,22 @@ MainWindow::MainWindow(QWidget *parent) :
 
   // select folder / remove selected files / sort by name -> sort by time -> view in listWidge
   for ( size_t i=0; i<dirSelec.size(); ++i ) {
-    connect(dirSelec[i],&QPushButton::clicked,[=](){this->selectFolder(         i );});
-    connect(nameSort[i],&QPushButton::clicked,[=](){this->dataNameSort(         i );});
-    connect(delSelec[i],&QPushButton::clicked,[=](){this->dataRmvSelec(fileView[i]);});
-    connect(dirSelec[i],SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-    connect(delSelec[i],SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-    connect(nameSort[i],SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
-    connect(dirSelec[i],SIGNAL(clicked(bool)),this,SLOT(viewFileList()));
-    connect(delSelec[i],SIGNAL(clicked(bool)),this,SLOT(viewFileList()));
-    connect(nameSort[i],SIGNAL(clicked(bool)),this,SLOT(viewFileList()));
+    connect(dirSelec[i],&QPushButton::clicked,[=](){selectFolder(         i );});
+    connect(nameSort[i],&QPushButton::clicked,[=](){dataNameSort(         i );});
+    connect(delSelec[i],&QPushButton::clicked,[=](){dataRmvSelec(fileView[i]);});
+    connect(dirSelec[i],SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
+    connect(delSelec[i],SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
+    connect(nameSort[i],SIGNAL(clicked(bool)),SLOT(dataTimeSort()));
+    connect(dirSelec[i],SIGNAL(clicked(bool)),SLOT(viewFileList()));
+    connect(delSelec[i],SIGNAL(clicked(bool)),SLOT(viewFileList()));
+    connect(nameSort[i],SIGNAL(clicked(bool)),SLOT(viewFileList()));
   }
+
+  thumbnail = new Thumbnails;
+  thumbnail->moveToThread(&workerThread);
+  connect(&workerThread, &QThread::finished, thumbnail, &QObject::deleteLater);
+  for ( auto &i : dirSelec ) connect(i,&QPushButton::clicked,thumbnail,&Thumbnails::read);
+  workerThread.start();
 
   // any image manipulation button pressed -> (sort by time) -> display images
   connect(ui->mvDwImg_pushButton,SIGNAL(clicked(bool)),this,SLOT(dataTimeSort()));
@@ -188,6 +209,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+  workerThread.quit();
+  workerThread.wait();
+
   delete ui;
 }
 
@@ -211,6 +235,28 @@ void MainWindow::promptWarning ( QString msg )
     QMessageBox::Ok\
   );
 }
+
+// =================================================================================================
+
+//void MainWindow::thumbnails()
+//{
+//  for ( auto &i : thumb ) {
+//    if ( !i.read ) {
+//      QPixmap pix(i.path);
+//      pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
+//      i.thumbnail = pix;
+//    }
+//  }
+//}
+
+//  for ( size_t i=0; i<path.size() )
+
+  //  for ( auto &i : path ) {
+  //    QPixmap pix(i);
+  //    pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
+  //    out.push_back(pix);
+  //  }
+//}
 
 // =================================================================================================
 
@@ -335,8 +381,9 @@ void MainWindow::selectFolder(size_t folder)
     QFileInfo finfo = lst_jpeg.at(i);
     try         { std::tie(t,rot) = jpg2info(finfo.absoluteFilePath().toStdString()); }
     catch (...) { continue; }
-    QPixmap pix(50,50);
-    pix.fill(QColor("white"));
+
+    size_t ithumb = data.size();
+
     File file;
     file.camera    = camera;
     file.folder    = folder;
@@ -345,12 +392,13 @@ void MainWindow::selectFolder(size_t folder)
     file.dir       = finfo.absolutePath();
     file.time      = t;
     file.rotation  = rot;
-    file.thumbnail = pix;
+    file.ithumb    = ithumb;
     if ( lst_json.size()==1 ) {
       file.time    = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"  ]);
       file.camera += static_cast<size_t>     (jdata[finfo.fileName().toStdString()]["camera"]);
     }
     data.push_back(file);
+    thumbnail->push_back(file.path);
   }
 }
 
@@ -489,17 +537,40 @@ void MainWindow::viewStream(void)
   if ( data.size()<=0 )
     return;
 
-//  ui->listWidgetT2->setViewMode  (QListWidget::IconMode);
-  ui->listWidgetT2->setIconSize  (QSize(200,200)       );
-
-  QPixmap pix(data[0].path);
-  pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
-  data[0].thumbnail = pix;
-
+  // read number of cameras
+  size_t n = 0;
   for ( auto &i : data )
-  {
-    ui->listWidgetT2->addItem(new QListWidgetItem(QIcon(i.thumbnail),i.disp));
-  }
+    n = std::max(n,i.camera);
+  ++n;
+
+  // create a colormap
+  std::vector<int> cmap = cppcolormap::Set1(n);
+  std::vector<QColor> col;
+  for ( size_t i=0; i<n; ++i )
+    col.push_back(QColor(cmap[i*3+0],cmap[i*3+1],cmap[i*3+2]));
+
+  // define style of the widget
+  ui->listWidgetT2->setIconSize(QSize(200,200));
+
+
+//  for ( auto &i : data ) {
+//    QPixmap pix(i.path);
+//    pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
+//    i.thumbnail = pix;
+//  }
+
+  // empty the list
+  while ( ui->listWidgetT2->count()>0 )
+    ui->listWidgetT2->takeItem(0);
+
+  // fill the lists with names / icons
+  for ( auto &i : data )
+    ui->listWidgetT2->addItem(new QListWidgetItem(thumbnail->at(i.ithumb),i.disp));
+
+  // set background color, corresponding to the camera index
+  for ( size_t i=0; i<data.size(); ++i )
+    ui->listWidgetT2->item(i)->setBackground(QBrush(col[data[i].camera]));
+
 }
 
 // =================================================================================================

@@ -14,6 +14,8 @@
 #include <QScrollBar>
 #include <QListWidget>
 
+#include <QThread>
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -24,10 +26,54 @@
 #include <sstream>
 #include <algorithm>
 
+#include "cppcolormap/cppcolormap.h"
 #include "easyexif/exif.h"
 #include "json/json.hpp"
 
 using json = nlohmann::json;
+
+// =================================================================================================
+
+class Thumbnails: public QObject
+{
+  Q_OBJECT
+
+private:
+  std::vector<QString> path;
+  std::vector<QIcon>   data;
+  std::vector<int>     isread;
+
+public:
+  QIcon& at ( size_t i )
+  {
+    return data[i];
+  };
+
+  void push_back(QString name)
+  {
+    QPixmap pix(50,50);
+    pix.fill(QColor("white"));
+
+    path.push_back(name);
+    data.push_back(QIcon(pix));
+    isread.push_back(0);
+  };
+
+public slots:
+  void read()
+  {
+    for ( size_t i=0; i<path.size(); ++i ) {
+      if ( QThread::currentThread()->isInterruptionRequested() )
+        return;
+      if ( !isread[i] ) {
+        QPixmap pix(path[i]);
+        pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
+        data[i] = QIcon(pix);
+        isread[i] = 1;
+      }
+    }
+  };
+};
 
 // =================================================================================================
 
@@ -41,9 +87,9 @@ public:
   size_t      camera    = 0    ; // camera-index (allows several cameras in one folder)
   int         rotation  = 0    ; // rotation in degrees
   std::time_t time      = 0    ; // time at which the photo was taken
-  size_t      index     = 0    ; // for sorting: position in list -> locale where "idx" went
+  size_t      index     = 0    ; // for sorting: position in list -> locate where "idx" went
   bool        sort      = true ; // for sorting: selectively sort subset
-  QPixmap     thumbnail;
+  size_t      ithumb           ; // index in list with thumbnails
 };
 
 // =================================================================================================
@@ -60,6 +106,7 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
+  QThread workerThread;
 
 public:
   explicit MainWindow(QWidget *parent = 0);
@@ -98,6 +145,7 @@ private:
   Ui::MainWindow            *ui;
   size_t                    idx  = 0;    // current photo (index in "data")
   bool                      init = true; // re-initialize "idx" to zero, upon viewing
+  Thumbnails                *thumbnail;   // class containing all thumbnails
   std::vector<File>         data;        // array with photos + information
   std::vector<File>         delData;     // deleted images
   std::vector<QListWidget*> fileView;    // list with widgets to show selected files
