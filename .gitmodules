@@ -1,3 +1,6 @@
 [submodule "src/easyexif"]
 	path = src/easyexif
 	url = https://github.com/mayanklahiri/easyexif.git
+[submodule "src/cppcolormap"]
+	path = src/cppcolormap
+	url = https://github.com/tdegeus/cppcolormap.git

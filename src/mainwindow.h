@@ -34,15 +34,16 @@ using json = nlohmann::json;
 class File
 {
 public:
-  QString     dir      = ""   ; // directory in which the file is stored
-  QString     path     = ""   ; // absolute file-path to the file
-  QString     disp     = ""   ; // display name
-  size_t      folder   = 0    ; // folder-index (corresponds to "fileView")
-  size_t      camera   = 0    ; // camera-index (allows several cameras in one folder)
-  int         rotation = 0    ; // rotation in degrees
-  std::time_t time     = 0    ; // time at which the photo was taken
-  size_t      index    = 0    ; // for sorting: position in list -> locale where "idx" went
-  bool        sort     = true ; // for sorting: selectively sort subset
+  QString     dir       = ""   ; // directory in which the file is stored
+  QString     path      = ""   ; // absolute file-path to the file
+  QString     disp      = ""   ; // display name
+  size_t      folder    = 0    ; // folder-index (corresponds to "fileView")
+  size_t      camera    = 0    ; // camera-index (allows several cameras in one folder)
+  int         rotation  = 0    ; // rotation in degrees
+  std::time_t time      = 0    ; // time at which the photo was taken
+  size_t      index     = 0    ; // for sorting: position in list -> locale where "idx" went
+  bool        sort      = true ; // for sorting: selectively sort subset
+  QPixmap     thumbnail;
 };
 
 // =================================================================================================
@@ -74,6 +75,7 @@ private slots:
   void idxViewLabel(QLabel*,size_t i); // view photo "i" in a supplied label
   void displayImage();                 // display cur/prev/next images (selectively enables buttons)
   void showDate();                     // show date in output tab
+  void viewStream();                   // view images as thumbnails in stream
   void on_prevImg_pushButton_clicked();// show previous photo
   void on_prevBnd_pushButton_clicked();// jump to previous photo of a different camera
   void on_nextImg_pushButton_clicked();// show next photo

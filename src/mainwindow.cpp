@@ -177,6 +177,7 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->viewFileList();});
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->displayImage();});
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->showDate    ();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){this->viewStream  ();});
 
   // couple outPath button to outPath line-edit
   connect(ui->outPath_pushButton,SIGNAL(clicked(bool)),this,
@@ -334,6 +335,8 @@ void MainWindow::selectFolder(size_t folder)
     QFileInfo finfo = lst_jpeg.at(i);
     try         { std::tie(t,rot) = jpg2info(finfo.absoluteFilePath().toStdString()); }
     catch (...) { continue; }
+    QPixmap pix(50,50);
+    pix.fill(QColor("white"));
     File file;
     file.camera    = camera;
     file.folder    = folder;
@@ -342,6 +345,7 @@ void MainWindow::selectFolder(size_t folder)
     file.dir       = finfo.absolutePath();
     file.time      = t;
     file.rotation  = rot;
+    file.thumbnail = pix;
     if ( lst_json.size()==1 ) {
       file.time    = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"  ]);
       file.camera += static_cast<size_t>     (jdata[finfo.fileName().toStdString()]["camera"]);
@@ -476,6 +480,26 @@ void MainWindow::viewFileList()
 
   for ( size_t l=0; l<fileView.size(); ++l )
     fileView[l]->setCurrentRow(idx);
+}
+
+// =================================================================================================
+
+void MainWindow::viewStream(void)
+{
+  if ( data.size()<=0 )
+    return;
+
+//  ui->listWidgetT2->setViewMode  (QListWidget::IconMode);
+  ui->listWidgetT2->setIconSize  (QSize(200,200)       );
+
+  QPixmap pix(data[0].path);
+  pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
+  data[0].thumbnail = pix;
+
+  for ( auto &i : data )
+  {
+    ui->listWidgetT2->addItem(new QListWidgetItem(QIcon(i.thumbnail),i.disp));
+  }
 }
 
 // =================================================================================================
