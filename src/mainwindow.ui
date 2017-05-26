@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -774,12 +774,37 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_8">
         <item>
-         <widget class="QListWidget" name="listWidgetT2"/>
-        </item>
-        <item>
          <layout class="QVBoxLayout" name="verticalLayout_18">
           <item>
-           <spacer name="verticalSpacer_8">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Selected images:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonT2i_up">
+            <property name="text">
+             <string>Earlier (up)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonT2i_sync">
+            <property name="text">
+             <string>Sync</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonT2i_dwn">
+            <property name="text">
+             <string>Later (down)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_11">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -792,21 +817,53 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButtonT2_earlier">
+           <widget class="QPushButton" name="pushButtonT2i_excl">
+            <property name="text">
+             <string>Exclude</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonT2i_del">
+            <property name="text">
+             <string>Delete</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QListWidget" name="listWidgetT2">
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ExtendedSelection</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_19">
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Entire camera:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonT2c_up">
             <property name="text">
              <string>Earlier (up)</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButtonT2_sync">
+           <widget class="QPushButton" name="pushButtonT2c_sync">
             <property name="text">
              <string>Sync</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButtonT2_later">
+           <widget class="QPushButton" name="pushButtonT2c_dwn">
             <property name="text">
              <string>Later (down)</string>
             </property>
@@ -853,19 +910,6 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="prevBnd_pushButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Previous boundary between two sets of photos (two camera's)</string>
-            </property>
-            <property name="text">
-             <string>Previous boundary</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="prevImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
@@ -878,19 +922,6 @@
             </property>
             <property name="shortcut">
              <string>Left</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="prevImg_spinBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>999</number>
             </property>
            </widget>
           </item>
@@ -920,89 +951,12 @@
             </property>
            </spacer>
           </item>
-          <item>
-           <widget class="QPushButton" name="mvDwSet_pushButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Move image one images earlier, and apply the same time jump to all images in this set [shift + E]</string>
-            </property>
-            <property name="text">
-             <string>Earlier (all)</string>
-            </property>
-            <property name="shortcut">
-             <string>Shift+E</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="mvDwImg_pushButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Move image one images earlier [E]</string>
-            </property>
-            <property name="text">
-             <string>Earlier</string>
-            </property>
-            <property name="shortcut">
-             <string>E</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="jump_Dw_spinBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Move invidiual photo N photos earlier</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>999</number>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="view_prv_label">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>201</width>
-              <height>134</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QPushButton" name="jumpSel_pushButton">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="text">
-               <string>Time jump</string>
-              </property>
-             </widget>
-            </item>
             <item>
              <widget class="QPushButton" name="exclImg_pushButton">
               <property name="enabled">
@@ -1036,6 +990,12 @@
           </item>
           <item>
            <widget class="QLabel" name="view_idx_label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>402</width>
@@ -1068,19 +1028,6 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="nextBnd_pushButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Next boundary between two sets of photos (two camera's)</string>
-            </property>
-            <property name="text">
-             <string>Next boundary</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="nextImg_pushButton">
             <property name="enabled">
              <bool>false</bool>
@@ -1093,19 +1040,6 @@
             </property>
             <property name="shortcut">
              <string>Right</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="nextImg_spinBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>999</number>
             </property>
            </widget>
           </item>
@@ -1134,73 +1068,6 @@
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="mvUpSet_pushButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Move image one images later, and apply the same time jump to all images in this set [shift + L]</string>
-            </property>
-            <property name="text">
-             <string>Later (all)</string>
-            </property>
-            <property name="shortcut">
-             <string>Shift+L</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="mvUpImg_pushButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Move image one images later [shift + E]</string>
-            </property>
-            <property name="text">
-             <string>Later</string>
-            </property>
-            <property name="shortcut">
-             <string>L</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="jump_Up_spinBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Move invidiual photo N photos later</string>
-            </property>
-            <property name="minimum">
-             <number>1</number>
-            </property>
-            <property name="maximum">
-             <number>999</number>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="view_nxt_label">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>201</width>
-              <height>134</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
           </item>
          </layout>
         </item>

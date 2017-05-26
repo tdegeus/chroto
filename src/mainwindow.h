@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "imageselection.h"
+// #include "imageselection.h"
 
 #include <QMainWindow>
 #include <QFileDialog>
@@ -49,6 +49,11 @@ public:
     return data[i];
   };
 
+  size_t size()
+  {
+    return data.size();
+  }
+
   void push_back(QString name)
   {
     QPixmap pix(50,50);
@@ -58,6 +63,17 @@ public:
     data.push_back(QIcon(pix));
     isread.push_back(0);
   };
+
+  void pop_back(std::vector<int> index)
+  {
+    std::sort(index.begin(),index.end(),[](size_t i,size_t j){return i>j;});
+
+    for ( auto &i: index ) {
+      data.erase(data.begin()+i);
+      path.erase(path.begin()+i);
+      isread.erase(isread.begin()+i);
+    }
+  }
 
 public slots:
   void read()
@@ -90,12 +106,82 @@ public:
   size_t      index     = 0    ; // for sorting: position in list -> locate where "idx" went
   bool        sort      = true ; // for sorting: selectively sort subset
   size_t      ithumb           ; // index in list with thumbnails
+
+  File            (const File &) = default;
+  File& operator= (const File &) = default;
+  File(){};
 };
 
 // =================================================================================================
 
 // read absolute time + rotation from JPEG with specified file-name "fname"
-std::tuple<std::time_t,int> jpg2info(std::string fname);
+inline std::tuple<std::time_t,int> jpg2info (std::string fname)
+{
+  // read JPEG-file into a buffer
+  FILE *fp = std::fopen(fname.c_str(),"rb");
+  if (!fp) {
+    throw std::runtime_error("File cannot be opened");
+  }
+  fseek(fp, 0, SEEK_END);
+  unsigned long fsize = ftell(fp);
+  rewind(fp);
+  unsigned char *buf = new unsigned char[fsize];
+  if (fread(buf, 1, fsize, fp) != fsize) {
+    delete[] buf;
+    throw std::runtime_error("File cannot be read");
+  }
+  fclose(fp);
+
+  // parse EXIF
+  easyexif::EXIFInfo result;
+  int code = result.parseFrom(buf, fsize);
+  delete[] buf;
+  if ( code ) {
+    throw std::runtime_error("Error parsing file");
+  }
+
+  // interpret time string
+  struct std::tm tm;
+  std::istringstream iss;
+  if      ( result.DateTime         .size()==19 ) { iss.str(result.DateTime         ); }
+  else if ( result.DateTimeOriginal .size()==19 ) { iss.str(result.DateTimeOriginal ); }
+  else if ( result.DateTimeDigitized.size()==19 ) { iss.str(result.DateTimeDigitized); }
+  else    { throw std::runtime_error("No time string found"); }
+  iss >> std::get_time(&tm,"%Y:%m:%d %H:%M:%S");
+  std::time_t t = mktime(&tm);
+
+  // convert orientation to rotation
+  int rot = 0;
+  if      ( result.Orientation==8 ) rot = -90;
+  else if ( result.Orientation==6 ) rot =  90;
+  else if ( result.Orientation==3 ) rot = 180;
+
+  return std::make_tuple(t,rot);
+};
+
+// =================================================================================================
+
+inline std::vector<size_t> selectedItems(QListWidget* list, bool ascending=true)
+{
+  // allocate
+  std::vector<size_t> out;
+
+  // fill
+  foreach ( QListWidgetItem *item, list->selectedItems() ) {
+    int i = list->row(item);
+    if ( i>=0 )
+      out.push_back(static_cast<size_t>(i));
+  }
+
+  // sort from low to high / high to low
+  if ( ascending )
+    std::sort(out.begin(),out.end());
+  else
+    std::sort(out.begin(),out.end(),[](size_t i,size_t j){return i>j;});
+
+  // return list
+  return out;
+};
 
 // =================================================================================================
 
@@ -115,36 +201,33 @@ public:
 private slots:
   void on_nfolder_comboBox_currentIndexChanged(int index);// change the displayed number of folders
   void selectFolder(size_t folder);    // select+read folder
-  void dataRmvSelec(QListWidget*);     // remove items selected in one of the listWidgets
+  void selectExcl(QListWidget*);       // remove items selected in one of the listWidgets
+  void select2idx(QListWidget*);       //
   void dataNameSort(size_t folder);    // sort photos in a specific folder by name (time modified)
   void dataTimeSort();                 // sort all photos by time
   void viewFileList();                 // update listWidgets with current files/order
-  void idxViewLabel(QLabel*,size_t i); // view photo "i" in a supplied label
   void displayImage();                 // display cur/prev/next images (selectively enables buttons)
   void showDate();                     // show date in output tab
   void viewStream();                   // view images as thumbnails in stream
+  void selectDel(std::vector<size_t> index, bool del=false);
   void on_prevImg_pushButton_clicked();// show previous photo
-  void on_prevBnd_pushButton_clicked();// jump to previous photo of a different camera
   void on_nextImg_pushButton_clicked();// show next photo
-  void on_nextBnd_pushButton_clicked();// jump to next photo of a different camera
   void on_headImg_pushButton_clicked();// jump to first photo
   void on_lastImg_pushButton_clicked();// jump to last photo
-  void on_mvDwImg_pushButton_clicked();// move photo one photo earlier
-  void on_mvDwSet_pushButton_clicked();// move photo earlier than latest photo of another camera
-  void on_mvUpImg_pushButton_clicked();// move photo one photo later
-  void on_mvUpSet_pushButton_clicked();// move photo later than earliest photo of another camera
-  void on_jumpSel_pushButton_clicked();// open dialog to select time-jump visually
   void on_exclImg_pushButton_clicked();// exclude image from proceedings (never removed from disk)
   void on_deltImg_pushButton_clicked();// remove photo (can be removed from disk using "clean")
   void on_outPath_pushButton_clicked();// select output path
   void on_outPath_lineEdit_editingFinished();// manually edit output path
   void on_write_pushButton_clicked();  // write sorted batch to output folder
   void on_clean_pushButton_clicked();  // remove all photos marked deleted, remove empty directories
+  void on_pushButtonT2i_del_clicked();
+
+
+  void on_pushButtonT2i_up_clicked();
 
 private:
   Ui::MainWindow            *ui;
   size_t                    idx  = 0;    // current photo (index in "data")
-  bool                      init = true; // re-initialize "idx" to zero, upon viewing
   Thumbnails                *thumbnail;   // class containing all thumbnails
   std::vector<File>         data;        // array with photos + information
   std::vector<File>         delData;     // deleted images
