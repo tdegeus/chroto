@@ -1,8 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-// #include "imageselection.h"
-
 #include <QMainWindow>
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -13,7 +11,6 @@
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QListWidget>
-
 #include <QThread>
 
 #include <iostream>
@@ -42,8 +39,11 @@ private:
   std::vector<QString> path;
   std::vector<QIcon>   data;
   std::vector<int>     isread;
+  bool busy = false;
+  bool stop = false;
 
 public:
+
   QIcon& at ( size_t i )
   {
     return data[i];
@@ -52,43 +52,94 @@ public:
   size_t size()
   {
     return data.size();
+  };
+
+  void requestStop()
+  {
+    stop = true;
   }
 
-  void push_back(QString name)
+  bool isBusy()
+  {
+    return busy;
+  }
+
+  size_t unread()
+  {
+    size_t n = 0;
+
+    for ( auto &i: isread )
+      if ( !i )
+        ++n;
+
+    return n;
+  };
+
+  size_t push_back(QString name)
   {
     QPixmap pix(50,50);
     pix.fill(QColor("white"));
 
-    path.push_back(name);
-    data.push_back(QIcon(pix));
+    path  .push_back(name);
+    data  .push_back(QIcon(pix));
     isread.push_back(0);
+
+    return data.size()-1;
   };
 
-  void pop_back(std::vector<int> index)
+  void erase(std::vector<size_t> index)
   {
+    stop = true;
+
     std::sort(index.begin(),index.end(),[](size_t i,size_t j){return i>j;});
 
     for ( auto &i: index ) {
-      data.erase(data.begin()+i);
-      path.erase(path.begin()+i);
+      data  .erase(data  .begin()+i);
+      path  .erase(path  .begin()+i);
       isread.erase(isread.begin()+i);
     }
-  }
+  };
 
 public slots:
+
   void read()
   {
-    for ( size_t i=0; i<path.size(); ++i ) {
-      if ( QThread::currentThread()->isInterruptionRequested() )
+    busy = true ;
+    stop = false;
+
+    for ( size_t i=0; i<data.size(); ++i )
+    {
+      if ( stop || QThread::currentThread()->isInterruptionRequested() ) {
+        busy = false;
+        stop = false;
         return;
-      if ( !isread[i] ) {
+      }
+
+      if ( !isread[i] )
+      {
         QPixmap pix(path[i]);
         pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
-        data[i] = QIcon(pix);
+
+        if ( stop ) {
+          busy = false;
+          stop = false;
+          return;
+        }
+
+        data  [i] = QIcon(pix);
         isread[i] = 1;
       }
     }
+
+    busy = false;
+    stop = false;
+    emit completed();
   };
+
+signals:
+
+  void completed();
+
 };
 
 // =================================================================================================
@@ -99,7 +150,7 @@ public:
   QString     dir       = ""   ; // directory in which the file is stored
   QString     path      = ""   ; // absolute file-path to the file
   QString     disp      = ""   ; // display name
-  size_t      folder    = 0    ; // folder-index (corresponds to "fileView")
+  size_t      folder    = 0    ; // folder-index (corresponds to "fileList")
   size_t      camera    = 0    ; // camera-index (allows several cameras in one folder)
   int         rotation  = 0    ; // rotation in degrees
   std::time_t time      = 0    ; // time at which the photo was taken
@@ -199,47 +250,56 @@ public:
   ~MainWindow();
 
 private slots:
-  void on_nfolder_comboBox_currentIndexChanged(int index);// change the displayed number of folders
-  void selectFolder(size_t folder);    // select+read folder
-  void selectExcl(QListWidget*);       // remove items selected in one of the listWidgets
-  void select2idx(QListWidget*);       //
-  void dataNameSort(size_t folder);    // sort photos in a specific folder by name (time modified)
-  void dataTimeSort();                 // sort all photos by time
-  void viewFileList();                 // update listWidgets with current files/order
-  void displayImage();                 // display cur/prev/next images (selectively enables buttons)
-  void showDate();                     // show date in output tab
-  void viewStream();                   // view images as thumbnails in stream
-  void selectDel(std::vector<size_t> index, bool del=false);
-  void on_prevImg_pushButton_clicked();// show previous photo
-  void on_nextImg_pushButton_clicked();// show next photo
-  void on_headImg_pushButton_clicked();// jump to first photo
-  void on_lastImg_pushButton_clicked();// jump to last photo
-  void on_exclImg_pushButton_clicked();// exclude image from proceedings (never removed from disk)
-  void on_deltImg_pushButton_clicked();// remove photo (can be removed from disk using "clean")
-  void on_outPath_pushButton_clicked();// select output path
-  void on_outPath_lineEdit_editingFinished();// manually edit output path
-  void on_write_pushButton_clicked();  // write sorted batch to output folder
-  void on_clean_pushButton_clicked();  // remove all photos marked deleted, remove empty directories
-  void on_pushButtonT2i_del_clicked();
+  void on_comboBoxT1_nfol_currentIndexChanged(int index);// change the displayed number of folders
 
+  void addFiles(size_t folder);     // select folder, add all images to "data"
+  void listExcl(QListWidget*);      // exclude selected images (take from "data")
+  void listDel (QListWidget*);      // delete  selected images (take from "data", add to "delData")
+  void list2idx(QListWidget*);      // convert selected image -> "idx"
 
-  void on_pushButtonT2i_up_clicked();
+  void dataUpdate();                // update "data", "thumbnail", and relevant view
+  void dataNameSort(size_t folder); // sort photos in the folder by name (time modified)
+  void dataTimeSort();              // sort all photos by time
+  void clearAll();                  // reset the widget
+
+  void viewFileList();              // T1: update listWidgets with "data"
+  void viewStream();                // T2: view images as thumbnails in stream
+  void viewImage();                 // T3: display image "idx", selectively enable buttons
+  void showDate();                  // T4: suggest date
+
+  void on_pushButtonT3_prev_clicked();      // decrease "idx" by one
+  void on_pushButtonT3_next_clicked();      // increase "idx" by one
+  void on_pushButtonT3_first_clicked();     // set "idx = 0"
+  void on_pushButtonT3_last_clicked();      // set "idx = data.size()-1"
+  void on_pushButtonT3_excl_clicked();      // exclude image (take from "data")
+  void on_pushButtonT3_del_clicked();       // delete  image (take from "data", add to "delData")
+  void on_pushButtonT4_path_clicked();      // select output path
+  void on_lineEditT4_path_editingFinished();// manually edit output path
+  void on_pushButtonT4_write_clicked();     // write sorted batch to output folder
+  void on_pushButtonT4_clean_clicked();     // remove "delData" from disk, remove empty directories
+
+signals:
+  void thumbnailRead(); // start reading the thumbnails
+  void dataChanged();   // something has been changed in "data"
+  void indexChanged();  // "idx" has been changed (but not "data")
 
 private:
   Ui::MainWindow            *ui;
-  size_t                    idx  = 0;    // current photo (index in "data")
-  Thumbnails                *thumbnail;   // class containing all thumbnails
-  std::vector<File>         data;        // array with photos + information
-  std::vector<File>         delData;     // deleted images
-  std::vector<QListWidget*> fileView;    // list with widgets to show selected files
-  std::vector<QLineEdit*>   pathView;    // list with widgets to show selected paths
-  std::vector<QPushButton*> dirSelec;    // list with widgets to select a folder
-  std::vector<QPushButton*> delSelec;    // list with widgets to remover selects files in list
-  std::vector<QPushButton*> nameSort;    // list with widgets to sort by name for that camera
-  std::list  <QString>      cleanPaths;  // list with input paths (checked to clean later on)
-  QString                   workDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-  void promptWarning(QString);           // function to show pop-up warning
-  void resizeEvent(QResizeEvent*);       // function used to actively resize the window
+  size_t                    idx=0;      // current photo (index in "data")
+  Thumbnails                *thumbnail; // class containing all thumbnails
+  std::vector<File>         data;       // array with photos + information
+  std::vector<File>         delData;    // deleted images
+  std::vector<QListWidget*> fileList;   // list with widgets to show selected files
+  std::vector<QLineEdit*>   pathView;   // list with widgets to show selected paths
+  std::vector<QPushButton*> dirSelec;   // list with widgets to select a folder
+  std::vector<QPushButton*> delSelec;   // list with widgets to remover selects files in list
+  std::vector<QPushButton*> nameSort;   // list with widgets to sort by name for that camera
+  std::list  <QString>      cleanPaths; // list with input paths (checked to clean later on)
+  QString                   workDir=QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+
+  void promptWarning (QString msg);     // pop-up warning
+  bool promptQuestion(QString msg);     // pop-up question that the user has to confirm
+  void resizeEvent(QResizeEvent*);      // actively resize the viewed image with the window
 };
 
 #endif // MAINWINDOW_H
