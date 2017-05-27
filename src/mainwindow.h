@@ -256,6 +256,8 @@ private slots:
   void listExcl(QListWidget*);      // exclude selected images (take from "data")
   void listDel (QListWidget*);      // delete  selected images (take from "data", add to "delData")
   void list2idx(QListWidget*);      // convert selected image -> "idx"
+  void clearSel(QListWidget*);      // clear selection of a list
+  void clearSelAll();               // clear selection of all lists
 
   void dataUpdate();                // update "data", "thumbnail", and relevant view
   void dataNameSort(size_t folder); // sort photos in the folder by name (time modified)
@@ -267,6 +269,12 @@ private slots:
   void viewImage();                 // T3: display image "idx", selectively enable buttons
   void showDate();                  // T4: suggest date
 
+  void on_pushButtonT2i_up_clicked();       // move image(s) up
+  void on_pushButtonT2i_dwn_clicked();      // move image(s) down
+  void on_pushButtonT2i_sync_clicked();     // sync image(s)
+  void on_pushButtonT2c_up_clicked();       // move image(s) up   (apply for all images in camera)
+  void on_pushButtonT2c_dwn_clicked();      // move image(s) down (apply for all images in camera)
+  void on_pushButtonT2c_sync_clicked();     // sync image(s)      (apply for all images in camera)
   void on_pushButtonT3_prev_clicked();      // decrease "idx" by one
   void on_pushButtonT3_next_clicked();      // increase "idx" by one
   void on_pushButtonT3_first_clicked();     // set "idx = 0"

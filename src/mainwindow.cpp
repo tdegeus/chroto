@@ -77,7 +77,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(this     ,SIGNAL(thumbnailRead()),thumbnail,SLOT(read())      );
   connect(thumbnail,SIGNAL(completed    ()),this     ,SLOT(dataUpdate()));
   // tab changed: update "data" and views to latest values
-  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){dataUpdate();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){clearSelAll();});
+  connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){dataUpdate ();});
   // index changes: update view
   connect(this,SIGNAL(indexChanged()),this,SLOT(viewImage()));
 
@@ -85,9 +86,11 @@ MainWindow::MainWindow(QWidget *parent) :
   for ( auto &i: fileList ) connect(i,&QListWidget::itemSelectionChanged,[=](){list2idx(i);});
   connect(ui->listWidgetT2,&QListWidget::itemSelectionChanged,[=](){list2idx(ui->listWidgetT2);});
 
+  // T2: refresh view to show the latest thumbnails
+  connect(ui->pushButtonT2_refresh,SIGNAL(clicked(bool)),SLOT(viewStream()));
+
   // T4: couple outPath button to outPath line-edit
-  connect(ui->pushButtonT4_path,SIGNAL(clicked(bool)),this,
-    SLOT(on_lineEditT4_path_editingFinished()));
+  connect(ui->pushButtonT4_path,SIGNAL(clicked(bool)),SLOT(on_lineEditT4_path_editingFinished()));
 
   // clear all
   connect(ui->actionNew,SIGNAL(triggered(bool)),this,SLOT(clearAll()));
@@ -371,6 +374,24 @@ void MainWindow::list2idx(QListWidget *list)
 
 // =================================================================================================
 
+void MainWindow::clearSel(QListWidget *list)
+{
+  for ( int j=0; j<list->count(); ++j )
+    list->item(j)->setSelected(false);
+}
+
+// =================================================================================================
+
+void MainWindow::clearSelAll()
+{
+  for ( auto &list: fileList )
+    clearSel(list);
+
+  clearSel(ui->listWidgetT2);
+}
+
+// =================================================================================================
+
 void MainWindow::viewFileList()
 {
   // empty storage paths
@@ -407,10 +428,17 @@ void MainWindow::viewFileList()
 
 void MainWindow::viewStream(void)
 {
+  // list with selected rows
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
+  // no rows selected -> set "idx"
+  if ( rows.size()==0 && idx<data.size()-1 )
+    rows.push_back(idx);
+
   // empty the list
   while ( ui->listWidgetT2->count()>0 )
     ui->listWidgetT2->takeItem(0);
 
+  // no data -> quit
   if ( data.size()<=0 )
     return;
 
@@ -437,6 +465,13 @@ void MainWindow::viewStream(void)
   for ( size_t i=0; i<data.size(); ++i )
     ui->listWidgetT2->item(i)->setBackground(QBrush(col[data[i].camera]));
 
+  // restore selection
+  // - clear entire selection
+  for ( int j=0; j<ui->listWidgetT2->count(); ++j )
+    ui->listWidgetT2->item(j)->setSelected(false);
+  // - apply previous selection, moved one up
+  for ( auto &row : rows )
+    ui->listWidgetT2->item(row)->setSelected(true);
 }
 
 // =================================================================================================
@@ -545,6 +580,227 @@ void MainWindow::viewImage()
   QTransform transform;
   QTransform trans = transform.rotate(data[idx].rotation);
   ui->view_idx_label->setPixmap(p.scaled(w,h,Qt::KeepAspectRatio).transformed(trans));
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2i_up_clicked()
+{
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // top of the list: don't know what to do
+  if ( rows[0]==0 ) {
+    clearSel(ui->listWidgetT2);
+    return;
+  }
+
+  // move up (earlier)
+  for ( auto &i: rows )
+    data[i].time -= data[i].time-data[i-1].time+1;
+
+  // modify selection
+  // - clear entire selection
+  clearSel(ui->listWidgetT2);
+  // - apply previous selection, moved one up
+  for ( auto &i : rows )
+    ui->listWidgetT2->item(i-1)->setSelected(true);
+
+  // signal to process change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2i_dwn_clicked()
+{
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2,false);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // top of the list: don't know what to do
+  if ( rows[0]==data.size()-1 ) {
+    clearSel(ui->listWidgetT2);
+    return;
+  }
+
+  // move up (earlier)
+  for ( auto &i: rows )
+    data[i].time += data[i+1].time-data[i].time+1;
+
+  // modify selection
+  // - clear entire selection
+  clearSel(ui->listWidgetT2);
+  // - apply previous selection, moved one up
+  for ( auto &i : rows )
+    ui->listWidgetT2->item(i+1)->setSelected(true);
+
+  // signal to process change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2i_sync_clicked()
+{
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // move up (earlier)
+  for ( auto &i: rows )
+    data[i].time = data[rows[0]].time;
+
+  // empty selection
+  clearSel(ui->listWidgetT2);
+
+  // signal to process change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2c_up_clicked()
+{
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // top of the list / more then one item: don't know what to do
+  if ( rows[0]==0 || rows.size()>1 ) {
+    clearSel(ui->listWidgetT2);
+    return;
+  }
+
+  // get index
+  size_t row = rows[0];
+
+  // not a boundary: don't know what to do
+  if ( data[row-1].camera==data[row].camera ) {
+    clearSel(ui->listWidgetT2);
+    return;
+  }
+
+  // get time difference
+  std::time_t dt = data[row].time-data[row-1].time+1;
+
+  // apply to all
+  for ( auto &i: data )
+    if ( i.camera==data[row].camera )
+      i.time -= dt;
+
+  // modify selection
+  // - clear entire selection
+  clearSel(ui->listWidgetT2);
+  // - apply previous selection, moved one up
+  for ( auto &i : rows )
+    ui->listWidgetT2->item(i-1)->setSelected(true);
+
+  // signal to process change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2c_dwn_clicked()
+{
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2,false);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // top of the list / more then one item: don't know what to do
+  if ( rows[0]==data.size()-1 || rows.size()>1 ) {
+    clearSel(ui->listWidgetT2);
+    return;
+  }
+
+  // get index
+  size_t row = rows[0];
+
+  // not a boundary: don't know what to do
+  if ( data[row+1].camera==data[row].camera ) {
+    clearSel(ui->listWidgetT2);
+    return;
+  }
+
+  // get time difference
+  std::time_t dt = data[row+1].time-data[row].time+1;
+
+  // apply to all
+  for ( auto &i: data )
+    if ( i.camera==data[row].camera )
+      i.time += dt;
+
+  // modify selection
+  // - clear entire selection
+  clearSel(ui->listWidgetT2);
+  // - apply previous selection, moved one up
+  for ( auto &i : rows )
+    ui->listWidgetT2->item(i+1)->setSelected(true);
+
+  // signal to process change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2c_sync_clicked()
+{
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // read number of cameras
+  size_t ncam = 0;
+  for ( auto &i: data )
+    ncam = std::max(ncam,i.camera);
+
+  // list cameras
+  std::vector<int> check(ncam+1,0);
+  // check if camera occurs
+  for ( auto &row: rows ) {
+    if ( check[data[row].camera] ) {
+      clearSel(ui->listWidgetT2);
+      return;
+    }
+    check[data[row].camera] = 1;
+  }
+
+  // sync
+  size_t ref = rows[0];
+  for ( auto &row: rows ) {
+    if ( row!=ref ) {
+      std::time_t dt = data[row].time-data[ref].time;
+      for ( auto &i: data )
+        if ( i.camera==data[row].camera )
+          i.time -= dt;
+    }
+  }
+
+  // clear entire selection
+  clearSel(ui->listWidgetT2);
+
+  // signal to process change
+  emit dataChanged();
 }
 
 // =================================================================================================
