@@ -7,12 +7,13 @@ MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::MainWindow)
 {
+  // initialize widget using the UI-file
   ui->setupUi(this);
 
-  // class to read/store list of thumbnails; assign to worker thread
+  // class to read/store list of thumbnails; assign to worker-thread
   thumbnail = new Thumbnails;
   thumbnail->moveToThread(&workerThread);
-  // list of thumbnails is deleted only when the worker thread is deleted (in destructor below)
+  // list of thumbnails is deleted only when the worker-thread is deleted (in destructor below)
   connect(&workerThread,&QThread::finished,thumbnail,&QObject::deleteLater);
 
   // T1: fill arrays collecting the file-lists and related buttons
@@ -61,38 +62,42 @@ MainWindow::MainWindow(QWidget *parent) :
       if ( i!=j )
         connect(i->verticalScrollBar(),SIGNAL(valueChanged(int)),
                 j->verticalScrollBar(),SLOT  (setValue    (int)));
+  // T3: center image
+  ui->view_idx_label->setAlignment(Qt::AlignCenter);
 
-  // T1: select folder / remove selected files / sort by name -> apply to specific "folder"
+  // T1: select folder / remove selected files / sort by name -> apply to specific "QListWidget"
   for ( size_t i=0; i<dirSelec.size(); ++i ) {
     connect(dirSelec[i],&QPushButton::clicked,[=](){addFiles    (     i );});
     connect(nameSort[i],&QPushButton::clicked,[=](){dataNameSort(     i );});
     connect(delSelec[i],&QPushButton::clicked,[=](){listExcl(fileList[i]);});
   }
-  // T2: exclude images
+  // T2: exclude/delete photos
   connect(ui->pushButtonT2i_excl,&QPushButton::clicked,[=](){listExcl(ui->listWidgetT2);});
   connect(ui->pushButtonT2i_del ,&QPushButton::clicked,[=](){listDel (ui->listWidgetT2);});
 
-  // "data" changed / thumbnails complete -> read thumbnails, sort by name, refresh views
-  connect(this     ,SIGNAL(dataChanged  ()),this     ,SLOT(dataUpdate()));
+  // Tx: "data" changed -> sort by time and refresh views
+  connect(this,SIGNAL(dataChanged()),this,SLOT(dataUpdate()));
+  // Tx: "read" thumbnails, update "data" / refresh views when reading is completed
   connect(this     ,SIGNAL(thumbnailRead()),thumbnail,SLOT(read())      );
   connect(thumbnail,SIGNAL(completed    ()),this     ,SLOT(dataUpdate()));
-  // tab changed: update "data" and views to latest values
+  // Tx: tab changed: update "data" and views to latest values
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){clearSelAll();});
   connect(ui->tabWidget,&QTabWidget::currentChanged,[=](){dataUpdate ();});
-  // index changes: update view
+  // T3: "idx" changes -> update view
   connect(this,SIGNAL(indexChanged()),this,SLOT(viewImage()));
 
-  // T1/T2: convert selected item to current index
+  // T1: convert selected item to current index
   for ( auto &i: fileList ) connect(i,&QListWidget::itemSelectionChanged,[=](){list2idx(i);});
+  // T2: convert selected item to current index
   connect(ui->listWidgetT2,&QListWidget::itemSelectionChanged,[=](){list2idx(ui->listWidgetT2);});
 
-  // T2: refresh view to show the latest thumbnails
+  // T2: manually refresh view to show the latest thumbnails
   connect(ui->pushButtonT2_refresh,SIGNAL(clicked(bool)),SLOT(viewStream()));
 
-  // T4: couple outPath button to outPath line-edit
+  // T4: couple "outPath" pushButton to "outPath" lineEdit
   connect(ui->pushButtonT4_path,SIGNAL(clicked(bool)),SLOT(on_lineEditT4_path_editingFinished()));
 
-  // clear all
+  // start fresh: clear all data and widgets
   connect(ui->actionNew,SIGNAL(triggered(bool)),this,SLOT(clearAll()));
 
   // enforce opening on the first tab
@@ -101,10 +106,7 @@ MainWindow::MainWindow(QWidget *parent) :
   // T1: set number of folders (==2)
   ui->comboBoxT1_nfol->setCurrentIndex(1);
 
-  // T3: center image
-  ui->view_idx_label->setAlignment(Qt::AlignCenter);
-
-  // start worker thread (to which "thumbnail" is assigned)
+  // start worker-thread (to which "thumbnail" is assigned)
   workerThread.start();
 }
 
@@ -152,13 +154,13 @@ bool MainWindow::promptQuestion(QString msg)
 
 void MainWindow::dataUpdate()
 {
-  // request to stop reading thumbnails (to loose as little as time below)
+  // request to stop reading thumbnails (to lose fewer time below)
   thumbnail->requestStop();
 
   // list with thumbnails to include
   // - initialize
-  std::vector<int>    incl(thumbnail->size(),0);
-  std::vector<size_t> rm;
+  std::vector<int>    incl(thumbnail->size(),0); // 1 if the thumbnail is still part of "data"
+  std::vector<size_t> rm;                        // list with thumbnails to remove
   // - fill
   for ( auto &i: data ) incl[i.ithumb] = 1;
   // - list items to remove
@@ -171,15 +173,14 @@ void MainWindow::dataUpdate()
   for ( auto &i: data ) i.ithumb = incl[i.ithumb];
 
   // correct current index if needed
-  if ( idx>=data.size() )
-    idx = data.size()-1;
+  if ( idx>=data.size() ) idx = data.size()-1;
 
   // sort by time
   dataTimeSort();
 
   // remove thumbnails that are no longer part of "data"
   thumbnail->erase(rm);
-  // launch reading thumbnails that have not been read
+  // if needed, launch reading thumbnails (that have not been read)
   if ( thumbnail->unread() ) { emit thumbnailRead(); }
 
   // update widget
@@ -265,14 +266,12 @@ void MainWindow::addFiles(size_t folder)
   dialog.setViewMode (QFileDialog::List);
   // - launch dialog and read output
   QDir dir;
-  if ( dialog.exec() )
-    dir = dialog.directory();
-  else
-    return;
+  if ( dialog.exec() ) dir = dialog.directory();
+  else                 return;
 
   // store new suggested directory
-  try { workDir = dir.filePath("../"); }
-  catch (...) { workDir = workDir; }
+  try         { workDir = dir.filePath("../"); }
+  catch (...) { workDir = workDir;             }
 
   // set filters
   QStringList filter_jpeg;
@@ -297,8 +296,7 @@ void MainWindow::addFiles(size_t folder)
 
   // find which camera index to use (one more than the current maximum)
   if ( data.size()>0 ) {
-    for ( auto &file : data )
-      camera = std::max(camera,file.camera);
+    for ( auto &file : data ) camera = std::max(camera,file.camera);
     ++camera;
   }
 
@@ -319,10 +317,11 @@ void MainWindow::addFiles(size_t folder)
     file.dir       = finfo.absolutePath();
     file.time      = t;
     file.rotation  = rot;
-    file.ithumb    = thumbnail->push_back(file.path); // create new entry in thumbnail list
+    file.ithumb    = thumbnail->push_back(file.path,rot); // create new entry in thumbnail list
     if ( lst_json.size()==1 ) {
-      file.time    = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"  ]);
-      file.camera += static_cast<size_t>     (jdata[finfo.fileName().toStdString()]["camera"]);
+      file.time     = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"    ]);
+      file.camera  += static_cast<size_t>     (jdata[finfo.fileName().toStdString()]["camera"  ]);
+      file.modified = static_cast<int>        (jdata[finfo.fileName().toStdString()]["modified"]);
     }
     // - store in list
     data.push_back(file);
@@ -335,8 +334,12 @@ void MainWindow::addFiles(size_t folder)
 
 void MainWindow::listExcl(QListWidget *list)
 {
-  for ( size_t &i : selectedItems(list,false) )
+  std::vector<size_t> index = selectedItems(list,false);
+
+  for ( size_t &i: index )
     data.erase(data.begin()+i);
+
+  clearSel(list);
 
   emit dataChanged();
 }
@@ -345,10 +348,15 @@ void MainWindow::listExcl(QListWidget *list)
 
 void MainWindow::listDel(QListWidget *list)
 {
-  for ( size_t &i : selectedItems(list,false) ) {
+  std::vector<size_t> index = selectedItems(list,false);
+
+  for ( size_t &i: index )
     delData.push_back(data[i]);
+
+  for ( size_t &i: index )
     data.erase(data.begin()+i);
-  }
+
+  clearSel(list);
 
   emit dataChanged();
 }
@@ -429,10 +437,18 @@ void MainWindow::viewFileList()
 void MainWindow::viewStream(void)
 {
   // list with selected rows
-  std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
-  // no rows selected -> set "idx"
-  if ( rows.size()==0 && idx<data.size()-1 )
-    rows.push_back(idx);
+  std::vector<size_t> old = selectedItems(ui->listWidgetT2);
+  // convert rows to new index
+  // - allocate
+  std::vector<size_t> renum(data.size());
+  // - fill
+  for ( size_t i=0; i<data.size(); ++i )
+    renum[data[i].index] = i;
+  // - new rows
+  std::vector<size_t> rows;
+  // - renumber
+  for ( auto &i: old )
+    rows.push_back(renum[i]);
 
   // empty the list
   while ( ui->listWidgetT2->count()>0 )
@@ -469,9 +485,40 @@ void MainWindow::viewStream(void)
   // - clear entire selection
   for ( int j=0; j<ui->listWidgetT2->count(); ++j )
     ui->listWidgetT2->item(j)->setSelected(false);
+  // - no rows selected -> set "idx"
+  if ( rows.size()==0 && idx<data.size()-1 )
+    rows.push_back(idx);
   // - apply previous selection, moved one up
   for ( auto &row : rows )
     ui->listWidgetT2->item(row)->setSelected(true);
+}
+
+// =================================================================================================
+
+void MainWindow::on_listWidgetT2_itemSelectionChanged()
+{
+  selLast = -1;
+
+  // current selection
+  std::vector<size_t> sel = selectedItems(ui->listWidgetT2);
+
+  // catch all the obvious cases in which there is not one last selected item
+  if ( sel.size()==0 || selPrev.size()==0 || sel.size()!=selPrev.size()+1 ) {
+    selPrev = sel;
+    return;
+  }
+
+  std::vector<size_t> diff(sel.size()+selPrev.size());
+  std::vector<size_t>::iterator it;
+
+  it = std::set_difference(sel.begin(),sel.end(),selPrev.begin(),selPrev.end(),diff.begin());
+
+  diff.resize(it-diff.begin());
+
+  selPrev = sel;
+
+  if ( diff.size()==1 )
+    selLast = diff[0];
 }
 
 // =================================================================================================
@@ -482,21 +529,24 @@ void MainWindow::dataNameSort(size_t folder)
   if ( data.size()<=0 )
     return;
 
+  // clear all selected items
+  clearSelAll();
+
   // store current order, to retrieve the new position of "idx"
   for ( size_t i=0; i<data.size(); ++i )
     data[i].index = i;
 
   // only sort for this folder (items with "data[i].sort == false" are left untouched)
   for ( auto &file : data ) {
-    if ( file.folder==folder ) { file.sort = true;  }
-    else                       { file.sort = false; }
+    if ( file.folder==folder ) { file.sort = true ; file.modified = 1; }
+    else                       { file.sort = false;                    }
   }
 
   // apply selective sort, based on file-name
   std::sort(data.begin(),data.end(),
     [](File i,File j){
-      if ( i.sort && j.sort ) return i.path.toStdString()<j.path.toStdString();
-      else                    return i.index<j.index;
+      if ( i.sort && j.sort ) { return i.path.toStdString()<j.path.toStdString(); }
+      else                    { return i.index             <j.index             ; }
   });
 
   // update time such that the sorted list is also in chronological order
@@ -544,7 +594,7 @@ void MainWindow::dataTimeSort()
     }
   }
 
-  // make sure that all images are at least one second apart
+  // make sure that all photos are at least one second apart
   // this is needed to allow image insertion between image
   for ( size_t i=0; i<data.size()-1; ++i )
     if ( data[i+1].time<=data[i].time )
@@ -594,21 +644,14 @@ void MainWindow::on_pushButtonT2i_up_clicked()
     return;
 
   // top of the list: don't know what to do
-  if ( rows[0]==0 ) {
-    clearSel(ui->listWidgetT2);
-    return;
-  }
+  if ( rows[0]==0 )
+    return promptWarning("Selection includes first photo, cannot proceed");
 
   // move up (earlier)
-  for ( auto &i: rows )
-    data[i].time -= data[i].time-data[i-1].time+1;
-
-  // modify selection
-  // - clear entire selection
-  clearSel(ui->listWidgetT2);
-  // - apply previous selection, moved one up
-  for ( auto &i : rows )
-    ui->listWidgetT2->item(i-1)->setSelected(true);
+  for ( auto &i: rows ) {
+    data[i].time    -= data[i].time-data[i-1].time+1;
+    data[i].modified = 1;
+  }
 
   // signal to process change
   emit dataChanged();
@@ -626,21 +669,14 @@ void MainWindow::on_pushButtonT2i_dwn_clicked()
     return;
 
   // top of the list: don't know what to do
-  if ( rows[0]==data.size()-1 ) {
-    clearSel(ui->listWidgetT2);
-    return;
-  }
+  if ( rows[0]==data.size()-1 )
+    return promptWarning("Selection includes last photo, cannot proceed");
 
   // move up (earlier)
-  for ( auto &i: rows )
-    data[i].time += data[i+1].time-data[i].time+1;
-
-  // modify selection
-  // - clear entire selection
-  clearSel(ui->listWidgetT2);
-  // - apply previous selection, moved one up
-  for ( auto &i : rows )
-    ui->listWidgetT2->item(i+1)->setSelected(true);
+  for ( auto &i: rows ) {
+    data[i].time    += data[i+1].time-data[i].time+1;
+    data[i].modified = 1;
+  }
 
   // signal to process change
   emit dataChanged();
@@ -650,6 +686,13 @@ void MainWindow::on_pushButtonT2i_dwn_clicked()
 
 void MainWindow::on_pushButtonT2i_sync_clicked()
 {
+  // check if there is a destination: the last selected image
+  if ( selLast==-1 ) {
+    return promptWarning(
+      "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
+    );
+  }
+
   // get sorted list of selected items
   std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
 
@@ -658,11 +701,10 @@ void MainWindow::on_pushButtonT2i_sync_clicked()
     return;
 
   // move up (earlier)
-  for ( auto &i: rows )
-    data[i].time = data[rows[0]].time;
-
-  // empty selection
-  clearSel(ui->listWidgetT2);
+  for ( auto &i: rows ) {
+    data[i].time     = data[selLast].time;
+    data[i].modified = 1;
+  }
 
   // signal to process change
   emit dataChanged();
@@ -680,19 +722,17 @@ void MainWindow::on_pushButtonT2c_up_clicked()
     return;
 
   // top of the list / more then one item: don't know what to do
-  if ( rows[0]==0 || rows.size()>1 ) {
-    clearSel(ui->listWidgetT2);
-    return;
-  }
+  if ( rows[0]==0 )
+    return promptWarning("Selection includes first photo, cannot proceed");
+  if ( rows.size()>1 )
+    return promptWarning("Selection contains more than one photo, cannot proceed");
 
   // get index
   size_t row = rows[0];
 
   // not a boundary: don't know what to do
-  if ( data[row-1].camera==data[row].camera ) {
-    clearSel(ui->listWidgetT2);
-    return;
-  }
+  if ( data[row-1].camera==data[row].camera )
+    return promptWarning("Previous photo is not of another camera, cannot proceed");
 
   // get time difference
   std::time_t dt = data[row].time-data[row-1].time+1;
@@ -701,13 +741,6 @@ void MainWindow::on_pushButtonT2c_up_clicked()
   for ( auto &i: data )
     if ( i.camera==data[row].camera )
       i.time -= dt;
-
-  // modify selection
-  // - clear entire selection
-  clearSel(ui->listWidgetT2);
-  // - apply previous selection, moved one up
-  for ( auto &i : rows )
-    ui->listWidgetT2->item(i-1)->setSelected(true);
 
   // signal to process change
   emit dataChanged();
@@ -725,19 +758,17 @@ void MainWindow::on_pushButtonT2c_dwn_clicked()
     return;
 
   // top of the list / more then one item: don't know what to do
-  if ( rows[0]==data.size()-1 || rows.size()>1 ) {
-    clearSel(ui->listWidgetT2);
-    return;
-  }
+  if ( rows[0]>=data.size()-1 )
+    return promptWarning("Selection includes last photo, cannot proceed");
+  if ( rows.size()>1 )
+    return promptWarning("Selection contains more than one photo, cannot proceed");
 
   // get index
   size_t row = rows[0];
 
   // not a boundary: don't know what to do
-  if ( data[row+1].camera==data[row].camera ) {
-    clearSel(ui->listWidgetT2);
-    return;
-  }
+  if ( data[row+1].camera==data[row].camera )
+    return promptWarning("Next photo is not of another camera, cannot proceed");
 
   // get time difference
   std::time_t dt = data[row+1].time-data[row].time+1;
@@ -747,13 +778,6 @@ void MainWindow::on_pushButtonT2c_dwn_clicked()
     if ( i.camera==data[row].camera )
       i.time += dt;
 
-  // modify selection
-  // - clear entire selection
-  clearSel(ui->listWidgetT2);
-  // - apply previous selection, moved one up
-  for ( auto &i : rows )
-    ui->listWidgetT2->item(i+1)->setSelected(true);
-
   // signal to process change
   emit dataChanged();
 }
@@ -762,6 +786,13 @@ void MainWindow::on_pushButtonT2c_dwn_clicked()
 
 void MainWindow::on_pushButtonT2c_sync_clicked()
 {
+  // check if there is a destination: the last selected image
+  if ( selLast==-1 ) {
+    return promptWarning(
+      "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
+    );
+  }
+
   // get sorted list of selected items
   std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
 
@@ -778,15 +809,13 @@ void MainWindow::on_pushButtonT2c_sync_clicked()
   std::vector<int> check(ncam+1,0);
   // check if camera occurs
   for ( auto &row: rows ) {
-    if ( check[data[row].camera] ) {
-      clearSel(ui->listWidgetT2);
-      return;
-    }
+    if ( check[data[row].camera] )
+      return promptWarning("Selection includes several photos from the same camera, cannot proceed");
     check[data[row].camera] = 1;
   }
 
   // sync
-  size_t ref = rows[0];
+  size_t ref = selLast;
   for ( auto &row: rows ) {
     if ( row!=ref ) {
       std::time_t dt = data[row].time-data[ref].time;
@@ -795,9 +824,6 @@ void MainWindow::on_pushButtonT2c_sync_clicked()
           i.time -= dt;
     }
   }
-
-  // clear entire selection
-  clearSel(ui->listWidgetT2);
 
   // signal to process change
   emit dataChanged();
@@ -910,7 +936,7 @@ void MainWindow::on_lineEditT4_path_editingFinished()
 
 void MainWindow::on_pushButtonT4_write_clicked()
 {
-  // number of characters needed the fit the images
+  // number of characters needed the fit the photos
   // (ignore that the removed image might reduce N)
   int N = QString::number(data.size()).length();
 
@@ -945,14 +971,15 @@ void MainWindow::on_pushButtonT4_write_clicked()
   // write output
   // - allocate JSON-struct
   json j;
-  // - loop over images
+  // - loop over photos
   for ( int i=0; i<static_cast<int>(data.size()); ++i ) {
     // - format -> filename
     QString fname = ui->lineEditT4_name->text()+QString("-")+QString("%1.jpg").arg(i,N,10,QChar('0'));
     QString fpath = outdir.filePath(fname);
     // - store information to JSON-struct
-    j[fname.toStdString()]["camera"] = data[i].camera;
-    j[fname.toStdString()]["time"  ] = static_cast<long>(data[i].time);
+    j[fname.toStdString()]["modified"] = data[i].modified;
+    j[fname.toStdString()]["camera"  ] = data[i].camera;
+    j[fname.toStdString()]["time"    ] = static_cast<long>(data[i].time);
     j["camera"][std::to_string(data[i].camera)] = data[i].dir.toStdString();
     // - copy or move
     if ( ui->checkBoxT4_keepOrig->isChecked() ) { QFile::copy(  data[i].path,fpath); }

@@ -38,6 +38,7 @@ class Thumbnails: public QObject
 private:
   std::vector<QString> path;
   std::vector<QIcon>   data;
+  std::vector<int>     rotation;
   std::vector<int>     isread;
   bool busy = false;
   bool stop = false;
@@ -75,14 +76,15 @@ public:
     return n;
   };
 
-  size_t push_back(QString name)
+  size_t push_back(QString name, int rot=0)
   {
     QPixmap pix(50,50);
     pix.fill(QColor("white"));
 
-    path  .push_back(name);
-    data  .push_back(QIcon(pix));
-    isread.push_back(0);
+    path    .push_back(name);
+    data    .push_back(QIcon(pix));
+    isread  .push_back(0);
+    rotation.push_back(rot);
 
     return data.size()-1;
   };
@@ -94,9 +96,10 @@ public:
     std::sort(index.begin(),index.end(),[](size_t i,size_t j){return i>j;});
 
     for ( auto &i: index ) {
-      data  .erase(data  .begin()+i);
-      path  .erase(path  .begin()+i);
-      isread.erase(isread.begin()+i);
+      data    .erase(data    .begin()+i);
+      path    .erase(path    .begin()+i);
+      isread  .erase(isread  .begin()+i);
+      rotation.erase(rotation.begin()+i);
     }
   };
 
@@ -117,6 +120,9 @@ public slots:
 
       if ( !isread[i] )
       {
+        QMatrix rot;
+        rot.rotate(rotation[i]);
+
         QPixmap pix(path[i]);
         pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
 
@@ -126,7 +132,7 @@ public slots:
           return;
         }
 
-        data  [i] = QIcon(pix);
+        data  [i] = QIcon(QPixmap(pix.transformed(rot)));
         isread[i] = 1;
       }
     }
@@ -156,6 +162,7 @@ public:
   std::time_t time      = 0    ; // time at which the photo was taken
   size_t      index     = 0    ; // for sorting: position in list -> locate where "idx" went
   bool        sort      = true ; // for sorting: selectively sort subset
+  int         modified  = 0    ; // signal that time is still in line with the rest of the photos
   size_t      ithumb           ; // index in list with thumbnails
 
   File            (const File &) = default;
@@ -285,6 +292,7 @@ private slots:
   void on_lineEditT4_path_editingFinished();// manually edit output path
   void on_pushButtonT4_write_clicked();     // write sorted batch to output folder
   void on_pushButtonT4_clean_clicked();     // remove "delData" from disk, remove empty directories
+  void on_listWidgetT2_itemSelectionChanged();// update last selected item
 
 signals:
   void thumbnailRead(); // start reading the thumbnails
@@ -293,7 +301,10 @@ signals:
 
 private:
   Ui::MainWindow            *ui;
+  QString                   workDir=QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
   size_t                    idx=0;      // current photo (index in "data")
+  int                       selLast=-1; // last selected index (in T2); -1 if no last selected item
+  std::vector<size_t>       selPrev;    // previous selection  (in T2)
   Thumbnails                *thumbnail; // class containing all thumbnails
   std::vector<File>         data;       // array with photos + information
   std::vector<File>         delData;    // deleted images
@@ -303,7 +314,6 @@ private:
   std::vector<QPushButton*> delSelec;   // list with widgets to remover selects files in list
   std::vector<QPushButton*> nameSort;   // list with widgets to sort by name for that camera
   std::list  <QString>      cleanPaths; // list with input paths (checked to clean later on)
-  QString                   workDir=QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
 
   void promptWarning (QString msg);     // pop-up warning
   bool promptQuestion(QString msg);     // pop-up question that the user has to confirm
