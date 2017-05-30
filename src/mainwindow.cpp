@@ -157,6 +157,18 @@ void MainWindow::dataUpdate()
   // request to stop reading thumbnails (to lose fewer time below)
   thumbnail->requestStop();
 
+  // update camera index to smallest possible
+  // - initialize
+  std::vector<int> cam(data.size(),0);
+  // - fill
+  for ( auto &i: data ) cam[i.camera] = 1;
+  // - convert to new indices, step 1/2: cumulative sum
+  for ( size_t i=1; i<cam.size(); ++i ) cam[i] += cam[i-1];
+  // - convert to new indices, step 2/2: correct one
+  for ( auto &i: cam ) --i;
+  // - renumber data
+  for ( auto &i: data ) i.camera = cam[i.camera];
+
   // list with thumbnails to include
   // - initialize
   std::vector<int>    incl(thumbnail->size(),0); // 1 if the thumbnail is still part of "data"
