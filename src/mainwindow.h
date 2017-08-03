@@ -12,6 +12,8 @@
 #include <QScrollBar>
 #include <QListWidget>
 #include <QThread>
+#include <QDateTime>
+#include <QListWidget>
 
 #include <iostream>
 #include <iomanip>
@@ -40,20 +42,21 @@ private:
   std::vector<QIcon>   data;
   std::vector<int>     rotation;
   std::vector<int>     isread;
-  bool busy = false;
-  bool stop = false;
+  bool                 busy = false;
+  bool                 stop = false;
+  size_t               npix = 50;
 
 public:
 
   QIcon& at ( size_t i )
   {
     return data[i];
-  };
+  }
 
   size_t size()
   {
     return data.size();
-  };
+  }
 
   void requestStop()
   {
@@ -74,11 +77,11 @@ public:
         ++n;
 
     return n;
-  };
+  }
 
   size_t push_back(QString name, int rot=0)
   {
-    QPixmap pix(50,50);
+    QPixmap pix(npix,npix);
     pix.fill(QColor("white"));
 
     path    .push_back(name);
@@ -87,7 +90,7 @@ public:
     rotation.push_back(rot);
 
     return data.size()-1;
-  };
+  }
 
   void erase(std::vector<size_t> index)
   {
@@ -101,7 +104,17 @@ public:
       isread  .erase(isread  .begin()+i);
       rotation.erase(rotation.begin()+i);
     }
-  };
+  }
+
+  void setSize( size_t N )
+  {
+    // stop the current read
+    stop = true;
+    // overwrite number of pixels in both directions
+    npix = N;
+    // mark all for reading
+    for ( auto &i : isread ) i = 0;
+  }
 
 public slots:
 
@@ -124,7 +137,7 @@ public slots:
         rot.rotate(rotation[i]);
 
         QPixmap pix(path[i]);
-        pix.scaled(50,50,Qt::KeepAspectRatio, Qt::FastTransformation);
+        pix.scaled(npix,npix,Qt::KeepAspectRatio, Qt::FastTransformation);
 
         if ( stop ) {
           busy = false;
@@ -140,7 +153,7 @@ public slots:
     busy = false;
     stop = false;
     emit completed();
-  };
+  }
 
 signals:
 
@@ -159,7 +172,8 @@ public:
   size_t      folder    = 0    ; // folder-index (corresponds to "fileList")
   size_t      camera    = 0    ; // camera-index (allows several cameras in one folder)
   int         rotation  = 0    ; // rotation in degrees
-  std::time_t time      = 0    ; // time at which the photo was taken
+  std::time_t time_orig = 0    ; // time at which the photo was taken: no change on sort
+  std::time_t time      = 0    ; // time at which the photo was taken: changed on sort
   size_t      index     = 0    ; // for sorting: position in list -> locate where "idx" went
   bool        sort      = true ; // for sorting: selectively sort subset
   int         modified  = 0    ; // signal that time is still in line with the rest of the photos
@@ -167,7 +181,7 @@ public:
 
   File            (const File &) = default;
   File& operator= (const File &) = default;
-  File(){};
+  File(){}
 };
 
 // =================================================================================================
@@ -195,7 +209,9 @@ inline std::tuple<std::time_t,int> jpg2info (std::string fname)
   int code = result.parseFrom(buf, fsize);
   delete[] buf;
   if ( code ) {
-    throw std::runtime_error("Error parsing file");
+    std::string txt = "Error parsing file, error code: ";
+    std::string err = txt + std::to_string(code);
+    throw std::runtime_error(err);
   }
 
   // interpret time string
@@ -215,7 +231,7 @@ inline std::tuple<std::time_t,int> jpg2info (std::string fname)
   else if ( result.Orientation==3 ) rot = 180;
 
   return std::make_tuple(t,rot);
-};
+}
 
 // =================================================================================================
 
@@ -239,7 +255,7 @@ inline std::vector<size_t> selectedItems(QListWidget* list, bool ascending=true)
 
   // return list
   return out;
-};
+}
 
 // =================================================================================================
 
@@ -276,12 +292,19 @@ private slots:
   void viewImage();                 // T3: display image "idx", selectively enable buttons
   void showDate();                  // T4: suggest date
 
+  void on_pushButtonT2_navTop_clicked();    // quick scroll navigation
+  void on_pushButtonT2_navBottom_clicked(); // quick scroll navigation
+  void on_pushButtonT2_navPgUp_clicked();   // quick scroll navigation
+  void on_pushButtonT2_navPgDwn_clicked();  // quick scroll navigation
   void on_pushButtonT2i_up_clicked();       // move image(s) up
   void on_pushButtonT2i_dwn_clicked();      // move image(s) down
   void on_pushButtonT2i_sync_clicked();     // sync image(s)
   void on_pushButtonT2c_up_clicked();       // move image(s) up   (apply for all images in camera)
   void on_pushButtonT2c_dwn_clicked();      // move image(s) down (apply for all images in camera)
   void on_pushButtonT2c_sync_clicked();     // sync image(s)      (apply for all images in camera)
+  void on_pushButtonT2f_up_clicked();       // move image(s) up   (apply for all images in folder)
+  void on_pushButtonT2f_dwn_clicked();      // move image(s) down (apply for all images in folder)
+  void on_pushButtonT2f_sync_clicked();     // sync image(s)      (apply for all images in folder)
   void on_pushButtonT3_prev_clicked();      // decrease "idx" by one
   void on_pushButtonT3_next_clicked();      // increase "idx" by one
   void on_pushButtonT3_first_clicked();     // set "idx = 0"
@@ -293,6 +316,7 @@ private slots:
   void on_pushButtonT4_write_clicked();     // write sorted batch to output folder
   void on_pushButtonT4_clean_clicked();     // remove "delData" from disk, remove empty directories
   void on_listWidgetT2_itemSelectionChanged();// update last selected item
+  void on_comboBoxt4_ref_activated(int index);// set time reference based on folder
 
 signals:
   void thumbnailRead(); // start reading the thumbnails
@@ -302,6 +326,7 @@ signals:
 private:
   Ui::MainWindow            *ui;
   QString                   workDir=QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+  size_t                    npix=200;   // size of the thumbnails (T2)
   size_t                    idx=0;      // current photo (index in "data")
   int                       selLast=-1; // last selected index (in T2); -1 if no last selected item
   std::vector<size_t>       selPrev;    // previous selection  (in T2)

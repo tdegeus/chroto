@@ -304,7 +304,8 @@ void MainWindow::addFiles(size_t folder)
   // allocate local variables
   std::time_t t;
   int         rot;
-  size_t      camera = 0;
+  size_t      camera   = 0;
+  int         modified = 0;
 
   // find which camera index to use (one more than the current maximum)
   if ( data.size()>0 ) {
@@ -318,8 +319,15 @@ void MainWindow::addFiles(size_t folder)
     // - extract file from list
     QFileInfo finfo = lst_jpeg.at(i);
     // - try the read the EXIF information. skip image if unsuccessful
-    try         { std::tie(t,rot) = jpg2info(finfo.absoluteFilePath().toStdString()); }
-    catch (...) { continue; }
+    try {
+      std::tie(t,rot) = jpg2info(finfo.absoluteFilePath().toStdString());
+    }
+    catch (...) {
+      modified = 1;
+      rot      = 0;
+      t        = finfo.created().toTime_t();
+    }
+
     // - compute information to file
     File file;
     file.camera    = camera;
@@ -328,7 +336,9 @@ void MainWindow::addFiles(size_t folder)
     file.path      = finfo.absoluteFilePath();
     file.dir       = finfo.absolutePath();
     file.time      = t;
+    file.time_orig = t;
     file.rotation  = rot;
+    file.modified  = modified;
     file.ithumb    = thumbnail->push_back(file.path,rot); // create new entry in thumbnail list
     if ( lst_json.size()==1 ) {
       file.time     = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"    ]);
@@ -337,6 +347,24 @@ void MainWindow::addFiles(size_t folder)
     }
     // - store in list
     data.push_back(file);
+  }
+
+  // set the thumbail size
+  if ( data.size()<200 ) {
+    npix = 200;
+    thumbnail->setSize(50);
+  }
+  else if ( data.size()<1000 ) {
+    npix = 100;
+    thumbnail->setSize(25);
+  }
+  else if ( data.size()<10000 ) {
+    npix = 50;
+    thumbnail->setSize(25);
+  }
+  else {
+    npix = 15;
+    thumbnail->setSize(15);
   }
 
   emit dataChanged();
@@ -442,6 +470,19 @@ void MainWindow::viewFileList()
   // update selected row to current index
   for ( size_t l=0; l<fileList.size(); ++l )
     fileList[l]->setCurrentRow(idx);
+
+  // update the folders on T4
+  // - store current index
+  int cur = ui->comboBoxt4_ref->currentIndex();
+  // - clear the widget
+  ui->comboBoxt4_ref->clear();
+  // - add folders
+  for ( auto &i : pathView )
+    if ( i->isVisible() )
+      ui->comboBoxt4_ref->addItem(i->text() );
+  // - set index to previous value
+  if ( cur < ui->comboBoxt4_ref->count() )
+    ui->comboBoxt4_ref->setCurrentIndex(cur);
 }
 
 // =================================================================================================
@@ -483,7 +524,7 @@ void MainWindow::viewStream(void)
     col.push_back(QColor(cmap[i*3+0],cmap[i*3+1],cmap[i*3+2]));
 
   // define style of the widget
-  ui->listWidgetT2->setIconSize(QSize(200,200));
+  ui->listWidgetT2->setIconSize(QSize(npix,npix));
 
   // fill the lists with names / icons
   for ( auto &i : data )
@@ -492,6 +533,10 @@ void MainWindow::viewStream(void)
   // set background color, corresponding to the camera index
   for ( size_t i=0; i<data.size(); ++i )
     ui->listWidgetT2->item(i)->setBackground(QBrush(col[data[i].camera]));
+
+  // change focus
+  QListWidgetItem *item = ui->listWidgetT2->item(idx);
+  ui->listWidgetT2->scrollToItem(item, QAbstractItemView::EnsureVisible);
 
   // restore selection
   // - clear entire selection
@@ -503,6 +548,48 @@ void MainWindow::viewStream(void)
   // - apply previous selection, moved one up
   for ( auto &row : rows )
     ui->listWidgetT2->item(row)->setSelected(true);
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2_navTop_clicked()
+{
+  ui->listWidgetT2->scrollToTop();
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2_navBottom_clicked()
+{
+  ui->listWidgetT2->scrollToBottom();
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2_navPgUp_clicked()
+{
+  int i = ui->listWidgetT2->verticalScrollBar()->value();
+  int N = ui->listWidgetT2->verticalScrollBar()->maximum();
+
+  i -= N/10;
+
+  if ( i < 0 ) i = 0;
+
+  ui->listWidgetT2->verticalScrollBar()->setValue(i);
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2_navPgDwn_clicked()
+{
+  int i = ui->listWidgetT2->verticalScrollBar()->value();
+  int N = ui->listWidgetT2->verticalScrollBar()->maximum();
+
+  i += N/10;
+
+  if ( i >= N ) i = N-1;
+
+  ui->listWidgetT2->verticalScrollBar()->setValue(i);
 }
 
 // =================================================================================================
@@ -602,14 +689,14 @@ void MainWindow::dataTimeSort()
   for ( size_t i=0; i<data.size(); ++i ) {
     if ( data[i].index==idx ) {
       idx = i;
-      return;
+      break;
     }
   }
 
   // make sure that all photos are at least one second apart
   // this is needed to allow image insertion between image
   for ( size_t i=0; i<data.size()-1; ++i )
-    if ( data[i+1].time<=data[i].time )
+    if ( data[i+1].time <= data[i].time )
       data[i+1].time = data[i].time+1;
 }
 
@@ -843,6 +930,126 @@ void MainWindow::on_pushButtonT2c_sync_clicked()
 
 // =================================================================================================
 
+void MainWindow::on_pushButtonT2f_up_clicked()
+{
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // top of the list / more then one item: don't know what to do
+  if ( rows[0]==0 )
+    return promptWarning("Selection includes first photo, cannot proceed");
+  if ( rows.size()>1 )
+    return promptWarning("Selection contains more than one photo, cannot proceed");
+
+  // get index
+  size_t row = rows[0];
+
+  // not a boundary: don't know what to do
+  if ( data[row-1].folder==data[row].folder )
+    return promptWarning("Previous photo is not of another folder, cannot proceed");
+
+  // get time difference
+  std::time_t dt = data[row].time-data[row-1].time+1;
+
+  // apply to all
+  for ( auto &i: data )
+    if ( i.folder==data[row].folder )
+      i.time -= dt;
+
+  // signal to process change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2f_dwn_clicked()
+{
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2,false);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // top of the list / more then one item: don't know what to do
+  if ( rows[0]>=data.size()-1 )
+    return promptWarning("Selection includes last photo, cannot proceed");
+  if ( rows.size()>1 )
+    return promptWarning("Selection contains more than one photo, cannot proceed");
+
+  // get index
+  size_t row = rows[0];
+
+  // not a boundary: don't know what to do
+  if ( data[row+1].folder==data[row].folder )
+    return promptWarning("Next photo is not of another folder, cannot proceed");
+
+  // get time difference
+  std::time_t dt = data[row+1].time-data[row].time+1;
+
+  // apply to all
+  for ( auto &i: data )
+    if ( i.folder==data[row].folder )
+      i.time += dt;
+
+  // signal to process change
+  emit dataChanged();
+}
+
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT2f_sync_clicked()
+{
+  // check if there is a destination: the last selected image
+  if ( selLast==-1 ) {
+    return promptWarning(
+      "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
+    );
+  }
+
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // read number of folders
+  size_t nfol = 0;
+  for ( auto &i: data )
+    nfol = std::max(nfol,i.folder);
+
+  // list folders
+  std::vector<int> check(nfol+1,0);
+  // check if folder occurs
+  for ( auto &row: rows ) {
+    if ( check[data[row].folder] )
+      return promptWarning("Selection includes several photos from the same folder, cannot proceed");
+    check[data[row].folder] = 1;
+  }
+
+  // sync
+  size_t ref = selLast;
+  for ( auto &row: rows ) {
+    if ( row!=ref ) {
+      std::time_t dt = data[row].time-data[ref].time;
+      for ( auto &i: data )
+        if ( i.folder==data[row].folder )
+          i.time -= dt;
+    }
+  }
+
+  // signal to process change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
 void MainWindow::on_pushButtonT3_prev_clicked()
 {
   if ( idx!=0 ) {
@@ -912,6 +1119,69 @@ void MainWindow::showDate()
   std::string str(std::ctime(&data[0].time));
 
   ui->lineEditT4_date->setText(QString::fromStdString(str));
+}
+
+// =================================================================================================
+
+void MainWindow::on_comboBoxt4_ref_activated(int index)
+{
+  // no folder selected -> do nothing
+  if ( index < 0 )
+    return;
+
+  // local variables
+  std::time_t dt   = 0; // time difference
+  int         sign = 0; // sign of the time difference (std::time_t can only be positve)
+
+  // try to find reference image in selected folder, and extract time difference between the
+  // time as a result of sorting, and the original time of the image
+  for ( auto &i : data ) {
+    if ( static_cast<int>(i.folder) == index && !(i.modified) ) {
+      if ( i.time > i.time_orig ) {
+        dt   = i.time - i.time_orig;
+        sign = -1;
+        break;
+      }
+      else if ( i.time <= i.time_orig ) {
+        dt   = i.time_orig - i.time;
+        sign = +1;
+        break;
+      }
+    }
+  }
+
+  if ( sign == 0 ) {
+    promptWarning("All images have been manually modified, consider using different folder");
+    for ( auto &i : data ) {
+      if ( static_cast<int>(i.folder) == index ) {
+        if ( i.time > i.time_orig ) {
+          dt   = i.time - i.time_orig;
+          sign = -1;
+          break;
+        }
+        else if ( i.time <= i.time_orig ) {
+          dt   = i.time_orig - i.time;
+          sign = +1;
+          break;
+        }
+      }
+    }
+  }
+
+  // change the time of the sorted set
+  if ( sign == 0 ) {
+    promptWarning("Folder contains no image that can serve as reference, please select another");
+    return;
+  }
+
+  if ( sign == +1 ) {
+    for ( auto &i : data )
+      i.time += dt;
+  }
+  else if ( sign == -1 ) {
+    for ( auto &i : data )
+      i.time -= dt;
+  }
 }
 
 // =================================================================================================
@@ -1074,3 +1344,4 @@ void MainWindow::clearAll()
   // emit signal to clear also all thumbnails, and empty all views
   emit dataChanged();
 }
+
