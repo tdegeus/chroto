@@ -1,3 +1,11 @@
+/*
+See "mainwindow.h" to get an overview of the program, and a sense where what is. Another way to get
+an overview is to use Qt Creator on "mainwindow.ui". The latter can also be used to investigate some
+of the signals and slots.
+
+(c) T.W.J. de Geus | tom@geus.me | www.geus.me | github.com/tdegeus/chroto
+*/
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -200,6 +208,10 @@ void MainWindow::dataUpdate()
   else if ( ui->tabWidget->currentIndex()==1 ) viewStream();
   else if ( ui->tabWidget->currentIndex()==2 ) viewImage();
   else if ( ui->tabWidget->currentIndex()==3 ) showDate();
+
+  ui->pushButtonT4_write->setEnabled(data   .size() > 0);
+  ui->pushButtonT4_clean->setEnabled(delData.size() > 0);
+
 }
 
 // =================================================================================================
@@ -473,16 +485,16 @@ void MainWindow::viewFileList()
 
   // update the folders on T4
   // - store current index
-  int cur = ui->comboBoxt4_ref->currentIndex();
+  int cur = ui->comboBoxT4_ref->currentIndex();
   // - clear the widget
-  ui->comboBoxt4_ref->clear();
+  ui->comboBoxT4_ref->clear();
   // - add folders
   for ( auto &i : pathView )
     if ( i->isVisible() )
-      ui->comboBoxt4_ref->addItem(i->text() );
+      ui->comboBoxT4_ref->addItem(i->text() );
   // - set index to previous value
-  if ( cur < ui->comboBoxt4_ref->count() )
-    ui->comboBoxt4_ref->setCurrentIndex(cur);
+  if ( cur < ui->comboBoxT4_ref->count() )
+    ui->comboBoxT4_ref->setCurrentIndex(cur);
 }
 
 // =================================================================================================
@@ -534,10 +546,6 @@ void MainWindow::viewStream(void)
   for ( size_t i=0; i<data.size(); ++i )
     ui->listWidgetT2->item(i)->setBackground(QBrush(col[data[i].camera]));
 
-  // change focus
-  QListWidgetItem *item = ui->listWidgetT2->item(idx);
-  ui->listWidgetT2->scrollToItem(item, QAbstractItemView::EnsureVisible);
-
   // restore selection
   // - clear entire selection
   for ( int j=0; j<ui->listWidgetT2->count(); ++j )
@@ -548,6 +556,10 @@ void MainWindow::viewStream(void)
   // - apply previous selection, moved one up
   for ( auto &row : rows )
     ui->listWidgetT2->item(row)->setSelected(true);
+
+  // change focus
+  QListWidgetItem *item = ui->listWidgetT2->item(idx);
+  ui->listWidgetT2->scrollToItem(item, QAbstractItemView::EnsureVisible);
 }
 
 // =================================================================================================
@@ -733,6 +745,34 @@ void MainWindow::viewImage()
 
 // =================================================================================================
 
+void MainWindow::on_pushButtonT2_newCam_clicked()
+{
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->listWidgetT2);
+
+  // no items selected: quit
+  if ( rows.size()==0 )
+    return;
+
+  // find which camera index to use (one more than the current maximum)
+  // - initialize
+  size_t      camera   = 0;
+  // - search
+  if ( data.size()>0 ) {
+    for ( auto &file : data ) camera = std::max(camera,file.camera);
+    ++camera;
+  }
+
+  // change camera index
+  for ( auto &i: rows )
+    data[i].camera = camera;
+
+  // signal to process change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
 void MainWindow::on_pushButtonT2i_up_clicked()
 {
   // get sorted list of selected items
@@ -751,6 +791,9 @@ void MainWindow::on_pushButtonT2i_up_clicked()
     data[i].time    -= data[i].time-data[i-1].time+1;
     data[i].modified = 1;
   }
+
+  // set index
+  idx = rows[rows.size()-1];
 
   // signal to process change
   emit dataChanged();
@@ -776,6 +819,9 @@ void MainWindow::on_pushButtonT2i_dwn_clicked()
     data[i].time    += data[i+1].time-data[i].time+1;
     data[i].modified = 1;
   }
+
+  // set index
+  idx = rows[0];
 
   // signal to process change
   emit dataChanged();
@@ -804,6 +850,9 @@ void MainWindow::on_pushButtonT2i_sync_clicked()
     data[i].time     = data[selLast].time;
     data[i].modified = 1;
   }
+
+  // set index
+  idx = rows[rows.size()-1];
 
   // signal to process change
   emit dataChanged();
@@ -841,6 +890,9 @@ void MainWindow::on_pushButtonT2c_up_clicked()
     if ( i.camera==data[row].camera )
       i.time -= dt;
 
+  // set index
+  idx = rows[rows.size()-1];
+
   // signal to process change
   emit dataChanged();
 }
@@ -876,6 +928,9 @@ void MainWindow::on_pushButtonT2c_dwn_clicked()
   for ( auto &i: data )
     if ( i.camera==data[row].camera )
       i.time += dt;
+
+  // set index
+  idx = rows[0];
 
   // signal to process change
   emit dataChanged();
@@ -924,6 +979,9 @@ void MainWindow::on_pushButtonT2c_sync_clicked()
     }
   }
 
+  // set index
+  idx = rows[rows.size()-1];
+
   // signal to process change
   emit dataChanged();
 }
@@ -960,6 +1018,9 @@ void MainWindow::on_pushButtonT2f_up_clicked()
     if ( i.folder==data[row].folder )
       i.time -= dt;
 
+  // set index
+  idx = rows[rows.size()-1];
+
   // signal to process change
   emit dataChanged();
 }
@@ -995,6 +1056,9 @@ void MainWindow::on_pushButtonT2f_dwn_clicked()
   for ( auto &i: data )
     if ( i.folder==data[row].folder )
       i.time += dt;
+
+  // set index
+  idx = rows[0];
 
   // signal to process change
   emit dataChanged();
@@ -1043,6 +1107,9 @@ void MainWindow::on_pushButtonT2f_sync_clicked()
           i.time -= dt;
     }
   }
+
+  // set index
+  idx = rows[rows.size()-1];
 
   // signal to process change
   emit dataChanged();
@@ -1123,7 +1190,7 @@ void MainWindow::showDate()
 
 // =================================================================================================
 
-void MainWindow::on_comboBoxt4_ref_activated(int index)
+void MainWindow::on_comboBoxT4_ref_activated(int index)
 {
   // no folder selected -> do nothing
   if ( index < 0 )
@@ -1276,6 +1343,12 @@ void MainWindow::on_pushButtonT4_write_clicked()
   // clear data-structure
   while ( data.size()>0 )
     data.erase(data.begin());
+
+  // clear thumbnails
+  thumbnail->empty();
+
+  // disable button (enabled when data is added)
+  ui->pushButtonT4_write->setEnabled(false);
 }
 
 // =================================================================================================
@@ -1310,6 +1383,9 @@ void MainWindow::on_pushButtonT4_clean_clicked()
   // clear lists
   while ( cleanPaths.size()>0 ) cleanPaths.erase(cleanPaths.begin());
   while ( delData   .size()>0 ) delData   .erase(delData   .begin());
+
+  // disable button (enabled when data is added)
+  ui->pushButtonT4_clean->setEnabled(false);
 }
 
 // =================================================================================================

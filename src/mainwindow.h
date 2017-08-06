@@ -1,3 +1,31 @@
+/*
+class MainWindow
+
+  This class controls everything. When the program is opened first "MainWindow::MainWindow" is run,
+  then the different functions are run based on the buttons that the user clicks. The streamline
+  can be understood (i) from the function directly linked to user actions
+  (e.g. "MainWindow::on_pushButtonT2i_up_clicked"); (ii) from the connections between the different
+  signals and slots (NB there are signals emitted by the Qt-widgets, but also some custom signals).
+
+  This class also stores all "data". The thumbnails of the entire "data" is stored in a different
+  class "thumbnail", which runs on a different processor in the background. The processes of
+  obtaining the thumbnails is restarted each time the "data" is added. "viewStream" reads from this
+  separate class, and restarts reading if the reading is incomplete.
+
+class File
+
+  The "data" in "MainWindow" is a vector of the "File"-class. This class holds all information on
+  the photo (time, location, etc.), except the thumbnail.
+
+class Thumbnails
+
+  Class that holds a vector of thumbnails. The process of getting the thumbnails can be (re)started
+  using "read". Note that except when items are removed using "Thumbnails::erase", the order never
+  changes. For each item, "MainWindow::data[i]", the index in this list is stored as "File::ithumb".
+
+(c) T.W.J. de Geus | tom@geus.me | www.geus.me | github.com/tdegeus/chroto
+*/
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -48,26 +76,19 @@ private:
 
 public:
 
-  QIcon& at ( size_t i )
-  {
-    return data[i];
-  }
+  // read QIcon "i"
+  QIcon& at          ( size_t i ) { return data[i];     }
 
-  size_t size()
-  {
-    return data.size();
-  }
+  // get the size
+  size_t size        (          ) { return data.size(); }
 
-  void requestStop()
-  {
-    stop = true;
-  }
+  // stop reading (restart reading by calling "Thumbnails::read")
+  void   requestStop (          ) { stop = true;        }
 
-  bool isBusy()
-  {
-    return busy;
-  }
+  // check if the class is (still) in the middle of the loop to read all images
+  bool   isBusy      (          ) { return busy;        }
 
+  // get the amount of unread images
   size_t unread()
   {
     size_t n = 0;
@@ -79,6 +100,7 @@ public:
     return n;
   }
 
+  // add an image to the list; return the index at which it is inserted
   size_t push_back(QString name, int rot=0)
   {
     QPixmap pix(npix,npix);
@@ -92,6 +114,7 @@ public:
     return data.size()-1;
   }
 
+  // remove items from the lists; warning: only time that the index of the images changes
   void erase(std::vector<size_t> index)
   {
     stop = true;
@@ -106,31 +129,51 @@ public:
     }
   }
 
+  // remove all items from the lists
+  void empty()
+  {
+    stop = true;
+
+    while ( data    .size()>0 ) data    .erase(data    .begin());
+    while ( path    .size()>0 ) path    .erase(path    .begin());
+    while ( isread  .size()>0 ) isread  .erase(isread  .begin());
+    while ( rotation.size()>0 ) rotation.erase(rotation.begin());
+
+    busy = false;
+    npix = 50;
+  }
+
+  // overwrite the size of the thumbnails
   void setSize( size_t N )
   {
-    // stop the current read
+    // - stop the current read
     stop = true;
-    // overwrite number of pixels in both directions
+    // - overwrite number of pixels in both directions
     npix = N;
-    // mark all for reading
+    // - mark all for reading
     for ( auto &i : isread ) i = 0;
   }
 
 public slots:
 
+  // loop to read all thumbnails
   void read()
   {
     busy = true ;
     stop = false;
 
+    // - loop over all photos
     for ( size_t i=0; i<data.size(); ++i )
     {
+      // -- break the loop if requested externally
       if ( stop || QThread::currentThread()->isInterruptionRequested() ) {
         busy = false;
         stop = false;
         return;
       }
 
+      // -- read if not read before: account for pre-specified rotation
+      //    (obtained from the EXIF-data in "MainWindow" below)
       if ( !isread[i] )
       {
         QMatrix rot;
@@ -150,6 +193,7 @@ public slots:
       }
     }
 
+    // - transmit that all images have been read
     busy = false;
     stop = false;
     emit completed();
@@ -235,6 +279,7 @@ inline std::tuple<std::time_t,int> jpg2info (std::string fname)
 
 // =================================================================================================
 
+// return selected item in a "QListWidget" as a list of indices (rows)
 inline std::vector<size_t> selectedItems(QListWidget* list, bool ascending=true)
 {
   // allocate
@@ -273,7 +318,6 @@ public:
   ~MainWindow();
 
 private slots:
-  void on_comboBoxT1_nfol_currentIndexChanged(int index);// change the displayed number of folders
 
   void addFiles(size_t folder);     // select folder, add all images to "data"
   void listExcl(QListWidget*);      // exclude selected images (take from "data")
@@ -292,6 +336,7 @@ private slots:
   void viewImage();                 // T3: display image "idx", selectively enable buttons
   void showDate();                  // T4: suggest date
 
+  void on_comboBoxT1_nfol_currentIndexChanged(int index);// change the displayed number of folders
   void on_pushButtonT2_navTop_clicked();    // quick scroll navigation
   void on_pushButtonT2_navBottom_clicked(); // quick scroll navigation
   void on_pushButtonT2_navPgUp_clicked();   // quick scroll navigation
@@ -305,10 +350,11 @@ private slots:
   void on_pushButtonT2f_up_clicked();       // move image(s) up   (apply for all images in folder)
   void on_pushButtonT2f_dwn_clicked();      // move image(s) down (apply for all images in folder)
   void on_pushButtonT2f_sync_clicked();     // sync image(s)      (apply for all images in folder)
-  void on_pushButtonT3_prev_clicked();      // decrease "idx" by one
-  void on_pushButtonT3_next_clicked();      // increase "idx" by one
-  void on_pushButtonT3_first_clicked();     // set "idx = 0"
-  void on_pushButtonT3_last_clicked();      // set "idx = data.size()-1"
+  void on_pushButtonT2_newCam_clicked();    // split selected images to new 'camera'
+  void on_pushButtonT3_prev_clicked();      // set "idx -= 1"
+  void on_pushButtonT3_next_clicked();      // set "idx += 1"
+  void on_pushButtonT3_first_clicked();     // set "idx  = 0"
+  void on_pushButtonT3_last_clicked();      // set "idx  = data.size()-1"
   void on_pushButtonT3_excl_clicked();      // exclude image (take from "data")
   void on_pushButtonT3_del_clicked();       // delete  image (take from "data", add to "delData")
   void on_pushButtonT4_path_clicked();      // select output path
@@ -316,7 +362,7 @@ private slots:
   void on_pushButtonT4_write_clicked();     // write sorted batch to output folder
   void on_pushButtonT4_clean_clicked();     // remove "delData" from disk, remove empty directories
   void on_listWidgetT2_itemSelectionChanged();// update last selected item
-  void on_comboBoxt4_ref_activated(int index);// set time reference based on folder
+  void on_comboBoxT4_ref_activated(int index);// set time reference based on folder
 
 signals:
   void thumbnailRead(); // start reading the thumbnails
@@ -326,23 +372,23 @@ signals:
 private:
   Ui::MainWindow            *ui;
   QString                   workDir=QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-  size_t                    npix=200;   // size of the thumbnails (T2)
-  size_t                    idx=0;      // current photo (index in "data")
-  int                       selLast=-1; // last selected index (in T2); -1 if no last selected item
-  std::vector<size_t>       selPrev;    // previous selection  (in T2)
-  Thumbnails                *thumbnail; // class containing all thumbnails
-  std::vector<File>         data;       // array with photos + information
-  std::vector<File>         delData;    // deleted images
-  std::vector<QListWidget*> fileList;   // list with widgets to show selected files
-  std::vector<QLineEdit*>   pathView;   // list with widgets to show selected paths
-  std::vector<QPushButton*> dirSelec;   // list with widgets to select a folder
-  std::vector<QPushButton*> delSelec;   // list with widgets to remover selects files in list
-  std::vector<QPushButton*> nameSort;   // list with widgets to sort by name for that camera
-  std::list  <QString>      cleanPaths; // list with input paths (checked to clean later on)
+  size_t                    npix   = 200;// size of the thumbnails (T2)
+  size_t                    idx    = 0  ;// current photo (index in "data")
+  int                       selLast= -1 ;// last selected index (in T2); -1 if no last selected item
+  std::vector<size_t>       selPrev;     // previous selection  (in T2)
+  Thumbnails                *thumbnail;  // class containing all thumbnails
+  std::vector<File>         data;        // array with photos + information
+  std::vector<File>         delData;     // deleted images
+  std::vector<QListWidget*> fileList;    // list with widgets to show selected files
+  std::vector<QLineEdit*>   pathView;    // list with widgets to show selected paths
+  std::vector<QPushButton*> dirSelec;    // list with widgets to select a folder
+  std::vector<QPushButton*> delSelec;    // list with widgets to remover selects files in list
+  std::vector<QPushButton*> nameSort;    // list with widgets to sort by name for that camera
+  std::list  <QString>      cleanPaths;  // list with input paths (checked to clean later on)
 
-  void promptWarning (QString msg);     // pop-up warning
-  bool promptQuestion(QString msg);     // pop-up question that the user has to confirm
-  void resizeEvent(QResizeEvent*);      // actively resize the viewed image with the window
+  void promptWarning (QString msg);      // pop-up warning
+  bool promptQuestion(QString msg);      // pop-up question that the user has to confirm
+  void resizeEvent(QResizeEvent*);       // actively resize the viewed image with the window
 };
 
 #endif // MAINWINDOW_H
