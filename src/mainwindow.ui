@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -1163,6 +1163,16 @@
             </property>
             <property name="shortcut">
              <string>Backspace</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonT3_undoDel">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Undo Delete</string>
             </property>
            </widget>
           </item>

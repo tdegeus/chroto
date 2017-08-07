@@ -357,6 +357,7 @@ private slots:
   void on_pushButtonT3_last_clicked();      // set "idx  = data.size()-1"
   void on_pushButtonT3_excl_clicked();      // exclude image (take from "data")
   void on_pushButtonT3_del_clicked();       // delete  image (take from "data", add to "delData")
+  void on_pushButtonT3_undoDel_clicked();   // re-insert latex image from "delData" into "data"
   void on_pushButtonT4_path_clicked();      // select output path
   void on_lineEditT4_path_editingFinished();// manually edit output path
   void on_pushButtonT4_write_clicked();     // write sorted batch to output folder

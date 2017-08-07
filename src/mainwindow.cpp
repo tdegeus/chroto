@@ -721,12 +721,13 @@ void MainWindow::viewImage()
     return;
 
   // selectively disable/enable navigation buttons
-  ui->pushButtonT3_prev ->setEnabled(idx>0            );
-  ui->pushButtonT3_first->setEnabled(idx>0            );
-  ui->pushButtonT3_next ->setEnabled(idx<data.size()-1);
-  ui->pushButtonT3_last ->setEnabled(idx<data.size()-1);
-  ui->pushButtonT3_del  ->setEnabled(data.size()>0    );
-  ui->pushButtonT3_excl ->setEnabled(data.size()>0    );
+  ui->pushButtonT3_prev   ->setEnabled(idx>0            );
+  ui->pushButtonT3_first  ->setEnabled(idx>0            );
+  ui->pushButtonT3_next   ->setEnabled(idx<data.size()-1);
+  ui->pushButtonT3_last   ->setEnabled(idx<data.size()-1);
+  ui->pushButtonT3_undoDel->setEnabled(delData.size()>0 );
+  ui->pushButtonT3_del    ->setEnabled(data   .size()>0 );
+  ui->pushButtonT3_excl   ->setEnabled(data   .size()>0 );
 
   // clear currently viewed photos
   ui->view_idx_label->clear();
@@ -1169,9 +1170,31 @@ void MainWindow::on_pushButtonT3_excl_clicked()
 
 void MainWindow::on_pushButtonT3_del_clicked()
 {
-  if ( idx<data.size() ) {
+  if ( idx < data.size() ) {
     delData.push_back(data[idx]);
     data.erase(data.begin()+idx);
+    emit dataChanged();
+  }
+}
+
+// =================================================================================================
+
+void MainWindow::on_pushButtonT3_undoDel_clicked()
+{
+  if ( delData.size() > 0 )
+  {
+    // insert last item from "delData" in "data"; and remove from "delData"
+    data   .push_back(delData[delData.size()-1]       );
+    delData.erase    (delData.begin()+delData.size()-1);
+
+    // switch to inserted image
+    idx = data.size()-1;
+
+    // create new thumbnail, as it was removed
+    auto file = &data[idx];
+    file->ithumb = thumbnail->push_back(file->path,file->rotation);
+
+    // signal change
     emit dataChanged();
   }
 }
@@ -1420,4 +1443,5 @@ void MainWindow::clearAll()
   // emit signal to clear also all thumbnails, and empty all views
   emit dataChanged();
 }
+
 
