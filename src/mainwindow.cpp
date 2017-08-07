@@ -393,6 +393,9 @@ void MainWindow::listExcl(QListWidget *list)
 
   clearSel(list);
 
+  if ( index[index.size()-1] > 0 ) idx = index[index.size()-1]-1;
+  else                             idx = 0;
+
   emit dataChanged();
 }
 
@@ -409,6 +412,9 @@ void MainWindow::listDel(QListWidget *list)
     data.erase(data.begin()+i);
 
   clearSel(list);
+
+  if ( index[index.size()-1] > 0 ) idx = index[index.size()-1]-1;
+  else                             idx = 0;
 
   emit dataChanged();
 }
