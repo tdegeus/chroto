@@ -1057,6 +1057,9 @@
             <property name="text">
              <string>First</string>
             </property>
+            <property name="shortcut">
+             <string>Ctrl+Left</string>
+            </property>
            </widget>
           </item>
           <item>
@@ -1135,6 +1138,9 @@
             <property name="text">
              <string>Last</string>
             </property>
+            <property name="shortcut">
+             <string>Ctrl+Right</string>
+            </property>
            </widget>
           </item>
           <item>
@@ -1173,6 +1179,9 @@
             </property>
             <property name="text">
              <string>Undo Delete</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+Z</string>
             </property>
            </widget>
           </item>

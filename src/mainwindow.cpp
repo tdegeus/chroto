@@ -1449,5 +1449,3 @@ void MainWindow::clearAll()
   // emit signal to clear also all thumbnails, and empty all views
   emit dataChanged();
 }
-
-
