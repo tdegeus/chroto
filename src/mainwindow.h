@@ -4,12 +4,12 @@ class MainWindow
   This class controls everything. When the program is opened first "MainWindow::MainWindow" is run,
   then the different functions are run based on the buttons that the user clicks. The streamline
   can be understood (i) from the function directly linked to user actions
-  (e.g. "MainWindow::on_pushButtonT2i_up_clicked"); (ii) from the connections between the different
+  (e.g. "MainWindow::on_tS_pushButton_Iup_clicked"); (ii) from the connections between the different
   signals and slots (NB there are signals emitted by the Qt-widgets, but also some custom signals).
 
   This class also stores all "data". The thumbnails of the entire "data" is stored in a different
   class "thumbnail", which runs on a different processor in the background. The processes of
-  obtaining the thumbnails is restarted each time the "data" is added. "viewStream" reads from this
+  obtaining the thumbnails is restarted each time the "data" is added. "tS_view" reads from this
   separate class, and restarts reading if the reading is incomplete.
 
 class File
@@ -42,6 +42,9 @@ class Thumbnails
 #include <QThread>
 #include <QDateTime>
 #include <QListWidget>
+#include <QLabel>
+#include <QShortcut>
+#include <QTextStream>
 
 #include <iostream>
 #include <iomanip>
@@ -213,7 +216,7 @@ public:
   QString     dir       = ""   ; // directory in which the file is stored
   QString     path      = ""   ; // absolute file-path to the file
   QString     disp      = ""   ; // display name
-  size_t      folder    = 0    ; // folder-index (corresponds to "fileList")
+  size_t      folder    = 0    ; // folder-index (corresponds to "tF_listWidgets")
   size_t      camera    = 0    ; // camera-index (allows several cameras in one folder)
   int         rotation  = 0    ; // rotation in degrees
   std::time_t time_orig = 0    ; // time at which the photo was taken: no change on sort
@@ -319,51 +322,75 @@ public:
 
 private slots:
 
-  void addFiles(size_t folder);     // select folder, add all images to "data"
-  void listExcl(QListWidget*);      // exclude selected images (take from "data")
-  void listDel (QListWidget*);      // delete  selected images (take from "data", add to "delData")
-  void list2idx(QListWidget*);      // convert selected image -> "idx"
-  void clearSel(QListWidget*);      // clear selection of a list
-  void clearSelAll();               // clear selection of all lists
+  // support functions
+  void listExcl(QListWidget*); // exclude selected images (take from "data")
+  void listDel (QListWidget*); // delete  selected images (take from "data", add to "delData")
+  void list2idx(QListWidget*); // convert selected image -> "idx"
+  void clearSel(QListWidget*); // clear selection of a list
+  void clearSelAll();          // clear selection of all lists
+  void clearAll();             // reset the widget
 
-  void dataUpdate();                // update "data", "thumbnail", and relevant view
-  void dataNameSort(size_t folder); // sort photos in the folder by name (time modified)
-  void dataTimeSort();              // sort all photos by time
-  void clearAll();                  // reset the widget
+  // "data" manipulation
+  size_t data_renumCamera();        // update cameras to the smallest possible index (returns size)
+  size_t data_nCamera();            // the number of cameras in "data" (a.k.a. size)
+  void   data_update();             // update "data", "thumbnail", and relevant view
+  void   data_sortName(size_t fol); // sort photos in the folder by name (time modified)
+  void   data_sortTime();            // sort all photos by time
 
-  void viewFileList();              // T1: update listWidgets with "data"
-  void viewStream();                // T2: view images as thumbnails in stream
-  void viewImage();                 // T3: display image "idx", selectively enable buttons
-  void showDate();                  // T4: suggest date
+  // control the view and buttons in each of the tabs
+  void tF_view(); // tabFiles: update listWidgets with "data"
+  void tV_view(); // tabView : display image "idx", selectively enable buttons
+  void tS_view(); // tabSort : view images as thumbnails in stream
+  void tW_view(); // tabWrite: control write and clean buttons
 
-  void on_comboBoxT1_nfol_currentIndexChanged(int index);// change the displayed number of folders
-  void on_pushButtonT2_navTop_clicked();    // quick scroll navigation
-  void on_pushButtonT2_navBottom_clicked(); // quick scroll navigation
-  void on_pushButtonT2_navPgUp_clicked();   // quick scroll navigation
-  void on_pushButtonT2_navPgDwn_clicked();  // quick scroll navigation
-  void on_pushButtonT2i_up_clicked();       // move image(s) up
-  void on_pushButtonT2i_dwn_clicked();      // move image(s) down
-  void on_pushButtonT2i_sync_clicked();     // sync image(s)
-  void on_pushButtonT2c_up_clicked();       // move image(s) up   (apply for all images in camera)
-  void on_pushButtonT2c_dwn_clicked();      // move image(s) down (apply for all images in camera)
-  void on_pushButtonT2c_sync_clicked();     // sync image(s)      (apply for all images in camera)
-  void on_pushButtonT2f_up_clicked();       // move image(s) up   (apply for all images in folder)
-  void on_pushButtonT2f_dwn_clicked();      // move image(s) down (apply for all images in folder)
-  void on_pushButtonT2f_sync_clicked();     // sync image(s)      (apply for all images in folder)
-  void on_pushButtonT2_newCam_clicked();    // split selected images to new 'camera'
-  void on_pushButtonT3_prev_clicked();      // set "idx -= 1"
-  void on_pushButtonT3_next_clicked();      // set "idx += 1"
-  void on_pushButtonT3_first_clicked();     // set "idx  = 0"
-  void on_pushButtonT3_last_clicked();      // set "idx  = data.size()-1"
-  void on_pushButtonT3_excl_clicked();      // exclude image (take from "data")
-  void on_pushButtonT3_del_clicked();       // delete  image (take from "data", add to "delData")
-  void on_pushButtonT3_undoDel_clicked();   // re-insert latex image from "delData" into "data"
-  void on_pushButtonT4_path_clicked();      // select output path
-  void on_lineEditT4_path_editingFinished();// manually edit output path
-  void on_pushButtonT4_write_clicked();     // write sorted batch to output folder
-  void on_pushButtonT4_clean_clicked();     // remove "delData" from disk, remove empty directories
-  void on_listWidgetT2_itemSelectionChanged();// update last selected item
-  void on_comboBoxT4_ref_activated(int index);// set time reference based on folder
+  // tabFiles: change the displayed number of folders
+  void on_tF_comboBox_currentIndexChanged(int index);
+
+  // tabFiles: select folder, add all images to "data"
+  void tF_addFiles(size_t folder);
+
+  // tabView: full screen control
+  void tV_startFullScreen();
+  void tV_stopFullScreen();
+
+  // tabView: navigation / (un)delete / exclude
+  void on_tV_pushButton_prev_clicked   (); // set "idx -= 1"
+  void on_tV_pushButton_next_clicked   (); // set "idx += 1"
+  void on_tV_pushButton_first_clicked  (); // set "idx  = 0"
+  void on_tV_pushButton_last_clicked   (); // set "idx  = data.size()-1"
+  void on_tV_pushButton_excl_clicked   (); // exclude image (take from "data")
+  void on_tV_pushButton_del_clicked    (); // delete  image (take from "data", add to "delData")
+  void on_tV_pushButton_undoDel_clicked(); // re-insert latex image from "delData" into "data"
+
+  // tabSort: quick scroll navigation
+  void on_tS_pushButton_navTop_clicked   ();
+  void on_tS_pushButton_navBottom_clicked();
+  void on_tS_pushButton_navPgUp_clicked  ();
+  void on_tS_pushButton_navPgDwn_clicked ();
+
+  // tabSort: register last selected
+  void on_tS_listWidget_itemSelectionChanged();
+
+  // tabSort: sort control buttons
+  void on_tS_pushButton_Iexcl_clicked(); // exclude image(s) (take from "data")
+  void on_tS_pushButton_Idel_clicked (); // delete  image(s) (take from "data", add to "delData")
+  void on_tS_pushButton_Iup_clicked  (); // move image(s) up
+  void on_tS_pushButton_Idown_clicked(); // move image(s) down
+  void on_tS_pushButton_Isync_clicked(); // sync image(s)
+  void on_tS_pushButton_Cup_clicked  (); // move image(s) up   (apply for all images in camera)
+  void on_tS_pushButton_Cdown_clicked(); // move image(s) down (apply for all images in camera)
+  void on_tS_pushButton_Csync_clicked(); // sync image(s)      (apply for all images in camera)
+  void on_tS_pushButton_Fup_clicked  (); // move image(s) up   (apply for all images in folder)
+  void on_tS_pushButton_Fdown_clicked(); // move image(s) down (apply for all images in folder)
+  void on_tS_pushButton_Fsync_clicked(); // sync image(s)      (apply for all images in folder)
+  void on_tS_pushButton_split_clicked(); // split selected images to new 'camera'
+
+  // tabWrite
+  void on_tW_pushButton_path_clicked      (); // select output path
+  void on_tW_lineEdit_path_editingFinished(); // manually edit output path
+  void on_tW_pushButton_write_clicked     (); // write sorted batch to output folder
+  void on_tW_pushButton_clean_clicked     (); // remove "delData" from disk, remove empty folders
+  void on_tW_comboBox_activated(int index);   // set time reference based on folder
 
 signals:
   void thumbnailRead(); // start reading the thumbnails
@@ -371,25 +398,41 @@ signals:
   void indexChanged();  // "idx" has been changed (but not "data")
 
 private:
-  Ui::MainWindow            *ui;
-  QString                   workDir=QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-  size_t                    npix   = 200;// size of the thumbnails (T2)
-  size_t                    idx    = 0  ;// current photo (index in "data")
-  int                       selLast= -1 ;// last selected index (in T2); -1 if no last selected item
-  std::vector<size_t>       selPrev;     // previous selection  (in T2)
-  Thumbnails                *thumbnail;  // class containing all thumbnails
-  std::vector<File>         data;        // array with photos + information
-  std::vector<File>         delData;     // deleted images
-  std::vector<QListWidget*> fileList;    // list with widgets to show selected files
-  std::vector<QLineEdit*>   pathView;    // list with widgets to show selected paths
-  std::vector<QPushButton*> dirSelec;    // list with widgets to select a folder
-  std::vector<QPushButton*> delSelec;    // list with widgets to remover selects files in list
-  std::vector<QPushButton*> nameSort;    // list with widgets to sort by name for that camera
-  std::list  <QString>      cleanPaths;  // list with input paths (checked to clean later on)
+  // Qt variables
+  Ui::MainWindow *ui;
 
-  void promptWarning (QString msg);      // pop-up warning
-  bool promptQuestion(QString msg);      // pop-up question that the user has to confirm
-  void resizeEvent(QResizeEvent*);       // actively resize the viewed image with the window
+  // tab identifiers
+  enum tab { tabFiles = 0 , tabView = 1 , tabSort = 2 , tabWrite = 3 };
+
+  // last selected directory
+  QString workDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+
+  // state variables
+  bool   fullScreen = false ;   // true is the program is full screen
+  size_t npix       = 200   ;   // size of the thumbnails (tabView)
+  size_t idx        =   0   ;   // current photo (index in "data")
+  int    selLast    =  -1   ;   // last selected index (in tabView); -1 if no last selected item
+
+  // selected items
+  std::vector<size_t> selPrev;  // previous selection  (in tabView)
+
+  // data
+  Thumbnails        *thumbnail;  // class containing all thumbnails
+  std::vector<File>  data;       // array with photos + information
+  std::vector<File>  delData;    // deleted images
+  std::list<QString> cleanPaths; // list with input paths (checked to clean later on)
+
+  // list with widgets
+  std::vector<QListWidget*> tF_listWidgets;          // to show selected files
+  std::vector<QLineEdit*>   tF_lineEdits;            // to show selected paths
+  std::vector<QPushButton*> tF_pushButtons_select;   // to select a folder
+  std::vector<QPushButton*> tF_pushButtons_excl;     // to remover selects files in list
+  std::vector<QPushButton*> tF_pushButtons_nameSort; // to sort by name for that camera
+
+  // support functions
+  void promptWarning (QString msg); // pop-up warning
+  bool promptQuestion(QString msg); // pop-up question that the user has to confirm
+  void resizeEvent(QResizeEvent*);  // actively resize the viewed image with the window
 };
 
 #endif // MAINWINDOW_H

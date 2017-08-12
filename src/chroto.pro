@@ -13,3 +13,5 @@ SOURCES += main.cpp mainwindow.cpp ./easyexif/exif.cpp
 HEADERS += mainwindow.h ./easyexif/exif.h
 
 FORMS   += mainwindow.ui
+
+RESOURCES += qdarkstyle/style.qrc
