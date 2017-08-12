@@ -323,18 +323,19 @@ public:
 private slots:
 
   // support functions
-  void listExcl(QListWidget*); // exclude selected images (take from "data")
-  void listDel (QListWidget*); // delete  selected images (take from "data", add to "delData")
-  void list2idx(QListWidget*); // convert selected image -> "idx"
-  void clearSel(QListWidget*); // clear selection of a list
-  void clearSelAll();          // clear selection of all lists
-  void clearAll();             // reset the widget
+  void listExcl(QListWidget*,int i); // exclude selected images (take from "data")
+  void listDel (QListWidget*      ); // delete  selected images (take from "data", add to "delData")
+  void list2idx(QListWidget*      ); // convert selected image -> "idx"
+  void clearSel(QListWidget*      ); // clear selection of a list
+  void clearSelAll();                // clear selection of all lists
+  void clearAll();                   // reset the widget
 
   // "data" manipulation
-  size_t data_renumCamera();        // update cameras to the smallest possible index (returns size)
-  size_t data_nCamera();            // the number of cameras in "data" (a.k.a. size)
-  void   data_update();             // update "data", "thumbnail", and relevant view
-  void   data_sortName(size_t fol); // sort photos in the folder by name (time modified)
+  size_t data_renumCamera();         // update cameras to the smallest possible index (returns size)
+  size_t data_nCamera();             // the number of cameras in "data" (a.k.a. size)
+  size_t data_nFolder();             // the number of folder  in "data" (a.k.a. size)
+  void   data_update();              // update "data", "thumbnail", and relevant view
+  void   data_sortName(size_t fol);  // sort photos in the folder by name (time modified)
   void   data_sortTime();            // sort all photos by time
 
   // control the view and buttons in each of the tabs

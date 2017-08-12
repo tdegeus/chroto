@@ -103,9 +103,9 @@ MainWindow::MainWindow(QWidget *parent) :
   // tabFiles: select folder / remove selected files / sort by name
   for ( size_t i = 0 ; i < tF_pushButtons_select.size() ; ++i )
   {
-    connect(tF_pushButtons_select  [i],&QPushButton::clicked,[=](){ tF_addFiles  (           i  ); });
-    connect(tF_pushButtons_nameSort[i],&QPushButton::clicked,[=](){ data_sortName(           i  ); });
-    connect(tF_pushButtons_excl    [i],&QPushButton::clicked,[=](){ listExcl( tF_listWidgets[i] ); });
+    connect(tF_pushButtons_select  [i],&QPushButton::clicked,[=](){tF_addFiles  (          i   );});
+    connect(tF_pushButtons_nameSort[i],&QPushButton::clicked,[=](){data_sortName(          i   );});
+    connect(tF_pushButtons_excl    [i],&QPushButton::clicked,[=](){listExcl(tF_listWidgets[i],i);});
   }
 
   // "data" changed -> sort by time and refresh views
@@ -232,13 +232,26 @@ bool MainWindow::promptQuestion(QString msg)
 
 // =================================================================================================
 
-void MainWindow::listExcl(QListWidget *list)
+void MainWindow::listExcl(QListWidget *list, int ilist)
 {
   // get a list with selected items
   std::vector<size_t> index = selectedItems(list,false);
 
   // proceed only for non-empty lists
   if  ( index.size() <= 0 ) return;
+
+  // remove indices which are not part of the current folder
+  if ( ilist >= 0 )
+  {
+    std::vector<int> rm;
+
+    for ( int i = index.size()-1 ; i >= 0 ; --i )
+      if ( data[index[i]].folder != static_cast<size_t>( ilist ) )
+        rm.push_back(i);
+
+    for ( auto &i : rm )
+      index.erase(index.begin()+i);
+  }
 
   // exclude images: remove from data
   for ( size_t &i : index ) data.erase(data.begin()+i);
@@ -383,9 +396,20 @@ size_t MainWindow::data_nCamera()
 {
   size_t n = 0;
 
-  for ( auto &i : data ) n = std::max(n,i.camera);
+  for ( auto &i : data ) n = std::max( n , i.camera );
 
   return n + 1;
+}
+
+// =================================================================================================
+
+size_t MainWindow::data_nFolder()
+{
+  std::vector<int> v( data.size() , 0 );
+
+  for ( auto &i : data ) v[i.folder] = 1;
+
+  return std::accumulate(v.begin(), v.end(), 0);
 }
 
 // =================================================================================================
@@ -554,14 +578,14 @@ void MainWindow::tV_view()
   if ( ui->tabWidget->currentIndex() != tabView ) return;
 
   // selectively disable/enable buttons
-  ui->tV_pushButton_prev       -> setEnabled( idx > 0             );
-  ui->tV_pushButton_first      -> setEnabled( idx > 0             );
-  ui->tV_pushButton_next       -> setEnabled( idx < data.size()-1 );
-  ui->tV_pushButton_last       -> setEnabled( idx < data.size()-1 );
-  ui->tV_pushButton_undoDel    -> setEnabled( delData.size() > 0  );
-  ui->tV_pushButton_fullScreen -> setEnabled( data   .size() > 0  );
-  ui->tV_pushButton_del        -> setEnabled( data   .size() > 0  );
-  ui->tV_pushButton_excl       -> setEnabled( data   .size() > 0  );
+  ui->tV_pushButton_prev       -> setEnabled( data   .size() > 0 && idx > 0             );
+  ui->tV_pushButton_first      -> setEnabled( data   .size() > 0 && idx > 0             );
+  ui->tV_pushButton_next       -> setEnabled( data   .size() > 0 && idx < data.size()-1 );
+  ui->tV_pushButton_last       -> setEnabled( data   .size() > 0 && idx < data.size()-1 );
+  ui->tV_pushButton_undoDel    -> setEnabled( delData.size() > 0                        );
+  ui->tV_pushButton_fullScreen -> setEnabled( data   .size() > 0                        );
+  ui->tV_pushButton_del        -> setEnabled( data   .size() > 0                        );
+  ui->tV_pushButton_excl       -> setEnabled( data   .size() > 0                        );
 
   // clear currently viewed photos
   ui->tV_label->clear();
@@ -584,6 +608,21 @@ void MainWindow::tS_view(void)
 {
   // only act on correct tab
   if ( ui->tabWidget->currentIndex() != tabSort ) return;
+
+  // selective enable buttons
+  ui->tS_pushButton_refresh -> setEnabled( data.size()    > 0 );
+  ui->tS_pushButton_Idel    -> setEnabled( data.size()    > 0 );
+  ui->tS_pushButton_Iexcl   -> setEnabled( data.size()    > 0 );
+  ui->tS_pushButton_Iup     -> setEnabled( data.size()    > 1 );
+  ui->tS_pushButton_Idown   -> setEnabled( data.size()    > 1 );
+  ui->tS_pushButton_Isync   -> setEnabled( data.size()    > 1 );
+  ui->tS_pushButton_split   -> setEnabled( data.size()    > 1 );
+  ui->tS_pushButton_Cup     -> setEnabled( data_nCamera() > 1 );
+  ui->tS_pushButton_Cdown   -> setEnabled( data_nCamera() > 1 );
+  ui->tS_pushButton_Csync   -> setEnabled( data_nCamera() > 1 );
+  ui->tS_pushButton_Fup     -> setEnabled( data_nFolder() > 1 );
+  ui->tS_pushButton_Fdown   -> setEnabled( data_nFolder() > 1 );
+  ui->tS_pushButton_Fsync   -> setEnabled( data_nFolder() > 1 );
 
   // list with selected rows
   std::vector<size_t> old = selectedItems(ui->tS_listWidget);
@@ -1073,7 +1112,7 @@ void MainWindow::on_tS_pushButton_Iexcl_clicked()
   if ( ui->tabWidget->currentIndex() != tabSort ) return;
   if ( data.size() == 0 ) return;
 
-  listExcl(ui->tS_listWidget);
+  listExcl(ui->tS_listWidget,-1);
 }
 
 // =================================================================================================
