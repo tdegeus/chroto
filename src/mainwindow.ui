@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -49,6 +49,9 @@
           </item>
           <item>
            <widget class="QComboBox" name="tF_comboBox">
+            <property name="toolTip">
+             <string>Set number of folders</string>
+            </property>
             <property name="currentText">
              <string>1</string>
             </property>
@@ -176,7 +179,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_0">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -186,7 +189,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_0">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -233,7 +236,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_1">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -243,7 +246,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_1">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -284,7 +287,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_2">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -294,7 +297,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_2">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -335,7 +338,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_3">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -345,7 +348,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_3">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -386,7 +389,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_4">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -396,7 +399,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_4">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -437,7 +440,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_5">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -447,7 +450,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_5">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -488,7 +491,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_6">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -498,7 +501,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_6">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -539,7 +542,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_7">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -549,7 +552,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_7">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -590,7 +593,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_8">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -600,7 +603,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_8">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -641,7 +644,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_9">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -651,7 +654,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_9">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -692,7 +695,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_10">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -702,7 +705,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_10">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -743,7 +746,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_11">
                 <property name="toolTip">
-                 <string>Remove selected photos (originals are not removed from disk)</string>
+                 <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
                 <property name="text">
                  <string>Exclude selection</string>
@@ -753,7 +756,7 @@
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_11">
                 <property name="toolTip">
-                 <string>Sort by name rather than by time captured (useful when the list of photos has previously been sorted without modification of the exif data)</string>
+                 <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
@@ -800,7 +803,10 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>View previous image [left arrow]</string>
+             <string>View previous photo [Left arrow]</string>
+            </property>
+            <property name="statusTip">
+             <string/>
             </property>
             <property name="text">
              <string>Previous</string>
@@ -813,7 +819,7 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>Jump to first image</string>
+             <string>Jump to first photo [Crtl + Up]</string>
             </property>
             <property name="text">
              <string>First</string>
@@ -840,6 +846,9 @@
            <widget class="QPushButton" name="tV_pushButton_fullScreen">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>View in full-screen [Ctrl + Shift + F]</string>
             </property>
             <property name="text">
              <string>Full screen</string>
@@ -868,7 +877,7 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>Exclude image from sorting, never delete from disk (also not on pressing &quot;clean-up&quot;)</string>
+             <string>Exclude photo from sorting (photo not removed from disk) [E]</string>
             </property>
             <property name="text">
              <string>Exclude</string>
@@ -881,7 +890,7 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>Delete image (not deleted from disk) [del]</string>
+             <string>Delete photo (not deleted from disk until &quot;clean-up&quot; is pressed) [Delete | Backspace | D]</string>
             </property>
             <property name="text">
              <string>Delete</string>
@@ -892,6 +901,9 @@
            <widget class="QPushButton" name="tV_pushButton_undoDel">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Re-insert last deleted photo [Ctrl + Z]</string>
             </property>
             <property name="text">
              <string>Undo Last Delete</string>
@@ -917,7 +929,7 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>Jump to last image</string>
+             <string>Jump to first photo [Crtl + Down]</string>
             </property>
             <property name="text">
              <string>Last</string>
@@ -933,7 +945,7 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>View next image [right arrow]</string>
+             <string>View next photo [Right arrow | Space]</string>
             </property>
             <property name="text">
              <string>Next</string>
@@ -960,6 +972,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Iup">
+            <property name="toolTip">
+             <string>Move selected photo(s) up (changes the camera stream, try to avoid this until the last moment)</string>
+            </property>
             <property name="text">
              <string>Earlier (up)</string>
             </property>
@@ -967,6 +982,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Isync">
+            <property name="toolTip">
+             <string>Sync selected photo(s) with the last selected photo (changes the camera stream, try to avoid this until the last moment)</string>
+            </property>
             <property name="text">
              <string>Sync</string>
             </property>
@@ -974,6 +992,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Idown">
+            <property name="toolTip">
+             <string>Move selected photo(s) down (changes the camera stream, try to avoid this until the last moment)</string>
+            </property>
             <property name="text">
              <string>Later (down)</string>
             </property>
@@ -1008,6 +1029,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_refresh">
+            <property name="toolTip">
+             <string>Refresh thumbnails (reading might take a while) [Ctrl + R]</string>
+            </property>
             <property name="text">
              <string>Refresh</string>
             </property>
@@ -1025,6 +1049,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_split">
+            <property name="toolTip">
+             <string>Move selected photo(s) to separate camera</string>
+            </property>
             <property name="text">
              <string>Split set</string>
             </property>
@@ -1039,6 +1066,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Iexcl">
+            <property name="toolTip">
+             <string>Exclude selected photo(s) from sorting (photo(s) not removed from disk) [E]</string>
+            </property>
             <property name="text">
              <string>Exclude</string>
             </property>
@@ -1046,6 +1076,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Idel">
+            <property name="toolTip">
+             <string>Delete selected photo(s) (not deleted from disk until &quot;clean-up&quot; is pressed) [Delete | Backspace | D]</string>
+            </property>
             <property name="text">
              <string>Delete</string>
             </property>
@@ -1071,6 +1104,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Cup">
+            <property name="toolTip">
+             <string>Move selected photo(s) + all other photos of that camera up</string>
+            </property>
             <property name="text">
              <string>Earlier (up)</string>
             </property>
@@ -1078,6 +1114,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Csync">
+            <property name="toolTip">
+             <string>Sync selected photo(s) + all other photos of that camera with the last selected photo</string>
+            </property>
             <property name="text">
              <string>Sync</string>
             </property>
@@ -1085,6 +1124,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Cdown">
+            <property name="toolTip">
+             <string>Move selected photo(s) + all other photos of that camera down</string>
+            </property>
             <property name="text">
              <string>Later (down)</string>
             </property>
@@ -1106,6 +1148,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Fup">
+            <property name="toolTip">
+             <string>Move selected photo(s) + all other photos of that folder up</string>
+            </property>
             <property name="text">
              <string>Earlier (up)</string>
             </property>
@@ -1113,6 +1158,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Fsync">
+            <property name="toolTip">
+             <string>Sync selected photo(s) + all other photos of that folder with the last selected photo</string>
+            </property>
             <property name="text">
              <string>Sync</string>
             </property>
@@ -1120,6 +1168,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_Fdown">
+            <property name="toolTip">
+             <string>Move selected photo(s) + all other photos of that folder down</string>
+            </property>
             <property name="text">
              <string>Later (down)</string>
             </property>
@@ -1154,6 +1205,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_navTop">
+            <property name="toolTip">
+             <string>Scroll to top of the list</string>
+            </property>
             <property name="text">
              <string>Top</string>
             </property>
@@ -1164,6 +1218,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_navPgUp">
+            <property name="toolTip">
+             <string>Scroll page up</string>
+            </property>
             <property name="text">
              <string>Page Up</string>
             </property>
@@ -1174,6 +1231,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_navPgDwn">
+            <property name="toolTip">
+             <string>Scroll page down</string>
+            </property>
             <property name="text">
              <string>Page Down</string>
             </property>
@@ -1184,6 +1244,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tS_pushButton_navBottom">
+            <property name="toolTip">
+             <string>Scroll to bottom of the list</string>
+            </property>
             <property name="text">
              <string>Bottom</string>
             </property>
@@ -1224,7 +1287,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QComboBox" name="tW_comboBox"/>
+           <widget class="QComboBox" name="tW_comboBox">
+            <property name="toolTip">
+             <string>Select folder to use as time reference. This can fix the absolute time to the (most) correct value, to simplify future sorts with this set</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label">
@@ -1237,6 +1304,9 @@
            <widget class="QLineEdit" name="tW_lineEdit_date">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Earliest date/time found in set (may not be correct, depending on the camera settings)</string>
             </property>
             <property name="readOnly">
              <bool>true</bool>
@@ -1260,6 +1330,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="tW_pushButton_path">
+          <property name="toolTip">
+           <string>Select folder to store the sorted set</string>
+          </property>
           <property name="text">
            <string>Select output folder</string>
           </property>
@@ -1287,7 +1360,7 @@
           <item>
            <widget class="QLineEdit" name="tW_lineEdit_name">
             <property name="toolTip">
-             <string>Format used to write selected and sorted photos</string>
+             <string>Name of the output photos (number is added to the end)</string>
             </property>
             <property name="text">
              <string>sorted</string>
@@ -1323,7 +1396,7 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>Write selected and sorted photos to output directory</string>
+             <string>Write photos to the output directory</string>
             </property>
             <property name="text">
              <string>Write</string>
@@ -1333,7 +1406,7 @@
           <item>
            <widget class="QPushButton" name="tW_pushButton_clean">
             <property name="toolTip">
-             <string>Remove all 'deleted' files from disk</string>
+             <string>Remove all 'deleted' photos from disk (and remove empty directories)</string>
             </property>
             <property name="text">
              <string>Clean-up</string>
@@ -1345,7 +1418,7 @@
         <item>
          <widget class="QCheckBox" name="tW_checkBox_keepOrig">
           <property name="toolTip">
-           <string>Keep originals (if not ticked the selected photos are moved to the output directory, all other files are left untouched)</string>
+           <string>Keep originals (if not ticked the selected photo(s) are moved to the output directory, all other file-types are left untouched)</string>
           </property>
           <property name="text">
            <string>Keep orginals</string>

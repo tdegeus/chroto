@@ -144,32 +144,39 @@ MainWindow::MainWindow(QWidget *parent) :
   // set shortcuts
   // - define
   QShortcut *short_esc   = new QShortcut(QKeySequence(Qt::Key_Escape                  ), this);
-  QShortcut *short_right = new QShortcut(QKeySequence(Qt::Key_Right                   ), this);
+  QShortcut *short_next1 = new QShortcut(QKeySequence(Qt::Key_Right                   ), this);
+  QShortcut *short_next2 = new QShortcut(QKeySequence(Qt::Key_Space                   ), this);
   QShortcut *short_left  = new QShortcut(QKeySequence(Qt::Key_Left                    ), this);
   QShortcut *short_excl  = new QShortcut(QKeySequence(Qt::Key_E                       ), this);
   QShortcut *short_del1  = new QShortcut(QKeySequence(Qt::Key_Delete                  ), this);
   QShortcut *short_del2  = new QShortcut(QKeySequence(Qt::Key_Backspace               ), this);
+  QShortcut *short_del3  = new QShortcut(QKeySequence(Qt::Key_D                       ), this);
   QShortcut *short_undo  = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z            ), this);
   QShortcut *short_full  = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_F), this);
   // - enable in full screen
   short_esc  ->setContext(Qt::ApplicationShortcut);
-  short_right->setContext(Qt::ApplicationShortcut);
+  short_next1->setContext(Qt::ApplicationShortcut);
+  short_next2->setContext(Qt::ApplicationShortcut);
   short_left ->setContext(Qt::ApplicationShortcut);
   short_excl ->setContext(Qt::ApplicationShortcut);
   short_del1 ->setContext(Qt::ApplicationShortcut);
   short_del2 ->setContext(Qt::ApplicationShortcut);
+  short_del3 ->setContext(Qt::ApplicationShortcut);
   short_undo ->setContext(Qt::ApplicationShortcut);
   // - connect shortcuts
   connect(short_esc  , SIGNAL( activated() ), this, SLOT( tV_stopFullScreen                () ));
   connect(short_full , SIGNAL( activated() ), this, SLOT( tV_startFullScreen               () ));
-  connect(short_right, SIGNAL( activated() ), this, SLOT( on_tV_pushButton_next_clicked    () ));
+  connect(short_next1, SIGNAL( activated() ), this, SLOT( on_tV_pushButton_next_clicked    () ));
+  connect(short_next2, SIGNAL( activated() ), this, SLOT( on_tV_pushButton_next_clicked    () ));
   connect(short_left , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_prev_clicked    () ));
   connect(short_excl , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_excl_clicked    () ));
   connect(short_excl , SIGNAL( activated() ), this, SLOT( on_tS_pushButton_Iexcl_clicked   () ));
   connect(short_del1 , SIGNAL( activated() ), this, SLOT( on_tS_pushButton_Idel_clicked    () ));
   connect(short_del2 , SIGNAL( activated() ), this, SLOT( on_tS_pushButton_Idel_clicked    () ));
+  connect(short_del3 , SIGNAL( activated() ), this, SLOT( on_tS_pushButton_Idel_clicked    () ));
   connect(short_del1 , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_del_clicked     () ));
   connect(short_del2 , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_del_clicked     () ));
+  connect(short_del3 , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_del_clicked     () ));
   connect(short_undo , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_undoDel_clicked () ));
 
   // enforce opening on correct tab
@@ -646,10 +653,21 @@ void MainWindow::tS_view(void)
   size_t n = data_nCamera();
 
   // create a colormap
-  std::vector<int> cmap = cppcolormap::Set1(n);
   std::vector<QColor> col;
-  for ( size_t i = 0 ; i < n ; ++i )
-    col.push_back( QColor( cmap[i*3+0], cmap[i*3+1], cmap[i*3+2] ) );
+  // - manually set first five colors
+  col.push_back( QColor(  72,   8 ,   7 ) );
+  col.push_back( QColor(  24,  63 ,  63 ) );
+  col.push_back( QColor(  22,  64 , 124 ) );
+  col.push_back( QColor(  68,  47 ,  35 ) );
+  col.push_back( QColor( 100, 100 , 100 ) );
+  col.push_back( QColor(  92,  92 , 134 ) );
+  // - automatically add more colors
+  if ( n > 6 )
+  {
+    std::vector<int> cmap = cppcolormap::Set1(n-6);
+    for ( size_t i = 0 ; i < n-6 ; ++i )
+      col.push_back( QColor( cmap[i*3+0], cmap[i*3+1], cmap[i*3+2] ) );
+  }
 
   // define style of the widget
   ui->tS_listWidget->setIconSize(QSize(npix,npix));
@@ -659,8 +677,9 @@ void MainWindow::tS_view(void)
     ui->tS_listWidget->addItem(new QListWidgetItem(thumbnail->at(i.ithumb),i.disp));
 
   // set background color, corresponding to the camera index
-  for ( size_t i = 0 ; i < data.size() ; ++i )
-    ui->tS_listWidget->item(i)->setBackground(QBrush(col[data[i].camera]));
+  if ( n > 1 )
+    for ( size_t i = 0 ; i < data.size() ; ++i )
+      ui->tS_listWidget->item(i)->setBackground(QBrush(col[data[i].camera]));
 
   // restore selection
   // - clear entire selection
@@ -881,6 +900,8 @@ void MainWindow::tV_startFullScreen()
   ui->tV_label->setWindowFlags(ui->tV_label->windowFlags() | Qt::Window);
   ui->tV_label->showFullScreen();
 
+  QApplication::setOverrideCursor(Qt::BlankCursor);
+
   emit indexChanged();
 }
 
@@ -897,6 +918,8 @@ void MainWindow::tV_stopFullScreen()
   ui->tV_pushButton_fullScreen->setText("Full screen");
   ui->tV_label->setWindowFlags(ui->tV_label->windowFlags() & ~Qt::Window);
   ui->tV_label->show();
+
+  QApplication::setOverrideCursor(Qt::ArrowCursor);
 
   emit indexChanged();
 }
