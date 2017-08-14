@@ -874,11 +874,11 @@ void MainWindow::tF_addFiles(size_t folder)
   }
 
   // set the thumbnail size based on the size of "data"
-  if      ( data.size() <   100 ) { npix = 256; thumbnail->setSize(64); }
-  if      ( data.size() <   200 ) { npix = 128; thumbnail->setSize(32); }
-  else if ( data.size() <   500 ) { npix =  64; thumbnail->setSize(32); }
-  else if ( data.size() <  2000 ) { npix =  32; thumbnail->setSize(16); }
-  else                            { npix =  16; thumbnail->setSize(16); }
+  if      ( data.size() <   100 ) { npix = 256; thumbnail->setResolution(64); }
+  if      ( data.size() <   200 ) { npix = 128; thumbnail->setResolution(32); }
+  else if ( data.size() <   500 ) { npix =  64; thumbnail->setResolution(32); }
+  else if ( data.size() <  2000 ) { npix =  32; thumbnail->setResolution(16); }
+  else                            { npix =  16; thumbnail->setResolution(16); }
 
   // enforce view the first photo
   idx = 0;

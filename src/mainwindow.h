@@ -147,8 +147,10 @@ public:
   }
 
   // overwrite the size of the thumbnails
-  void setSize( size_t N )
+  void setResolution( size_t N )
   {
+    // - check if the resolution is different
+    if ( N == npix ) return;
     // - stop the current read
     stop = true;
     // - overwrite number of pixels in both directions
