@@ -75,7 +75,7 @@ private:
   std::vector<int>     isread;
   bool                 busy = false;
   bool                 stop = false;
-  size_t               npix = 50;
+  size_t               npix = 32;
 
 public:
 
@@ -143,7 +143,7 @@ public:
     while ( rotation.size()>0 ) rotation.erase(rotation.begin());
 
     busy = false;
-    npix = 50;
+    npix = 32;
   }
 
   // overwrite the size of the thumbnails
@@ -410,7 +410,7 @@ private:
 
   // state variables
   bool   fullScreen = false ;   // true is the program is full screen
-  size_t npix       = 200   ;   // size of the thumbnails (tabView)
+  size_t npix       =  64   ;   // size of the thumbnails (tabView)
   size_t idx        =   0   ;   // current photo (index in "data")
   int    selLast    =  -1   ;   // last selected index (in tabView); -1 if no last selected item
 
