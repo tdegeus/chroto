@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>954</width>
-    <height>585</height>
+    <width>856</width>
+    <height>675</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,120 +18,13 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
         <string>1. Select photos</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_12">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Number of camera's</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="tF_comboBox">
-            <property name="toolTip">
-             <string>Set number of folders</string>
-            </property>
-            <property name="currentText">
-             <string>1</string>
-            </property>
-            <item>
-             <property name="text">
-              <string>1</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>2</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>3</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>4</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>5</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>6</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>7</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>8</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>9</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>10</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>11</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>12</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </item>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
          <widget class="QScrollArea" name="scrollArea">
           <property name="widgetResizable">
@@ -143,7 +36,7 @@
              <x>0</x>
              <y>0</y>
              <width>1910</width>
-             <height>412</height>
+             <height>538</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -161,13 +54,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_0">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_0">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_0">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -178,6 +90,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_0">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -188,6 +103,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_0">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -202,6 +120,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_2">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -212,13 +133,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_1">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -235,6 +175,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -245,6 +188,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -259,6 +205,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_7">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -269,13 +218,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_2">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -286,6 +254,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -296,6 +267,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -310,6 +284,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_8">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -320,13 +297,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_3">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -337,6 +333,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -347,6 +346,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -361,6 +363,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_9">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -371,13 +376,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_4">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -388,6 +412,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -398,6 +425,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -412,6 +442,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_10">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -422,13 +455,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_5">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -439,6 +491,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -449,6 +504,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -463,6 +521,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_11">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -473,13 +534,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_6">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -490,6 +570,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -500,6 +583,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -514,6 +600,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_13">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -524,13 +613,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_7">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -541,6 +649,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -551,6 +662,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -565,6 +679,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_14">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -575,13 +692,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_8">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -592,6 +728,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -602,6 +741,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -616,6 +758,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_15">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -626,13 +771,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_9">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -643,6 +807,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -653,6 +820,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -667,6 +837,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_16">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -677,13 +850,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_10">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -694,6 +886,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -704,6 +899,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -718,6 +916,9 @@
              <layout class="QVBoxLayout" name="verticalLayout_17">
               <item>
                <widget class="QPushButton" name="tF_pushButton_select_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Select a folder containing one set of photos</string>
                 </property>
@@ -728,13 +929,32 @@
               </item>
               <item>
                <widget class="QLineEdit" name="tF_lineEdit_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Path of the selected folder</string>
+                </property>
+                <property name="readOnly">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="tF_label_N_11">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
               <item>
                <widget class="QListWidget" name="tF_listWidget_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Photos in set</string>
                 </property>
@@ -745,6 +965,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_excl_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Exclude selected photo(s) (originals are not removed from disk)</string>
                 </property>
@@ -755,6 +978,9 @@
               </item>
               <item>
                <widget class="QPushButton" name="tF_pushButton_nameSort_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="toolTip">
                  <string>Sort photos in this folder by name rather than by time (useful when the list of photos has previously been sorted without modification of the EXIF data)</string>
                 </property>
@@ -776,6 +1002,60 @@
         <string>2. View</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="tV_label_index">
+            <property name="text">
+             <string>0/0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="tV_label_time">
+            <property name="text">
+             <string>time taken</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="tV_label_folder">
+            <property name="text">
+             <string>path</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
         <item>
          <widget class="QLabel" name="tV_label">
           <property name="sizePolicy">
@@ -1449,7 +1729,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>954</width>
+     <width>856</width>
      <height>22</height>
     </rect>
    </property>

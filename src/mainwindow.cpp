@@ -1,9 +1,7 @@
 /*
-See "mainwindow.h" to get an overview of the program, and a sense where what is. Another way to get
-an overview is to use Qt Creator on "mainwindow.ui". The latter can also be used to investigate some
-of the signals and slots.
+See notes in "mainwindow.h"
 
-(c) T.W.J. de Geus | tom@geus.me | www.geus.me | github.com/tdegeus/chroto
+(c - GPLv3) T.W.J. de Geus | tom@geus.me | www.geus.me | github.com/tdegeus/chroto
 */
 
 #include "mainwindow.h"
@@ -19,125 +17,156 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->setupUi(this);
 
   // class to read/store list of thumbnails; assign to worker-thread
-  thumbnail = new Thumbnails;
-  thumbnail->moveToThread(&workerThread);
+  m_thumnails = new Thumbnails;
+  m_thumnails->moveToThread(&workerThread);
   // list of thumbnails is deleted only when the worker-thread is deleted (in destructor below)
-  connect(&workerThread,&QThread::finished,thumbnail,&QObject::deleteLater);
+  connect(&workerThread,&QThread::finished,m_thumnails,&QObject::deleteLater);
 
-  // tabFiles: fill arrays collecting the file-lists and related buttons
-  tF_listWidgets         .push_back( ui->tF_listWidget_0          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_1          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_2          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_3          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_4          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_5          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_6          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_7          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_8          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_9          );
-  tF_listWidgets         .push_back( ui->tF_listWidget_10         );
-  tF_listWidgets         .push_back( ui->tF_listWidget_11         );
-  // --
-  tF_lineEdits           .push_back( ui->tF_lineEdit_0            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_1            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_2            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_3            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_4            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_5            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_6            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_7            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_8            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_9            );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_10           );
-  tF_lineEdits           .push_back( ui->tF_lineEdit_11           );
-  // --
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_0   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_1   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_2   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_3   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_4   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_5   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_6   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_7   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_8   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_9   );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_10  );
-  tF_pushButtons_select  .push_back( ui->tF_pushButton_select_11  );
-  // --
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_0     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_1     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_2     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_3     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_4     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_5     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_6     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_7     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_8     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_9     );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_10    );
-  tF_pushButtons_excl    .push_back( ui->tF_pushButton_excl_11    );
-  // --
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_0 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_1 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_2 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_3 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_4 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_5 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_6 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_7 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_8 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_9 );
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_10);
-  tF_pushButtons_nameSort.push_back( ui->tF_pushButton_nameSort_11);
+  // set basic colormap
+  m_col.push_back( QColor(  72,   8,   7 ) );
+  m_col.push_back( QColor( 109,   1,  78 ) );
+  m_col.push_back( QColor( 136,  14,   0 ) );
+  m_col.push_back( QColor( 124,  96,   0 ) );
+  m_col.push_back( QColor(   8,  89,   8 ) );
+  m_col.push_back( QColor(  24,  63,  63 ) );
+  m_col.push_back( QColor(  29,  29,  29 ) );
+  m_col.push_back( QColor(  22,  64 ,124 ) );
+  m_col.push_back( QColor(   8,   0,  79 ) );
+  m_col.push_back( QColor(  92,  92, 134 ) );
+  m_col.push_back( QColor(  68,  47,  35 ) );
+  m_col.push_back( QColor( 100, 100, 100 ) );
 
-  // tabFiles: link scroll position listWidgets
-  for ( auto &i: tF_listWidgets )
-    for ( auto &j: tF_listWidgets )
+  // Tab::Files : fill arrays collecting the file-lists and related buttons
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_0          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_1          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_2          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_3          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_4          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_5          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_6          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_7          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_8          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_9          );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_10         );
+  m_tF_listWidgets         .push_back(ui->tF_listWidget_11         );
+  // --
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_0            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_1            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_2            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_3            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_4            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_5            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_6            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_7            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_8            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_9            );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_10           );
+  m_tF_lineEdits           .push_back(ui->tF_lineEdit_11           );
+  // --
+  m_tF_labels_N            .push_back(ui->tF_label_N_0             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_1             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_2             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_3             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_4             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_5             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_6             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_7             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_8             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_9             );
+  m_tF_labels_N            .push_back(ui->tF_label_N_10            );
+  m_tF_labels_N            .push_back(ui->tF_label_N_11            );
+  // --
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_0   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_1   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_2   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_3   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_4   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_5   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_6   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_7   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_8   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_9   );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_10  );
+  m_tF_pushButtons_select  .push_back(ui->tF_pushButton_select_11  );
+  // --
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_0     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_1     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_2     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_3     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_4     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_5     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_6     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_7     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_8     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_9     );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_10    );
+  m_tF_pushButtons_excl    .push_back(ui->tF_pushButton_excl_11    );
+  // --
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_0 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_1 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_2 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_3 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_4 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_5 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_6 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_7 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_8 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_9 );
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_10);
+  m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_11);
+
+  // Tab::Files : link scroll position listWidgets
+  for ( auto &i: m_tF_listWidgets )
+    for ( auto &j: m_tF_listWidgets )
       if ( i!=j )
         connect(i->verticalScrollBar(),SIGNAL(valueChanged(int)),
                 j->verticalScrollBar(),SLOT  (setValue    (int)));
 
-  // tabView: center image
+  // Tab::View : center image
   ui->tV_label->setAlignment(Qt::AlignCenter);
 
-  // tabFiles: select folder / remove selected files / sort by name
-  for ( size_t i = 0 ; i < tF_pushButtons_select.size() ; ++i )
+  // Tab::Files : select folder / remove selected files / sort by name / sync selection
+  for ( size_t i = 0 ; i < m_tF_pushButtons_select.size() ; ++i )
   {
-    connect(tF_pushButtons_select  [i],&QPushButton::clicked,[=](){tF_addFiles  (          i   );});
-    connect(tF_pushButtons_nameSort[i],&QPushButton::clicked,[=](){data_sortName(          i   );});
-    connect(tF_pushButtons_excl    [i],&QPushButton::clicked,[=](){listExcl(tF_listWidgets[i],i);});
+    connect( m_tF_pushButtons_select  [i], &QPushButton::clicked, [=](){ tF_addFiles  (i); } );
+    connect( m_tF_pushButtons_nameSort[i], &QPushButton::clicked, [=](){ tF_nameSort  (i); } );
+    connect( m_tF_pushButtons_excl    [i], &QPushButton::clicked, [=](){ tF_excludeSel(i); } );
+    connect( m_tF_listWidgets[i], &QListWidget::itemSelectionChanged, [=](){tF_unifySelection(i);});
   }
 
-  // "data" changed -> sort by time and refresh views
-  connect( this     , SIGNAL( dataChanged  () ), this      , SLOT( data_update() ) );
+  // "m_data" changed -> sort by time and refresh view in relevant tab
+  connect( this, SIGNAL( dataChanged() ), this, SLOT( dataUpdate() ) );
 
-  // "read" thumbnails, update "data" / refresh views when reading is completed
-  connect( this     , SIGNAL( thumbnailRead() ), thumbnail , SLOT( read       () ) );
-  connect( thumbnail, SIGNAL( completed    () ), this      , SLOT( data_update() ) );
+  // Tab::Sort : "read" thumbnails, update "m_data" / refresh thumbnails
+  connect( this       , SIGNAL( thumbnailRead() ), m_thumnails , SLOT( read      () ) );
+  connect( m_thumnails, SIGNAL( completed    () ), this        , SLOT( dataUpdate() ) );
 
-  // tab changed: update "data" and views to latest values, clear selected items
-  connect( ui->tabWidget, &QTabWidget::currentChanged, [=](){ clearSelAll (); } );
-  connect( ui->tabWidget, &QTabWidget::currentChanged, [=](){ data_update (); } );
-
-  // tabView: "idx" changed -> update view
-  connect( this, SIGNAL( indexChanged() ), this, SLOT( tV_view() ) );
-
-  // tabFiles: convert selected item to current index
-  for ( auto &i: tF_listWidgets ) connect(i,&QListWidget::itemSelectionChanged,[=](){list2idx(i);});
-
-  // tabSort: convert selected item to current index
-  connect( ui->tS_listWidget,&QListWidget::itemSelectionChanged,[=](){list2idx(ui->tS_listWidget);});
-
-  // tabSort: manually refresh view to show the latest thumbnails
+  // Tab::Sort : manually refresh view to show the latest thumbnails
   connect( ui->tS_pushButton_refresh, SIGNAL( clicked(bool) ), SLOT( tS_view() ) );
 
-  // tabWrite: couple "outPath" pushButton to "outPath" lineEdit
+  // tab changed: show introduction, clear existing selection, process "m_data" (see above)
+  connect( ui->tabWidget, &QTabWidget::currentChanged, [=](){ instruction       (); } );
+  connect( ui->tabWidget, &QTabWidget::currentChanged, [=](){ selectionClearAll (); } );
+  connect( ui->tabWidget, &QTabWidget::currentChanged, [=](){ dataUpdate        (); } );
+
+  // Tab::View : "m_idx" or full-screen changed -> update view
+  connect( this, SIGNAL( indexChanged() ), this, SLOT( tV_view() ) );
+
+  // Tab::Files : convert selected item to current index
+  for ( auto &i: m_tF_listWidgets )
+    connect(i,&QListWidget::itemSelectionChanged,[=](){selection2idx(i);});
+
+  // Tab::Sort : convert selected item to current index
+  connect( ui->tS_listWidget, &QListWidget::itemSelectionChanged,
+    [=](){selection2idx(ui->tS_listWidget);});
+
+  // Tab::Write : couple "outPath" pushButton to "outPath" lineEdit
   connect( ui->tW_pushButton_path,SIGNAL(clicked(bool)),SLOT(on_tW_lineEdit_path_editingFinished()));
 
-  // start fresh: clear all data and widgets
-  connect( ui->actionNew, SIGNAL( triggered(bool) ), this, SLOT( clearAll() ) );
+  // start fresh: clear "m_data", "m_dataDel", and widgets; set default values for state-variables
+  connect( ui->actionNew, &QAction::triggered, [=](){ resetApp(true); } );
 
-  // connect full screen button
+  // Tab::View : connect full screen button
   connect( ui->tV_pushButton_fullScreen, SIGNAL( clicked(bool) ), SLOT( tV_stopFullScreen () ) );
   connect( ui->tV_pushButton_fullScreen, SIGNAL( clicked(bool) ), SLOT( tV_startFullScreen() ) );
 
@@ -179,13 +208,10 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(short_del3 , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_del_clicked     () ));
   connect(short_undo , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_undoDel_clicked () ));
 
-  // enforce opening on correct tab
-  ui->tabWidget->setCurrentIndex( tabFiles );
+  // initialize clear application
+  resetApp();
 
-  // tabFiles: set number of folders (==2)
-  ui->tF_comboBox->setCurrentIndex(1);
-
-  // start worker-thread (to which "thumbnail" is assigned)
+  // start worker-thread (to which "m_thumnails" is assigned)
   workerThread.start();
 
   // set style, due to : "https://github.com/ColinDuquesnoy/QDarkStyleSheet"
@@ -239,306 +265,230 @@ bool MainWindow::promptQuestion(QString msg)
 
 // =================================================================================================
 
-void MainWindow::listExcl(QListWidget *list, int ilist)
-{
-  // get a list with selected items
-  std::vector<size_t> index = selectedItems(list,false);
-
-  // proceed only for non-empty lists
-  if  ( index.size() <= 0 ) return;
-
-  // remove indices which are not part of the current folder
-  if ( ilist >= 0 )
-  {
-    std::vector<int> rm;
-
-    for ( int i = index.size()-1 ; i >= 0 ; --i )
-      if ( data[index[i]].folder != static_cast<size_t>( ilist ) )
-        rm.push_back(i);
-
-    for ( auto &i : rm )
-      index.erase(index.begin()+i);
-  }
-
-  // exclude images: remove from data
-  for ( size_t &i : index ) data.erase(data.begin()+i);
-
-  // empty selecting
-  clearSel(list);
-
-  // set number current item (TODO: might need revision)
-  if ( index[index.size()-1] > 0 ) idx = index[index.size()-1]-1;
-  else                             idx = 0;
-
-  // signal to process change
-  emit dataChanged();
-}
-
-// =================================================================================================
-
-void MainWindow::listDel(QListWidget *list)
-{
-  // get a list with selected items
-  std::vector<size_t> index = selectedItems(list,false);
-
-  // proceed only for non-empty lists
-  if  ( index.size() <= 0 ) return;
-
-  // delete images: add to "delData" (removal when 'clean up' is pressed)
-  for ( size_t &i : index ) delData.push_back(data[i]);
-  // delete images: remove from "data"
-  for ( size_t &i : index ) data.erase(data.begin()+i);
-
-  // empty selecting
-  clearSel(list);
-
-  // set number current item (TODO: might need revision)
-  if ( index[index.size()-1] > 0 ) idx = index[index.size()-1]-1;
-  else                             idx = 0;
-
-  // signal to process change
-  emit dataChanged();
-}
-
-// =================================================================================================
-
-void MainWindow::list2idx(QListWidget *list)
+void MainWindow::selection2idx(QListWidget *list)
 {
   // get a list with selected items
   std::vector<size_t> sel = selectedItems(list);
 
-  // new current item: default equal to "idx", try to change below
-  size_t jdx = idx;
+  // new "idx": default equal to "m_idx", try to change below
+  size_t idx = m_idx;
 
-  // new current item: take from selection
-  if ( sel.size() > 0     ) jdx = sel[0];
-  // new current item: fix possible out-of-bound
-  if ( jdx >= data.size() ) jdx = data.size()-1;
+  // try to take from selection
+  if ( sel.size() > 0       ) idx = sel[0];
+  // fix possible out-of-bounds
+  if ( idx >= m_data.size() ) idx = m_data.size()-1;
 
-  // if needed, change current item
-  if ( jdx != idx )
-  {
-    idx = jdx;
-    emit indexChanged();
-  }
+  // no change: do nothing
+  if ( idx == m_idx ) return;
+
+  // change current item
+  m_idx = idx;
+
+  // emit signal to process the change
+  emit indexChanged();
 }
 
 // =================================================================================================
 
-void MainWindow::clearSel(QListWidget *list)
+void MainWindow::selectionClear(QListWidget *list)
 {
-  for ( int j = 0 ; j < list->count() ; ++j ) list->item(j)->setSelected(false);
+  for ( int j = 0 ; j < list->count() ; ++j )
+    list->item(j)->setSelected(false);
 }
 
 // =================================================================================================
 
-void MainWindow::clearSelAll()
+void MainWindow::selectionClearAll()
 {
-  // all lists on tabFiles
-  for ( auto &list: tF_listWidgets ) clearSel(list);
+  // all lists on Tab::Files
+  for ( auto &list: m_tF_listWidgets ) selectionClear(list);
 
-  // list of tabSort
-  clearSel(ui->tS_listWidget);
+  // list of Tab::Sort
+  selectionClear(ui->tS_listWidget);
 }
 
 // =================================================================================================
 
-void MainWindow::clearAll()
+void MainWindow::resetApp(bool prompt)
 {
   // prompt user for confirmation
-  if ( !promptQuestion("This clears everything, to start fresh. Continue?") )
-    return;
+  if ( prompt )
+    if ( !promptQuestion("This clears everything, to start fresh. Continue?") )
+      return;
 
   // remove all data
-  while ( data   .size()>0 ) { data   .pop_back(); }
-  while ( delData.size()>0 ) { delData.pop_back(); }
+  while ( m_data   .size()>0 ) { m_data   .pop_back(); }
+  while ( m_dataDel.size()>0 ) { m_dataDel.pop_back(); }
 
-  // reset index and working directory
-  idx     = 0;
-  workDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-
-  // tabWrite: reset all widgets to default
+  // Tab::Write : (re)set all widgets to default
   ui->tW_lineEdit_date     -> clear();
   ui->tW_lineEdit_path     -> clear();
   ui->tW_lineEdit_name     -> setText("sorted");
   ui->tW_checkBox_keepOrig -> setChecked(false);
   ui->tW_pushButton_write  -> setEnabled(false);
 
-  // tabFiles: set number of folders (==2)
-  ui->tF_comboBox->setCurrentIndex(1);
+  // (re)set state variables
+  m_fullScreen = false ;
+  m_npix       =  64   ;
+  m_max_fol    =  12   ;
+  m_nfol       =   0   ;
+  m_ncam       =   0   ;
+  m_idx        =   0   ;
+  m_selLast    =  -1   ;
+  m_workDir    = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
 
-  // enforce opening on the first tab
-  ui->tabWidget->setCurrentIndex(0);
+  // enforce opening on the correct tab
+  // - avoid emitting "QTabWidget::currentChanged" signal
+  QSignalBlocker blocker( ui->tabWidget );
+  // - change tab
+  ui->tabWidget->setCurrentIndex( Tab::Files );
 
-  // emit signal to clear also all thumbnails, and empty all views
+  // write instruction to status-bar
+  instruction();
+
+  // emit signal to process the change
   emit dataChanged();
 }
 
 // =================================================================================================
 
-size_t MainWindow::data_renumCamera()
+void MainWindow::instruction()
 {
-  // only proceed for non-empty data
-  if ( data.size() == 0 ) return 0;
+  QString text;
 
-  // update camera index to smallest possible
-  // - logical list: 1 == camera is currently in use; 0 == camera is not in use (default)
-  std::vector<int> cam( data.size() , 0 );
-  // - fill
-  for ( auto &i : data ) cam[i.camera] = 1;
-  // - convert to new indices, step 1/2: first index starts at 0
-  cam[0] -= 1;
-  // - convert to new indices, step 2/2: cumulative sum
-  for ( size_t i=1; i<cam.size(); ++i ) cam[i] += cam[i-1];
-  // - renumber data
-  for ( auto &i : data ) i.camera = cam[i.camera];
-
-  // return number of cameras
-  return ( *std::max_element(cam.begin(), cam.end() ) ) + 1;
-}
-
-// =================================================================================================
-
-size_t MainWindow::data_nCamera()
-{
-  size_t n = 0;
-
-  for ( auto &i : data ) n = std::max( n , i.camera );
-
-  return n + 1;
-}
-
-// =================================================================================================
-
-size_t MainWindow::data_nFolder()
-{
-  std::vector<int> v( data.size() , 0 );
-
-  for ( auto &i : data ) v[i.folder] = 1;
-
-  return std::accumulate(v.begin(), v.end(), 0);
-}
-
-// =================================================================================================
-
-void MainWindow::data_sortName(size_t folder)
-{
-  // check to continue
-  if ( data.size() == 0 ) return;
-
-  // clear all selected items
-  clearSelAll();
-
-  // store current order, to retrieve the new position of "idx"
-  for ( size_t i = 0 ; i < data.size() ; ++i ) data[i].index = i;
-
-  // only sort for this folder (items with "data[i].sort == false" are left untouched)
-  for ( auto &file : data ) {
-    if ( file.folder==folder ) { file.sort = true ; file.modified = 1; }
-    else                       { file.sort = false;                    }
-  }
-
-  // apply selective sort, based on file-name
-  std::sort(data.begin(),data.end(),
-    [](File i,File j){
-      if ( i.sort && j.sort ) { return i.path.toStdString()<j.path.toStdString(); }
-      else                    { return i.index             <j.index             ; }
-  });
-
-  // update time such that the sorted list is also in chronological order
-  for ( size_t i=data.size()-1; i>0; --i )
-    if ( data[i-1].time > data[i].time )
-      data[i-1].time = data[i].time-1;
-
-  // locate new position of "idx"
-  for ( size_t i=0; i<data.size(); ++i ) {
-    if ( data[i].index==idx ) {
-      idx = i;
-      emit dataChanged();
-      return;
-    }
-  }
-
-  // force to view from the first index
-  idx = 0;
-
-  // signal to process change
-  emit dataChanged();
-}
-
-// =================================================================================================
-
-void MainWindow::data_sortTime()
-{
-  // check to continue
-  if ( data.size() == 0 ) return;
-
-  // store current order, to retrieve the new position of "idx"
-  for ( size_t i = 0 ; i < data.size() ; ++i ) data[i].index = i;
-
-  // sort chronologically (if the times are identical retain existing order)
-  std::sort(data.begin(),data.end(),
-    [](File i,File j){
-      if ( i.time==j.time ) return i.index<j.index;
-      else                  return i.time <j.time ;
-  });
-
-  // locate new position of "idx"
-  for ( size_t i=0; i<data.size(); ++i ) {
-    if ( data[i].index==idx ) {
-      idx = i;
+  switch( ui->tabWidget->currentIndex() )
+  {
+    case Tab::Files:
+      text  = "Store the photos of each camera in a separate folder. Select each folder here.";
       break;
-    }
+    case Tab::View:
+      text  = "Check out your great photos! Also time to delete less successful experiments.";
+      break;
+    case Tab::Sort:
+      text  = "Correct the order of photos if needed. Strategy: move entire folders/cameras first.";
+      text += " Try to move towards a correct reference.";
+      break;
+    case Tab::Write:
+      text  = "Write the sorted photos. Use clean-up to actually remove all 'deleted' photos.";
+      break;
+    default:
+      text = "";
+      break;
   }
 
-  // make sure that all photos are at least one second apart
-  // this is needed to allow image insertion between image
-  for ( size_t i=0; i<data.size()-1; ++i )
-    if ( data[i+1].time <= data[i].time )
-      data[i+1].time = data[i].time+1;
+  ui->statusBar->showMessage(text);
 }
 
 // =================================================================================================
 
-void MainWindow::data_update()
+void MainWindow::dataUpdate()
 {
   // request to stop reading thumbnails (to lose fewer time below)
-  thumbnail->requestStop();
+  m_thumnails->requestStop();
+
+  // initialize counters
+  m_ncam = 0;
+  m_nfol = 0;
 
   // update camera index to the smallest possible index
-  data_renumCamera();
+  if ( m_data.size() > 0 )
+  {
+    // - logical list: 1 == camera is currently in use; 0 == camera is not in use (default)
+    std::vector<int> cam( m_data.size() , 0 );
+    // - fill
+    for ( auto &i : m_data ) cam[i.camera] = 1;
+    // - convert to indices, step 1/2: first index starts at 0
+    cam[0] -= 1;
+    // - convert to indices, step 2/2: cumulative sum
+    for ( size_t i=1; i<cam.size(); ++i ) cam[i] += cam[i-1];
+    // - renumber m_data
+    for ( auto &i : m_data ) i.camera = cam[i.camera];
+    // - store the number of cameras
+    m_ncam = ( *std::max_element(cam.begin(), cam.end() ) ) + 1;
+  }
 
-  // list with thumbnails to include
-  // - initialize
-  std::vector<int>    incl( thumbnail->size() , 0 ); // 1 if the thumbnail is still part of "data"
-  std::vector<size_t> rm;                            // list with thumbnails to remove
-  // - fill
-  for ( auto &i : data ) incl[i.ithumb] = 1;
-  // - list items to remove
-  for ( size_t i=0; i<incl.size(); ++i ) if ( incl[i]==0 ) rm.push_back(i);
-  // - convert to new indices, step 1/2: cumulative sum
-  for ( size_t i=1; i<incl.size(); ++i ) incl[i] += incl[i-1];
-  // - convert to new indices, step 2/2: correct one (list started at 1, not 0)
-  for ( auto &i : incl ) --i;
-  // - renumber data
-  for ( auto &i : data ) i.ithumb = incl[i.ithumb];
+  // update folder index to the smallest possible index
+  if ( m_data.size() > 0 )
+  {
+    // - logical list: 1 == folder is currently in use; 0 == folder is not in use (default)
+    std::vector<int> fol( m_data.size() , 0 );
+    // - fill
+    for ( auto &i : m_data ) fol[i.folder] = 1;
+    // - convert to indices, step 1/2: first index starts at 0
+    fol[0] -= 1;
+    // - convert to indices, step 2/2: cumulative sum
+    for ( size_t i=1; i<fol.size(); ++i ) fol[i] += fol[i-1];
+    // - renumber m_data
+    for ( auto &i : m_data ) i.folder = fol[i.folder];
+    // - store the number of cameras
+    m_nfol = ( *std::max_element(fol.begin(), fol.end() ) ) + 1;
+  }
+
+  // add colors if needed
+  if ( m_ncam > m_col.size() )
+  {
+    // - remove everything that is not part of the basic colormap
+    while ( m_col.size() > m_max_fol ) m_col.erase(m_col.begin()+m_col.size()-1);
+    // - extend colormap
+    std::vector<int> cmap = cppcolormap::Set1(m_ncam-m_max_fol);
+    for ( size_t i = 0 ; i < m_ncam-m_max_fol ; ++i )
+      m_col.push_back( QColor( cmap[i*3+0], cmap[i*3+1], cmap[i*3+2] ) );
+  }
 
   // correct current index if needed (out-of-bounds -> last)
-  if ( idx >= data.size() ) idx = data.size()-1;
+  if ( m_idx >= m_data.size() ) m_idx = m_data.size()-1;
 
   // sort by time
-  data_sortTime();
+  if ( m_data.size() > 0 )
+  {
+    // - store current order, to retrieve the new position of "m_idx"
+    for ( size_t i = 0 ; i < m_data.size() ; ++i ) m_data[i].index = i;
+    // - sort chronologically (if the times are identical retain existing order)
+    std::sort(m_data.begin(),m_data.end(),
+      [](File i,File j){
+        if ( i.time==j.time ) return i.index<j.index;
+        else                  return i.time <j.time ;
+    });
+    // - locate new position of "m_idx"
+    for ( size_t i=0; i<m_data.size(); ++i ) {
+      if ( m_data[i].index==m_idx ) {
+        m_idx = i;
+        break;
+      }
+    }
+    // - make sure that all photos are at least one second apart (to allow image insertion)
+    for ( size_t i=0; i<m_data.size()-1; ++i )
+      if ( m_data[i+1].time <= m_data[i].time )
+        m_data[i+1].time = m_data[i].time+1;
+  }
 
-  // remove thumbnails that are no longer part of "data"
-  thumbnail->erase(rm);
-  // if needed, launch reading thumbnails (that have not been read)
-  if ( thumbnail->unread() ) { emit thumbnailRead(); }
+  // remove thumbnails that are not in "m_data", update index in "m_data" accordingly
+  if ( m_thumnails->size() > 0 )
+  {
+    // - initialize
+    std::vector<int>    incl( m_thumnails->size() , 0 ); // 1 if the m_thumnails is part of "m_data"
+    std::vector<size_t> rm;                            // list with thumbnails to remove
+    // - fill
+    for ( auto &i : m_data ) incl[i.ithumb] = 1;
+    // - list items to remove
+    for ( size_t i=0; i<incl.size(); ++i ) if ( incl[i]==0 ) rm.push_back(i);
+    // - convert to indices, step 1/2: first index starts at 0
+    incl[0] -= 1;
+    // - convert to indices, step 2/2: cumulative sum
+    for ( size_t i=1; i<incl.size(); ++i ) incl[i] += incl[i-1];
+    // - renumber m_data
+    for ( auto &i : m_data ) i.ithumb = incl[i.ithumb];
+    // - remove thumbnails that are no longer part of "m_data"
+    m_thumnails->erase(rm);
+    // - if needed, launch reading thumbnails (that have not been read)
+    if ( m_thumnails->unread() ) { emit thumbnailRead(); }
+  }
 
   // update widget
-  if      ( ui->tabWidget->currentIndex() == tabFiles ) tF_view();
-  else if ( ui->tabWidget->currentIndex() == tabView  ) tV_view();
-  else if ( ui->tabWidget->currentIndex() == tabSort  ) tS_view();
-  else if ( ui->tabWidget->currentIndex() == tabWrite ) tW_view();
+  if      ( ui->tabWidget->currentIndex() == Tab::Files ) tF_view();
+  else if ( ui->tabWidget->currentIndex() == Tab::View  ) tV_view();
+  else if ( ui->tabWidget->currentIndex() == Tab::Sort  ) tS_view();
+  else if ( ui->tabWidget->currentIndex() == Tab::Write ) tW_view();
 }
 
 // =================================================================================================
@@ -546,35 +496,102 @@ void MainWindow::data_update()
 void MainWindow::tF_view()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabFiles ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Files ) return;
 
-  // empty storage paths
-  for ( auto line : tF_lineEdits ) line->clear();
-  // empty listWidgets
-  for ( auto list : tF_listWidgets ) while ( list->count()>0 ) list->takeItem(0);
-
-  // no data -> quit this function
-  if ( data.size() == 0 ) return;
-
-  // fill listWidgets
-  for ( auto &file : data )
-  {
-    for ( size_t l=0; l<tF_listWidgets.size(); ++l )
-    {
-      if ( file.folder==l )
-      {
-        tF_listWidgets[l]->addItem(file.disp);
-        tF_lineEdits[l]->setText(file.dir );
-      }
-      else
-      {
-        tF_listWidgets[l]->addItem("");
-      }
-    }
+  // handle visibility: only the first "m_nfol + 1" folders will be visible
+  for ( size_t ifol = 0 ; ifol < m_max_fol ; ++ifol ) {
+    m_tF_listWidgets         [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_labels_N            [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_lineEdits           [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_pushButtons_select  [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_pushButtons_excl    [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_pushButtons_nameSort[ifol]->setVisible(ifol<=m_nfol);
   }
 
-  // update selected row to current index
-  for ( size_t l = 0 ; l < tF_listWidgets.size() ; ++l ) tF_listWidgets[l]->setCurrentRow(idx);
+  // enable all buttons of folders containing photos, rename selection button
+  for ( size_t ifol = 0 ; ifol < m_nfol ; ++ifol ) {
+    m_tF_listWidgets         [ifol]->setEnabled(true);
+    m_tF_labels_N            [ifol]->setEnabled(true);
+    m_tF_lineEdits           [ifol]->setEnabled(true);
+    m_tF_pushButtons_select  [ifol]->setEnabled(true);
+    m_tF_pushButtons_excl    [ifol]->setEnabled(true);
+    m_tF_pushButtons_nameSort[ifol]->setEnabled(true);
+    m_tF_pushButtons_select  [ifol]->setText("Exclude folder");
+  }
+
+  // enable selection button of the next folder and rename it, disable all other widgets
+  for ( size_t ifol = m_nfol ; ifol < m_max_fol ; ++ifol ) {
+    m_tF_listWidgets         [ifol]->setEnabled(false);
+    m_tF_labels_N            [ifol]->setEnabled(false);
+    m_tF_lineEdits           [ifol]->setEnabled(false);
+    m_tF_pushButtons_select  [ifol]->setEnabled(true );
+    m_tF_pushButtons_excl    [ifol]->setEnabled(false);
+    m_tF_pushButtons_nameSort[ifol]->setEnabled(false);
+    m_tF_labels_N            [ifol]->setText("");
+    m_tF_pushButtons_select  [ifol]->setText("Select folder");
+  }
+
+  // empty storage paths
+  for ( auto line : m_tF_lineEdits ) line->clear();
+  // empty listWidgets
+  for ( auto list : m_tF_listWidgets ) while ( list->count()>0 ) list->takeItem(0);
+
+  // no data -> quit this function
+  if ( m_data.size() == 0 ) return;
+
+  // fill listWidgets & set basic information
+  for ( size_t ifol = 0 ; ifol < m_nfol ; ++ifol )
+  {
+    // - zero initialize number of cameras and number pictures in this folder
+    std::vector<size_t> cam ( m_ncam , 0 );
+    size_t npic = 0;
+
+    // - loop over the data
+    for ( size_t i = 0 ; i < m_data.size() ; ++i )
+    {
+      // -- file in folder
+      if ( m_data[i].folder == ifol )
+      {
+        // --- write file and folder name
+        m_tF_listWidgets[ifol]->addItem(m_data[i].disp);
+        m_tF_lineEdits  [ifol]->setText(m_data[i].dir );
+        // -- set color
+        if ( m_ncam > 1 )
+          m_tF_listWidgets[ifol]->item(i)->setBackground(QBrush(m_col[m_data[i].camera]));
+        // --- signal usage of camera
+        cam[m_data[i].camera] = 1;
+        // --- add one picture
+        npic++;
+      }
+      // -- file not in folder
+      else
+      {
+        // --- write empty line
+        m_tF_listWidgets[ifol]->addItem("");
+      }
+    }
+
+    // - block the widget from sending signals
+    QSignalBlocker blocker( m_tF_listWidgets[ifol] );
+
+    // - change the current item to "m_idx"
+    m_tF_listWidgets[ifol]->setCurrentRow(m_idx);
+
+    // - compute the number of cameras in this folder
+    size_t ncam = std::accumulate(cam.begin(), cam.end(), 0);
+
+    // - write basic information
+    // -- initialize text
+    QString text = "";
+    // -- add number of photos
+    if ( npic == 1 ) text += QString("%1 photo - " ).arg(npic);
+    else             text += QString("%1 photos - ").arg(npic);
+    // -- add number of cameras
+    if ( ncam == 1 ) text += QString("%1 camera" ).arg(ncam);
+    else             text += QString("%1 cameras").arg(ncam);
+    // -- write to widget
+    m_tF_labels_N[ifol]->setText(text);
+  }
 }
 
 // =================================================================================================
@@ -582,30 +599,38 @@ void MainWindow::tF_view()
 void MainWindow::tV_view()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
 
   // selectively disable/enable buttons
-  ui->tV_pushButton_prev       -> setEnabled( data   .size() > 0 && idx > 0             );
-  ui->tV_pushButton_first      -> setEnabled( data   .size() > 0 && idx > 0             );
-  ui->tV_pushButton_next       -> setEnabled( data   .size() > 0 && idx < data.size()-1 );
-  ui->tV_pushButton_last       -> setEnabled( data   .size() > 0 && idx < data.size()-1 );
-  ui->tV_pushButton_undoDel    -> setEnabled( delData.size() > 0                        );
-  ui->tV_pushButton_fullScreen -> setEnabled( data   .size() > 0                        );
-  ui->tV_pushButton_del        -> setEnabled( data   .size() > 0                        );
-  ui->tV_pushButton_excl       -> setEnabled( data   .size() > 0                        );
+  ui->tV_pushButton_prev       -> setEnabled( m_data   .size() > 0 && m_idx > 0               );
+  ui->tV_pushButton_first      -> setEnabled( m_data   .size() > 0 && m_idx > 0               );
+  ui->tV_pushButton_next       -> setEnabled( m_data   .size() > 0 && m_idx < m_data.size()-1 );
+  ui->tV_pushButton_last       -> setEnabled( m_data   .size() > 0 && m_idx < m_data.size()-1 );
+  ui->tV_pushButton_undoDel    -> setEnabled( m_dataDel.size() > 0                            );
+  ui->tV_pushButton_fullScreen -> setEnabled( m_data   .size() > 0                            );
+  ui->tV_pushButton_del        -> setEnabled( m_data   .size() > 0                            );
+  ui->tV_pushButton_excl       -> setEnabled( m_data   .size() > 0                            );
 
   // clear currently viewed photos
   ui->tV_label->clear();
 
   // check to continue
-  if ( data.size() == 0 ) return;
+  if ( m_data.size() == 0 ) return;
 
-  // view current photo "idx"
-  QPixmap    p(data[idx].path);
+  // get the time as string
+  std::string time_str(std::ctime(&m_data[m_idx].time));
+
+  // write basic information
+  ui->tV_label_index ->setText(QString("%1 / ").arg(m_idx)+QString("%1").arg(m_data.size()));
+  ui->tV_label_time  ->setText(QString::fromStdString(time_str).trimmed());
+  ui->tV_label_folder->setText(m_data[m_idx].path);
+
+  // view current photo "m_idx"
+  QPixmap    p(m_data[m_idx].path);
   int        w = ui->tV_label->width();
   int        h = ui->tV_label->height();
   QTransform transform;
-  QTransform trans = transform.rotate(data[idx].rotation);
+  QTransform trans = transform.rotate(m_data[m_idx].rotation);
   ui->tV_label->setPixmap(p.scaled(w,h,Qt::KeepAspectRatio).transformed(trans));
 }
 
@@ -614,30 +639,30 @@ void MainWindow::tV_view()
 void MainWindow::tS_view(void)
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // selective enable buttons
-  ui->tS_pushButton_refresh -> setEnabled( data.size()    > 0 );
-  ui->tS_pushButton_Idel    -> setEnabled( data.size()    > 0 );
-  ui->tS_pushButton_Iexcl   -> setEnabled( data.size()    > 0 );
-  ui->tS_pushButton_Iup     -> setEnabled( data.size()    > 1 );
-  ui->tS_pushButton_Idown   -> setEnabled( data.size()    > 1 );
-  ui->tS_pushButton_Isync   -> setEnabled( data.size()    > 1 );
-  ui->tS_pushButton_split   -> setEnabled( data.size()    > 1 );
-  ui->tS_pushButton_Cup     -> setEnabled( data_nCamera() > 1 );
-  ui->tS_pushButton_Cdown   -> setEnabled( data_nCamera() > 1 );
-  ui->tS_pushButton_Csync   -> setEnabled( data_nCamera() > 1 );
-  ui->tS_pushButton_Fup     -> setEnabled( data_nFolder() > 1 );
-  ui->tS_pushButton_Fdown   -> setEnabled( data_nFolder() > 1 );
-  ui->tS_pushButton_Fsync   -> setEnabled( data_nFolder() > 1 );
+  ui->tS_pushButton_refresh -> setEnabled( m_data.size() > 0 );
+  ui->tS_pushButton_Idel    -> setEnabled( m_data.size() > 0 );
+  ui->tS_pushButton_Iexcl   -> setEnabled( m_data.size() > 0 );
+  ui->tS_pushButton_Iup     -> setEnabled( m_data.size() > 1 );
+  ui->tS_pushButton_Idown   -> setEnabled( m_data.size() > 1 );
+  ui->tS_pushButton_Isync   -> setEnabled( m_data.size() > 1 );
+  ui->tS_pushButton_split   -> setEnabled( m_data.size() > 1 );
+  ui->tS_pushButton_Cup     -> setEnabled( m_ncam        > 1 );
+  ui->tS_pushButton_Cdown   -> setEnabled( m_ncam        > 1 );
+  ui->tS_pushButton_Csync   -> setEnabled( m_ncam        > 1 );
+  ui->tS_pushButton_Fup     -> setEnabled( m_nfol        > 1 );
+  ui->tS_pushButton_Fdown   -> setEnabled( m_nfol        > 1 );
+  ui->tS_pushButton_Fsync   -> setEnabled( m_nfol        > 1 );
 
   // list with selected rows
   std::vector<size_t> old = selectedItems(ui->tS_listWidget);
   // convert rows to new index
   // - allocate
-  std::vector<size_t> renum(data.size());
+  std::vector<size_t> renum(m_data.size());
   // - fill
-  for ( size_t i = 0 ; i < data.size() ; ++i ) renum[data[i].index] = i;
+  for ( size_t i = 0 ; i < m_data.size() ; ++i ) renum[m_data[i].index] = i;
   // - new rows
   std::vector<size_t> rows;
   // - renumber
@@ -647,50 +672,30 @@ void MainWindow::tS_view(void)
   while ( ui->tS_listWidget->count() > 0 ) ui->tS_listWidget->takeItem(0);
 
   // check to continue
-  if ( data.size() == 0 ) return;
-
-  // read number of cameras
-  size_t n = data_nCamera();
-
-  // create a colormap
-  std::vector<QColor> col;
-  // - manually set first five colors
-  col.push_back( QColor(  72,   8 ,   7 ) );
-  col.push_back( QColor(  24,  63 ,  63 ) );
-  col.push_back( QColor(  22,  64 , 124 ) );
-  col.push_back( QColor(  68,  47 ,  35 ) );
-  col.push_back( QColor( 100, 100 , 100 ) );
-  col.push_back( QColor(  92,  92 , 134 ) );
-  // - automatically add more colors
-  if ( n > 6 )
-  {
-    std::vector<int> cmap = cppcolormap::Set1(n-6);
-    for ( size_t i = 0 ; i < n-6 ; ++i )
-      col.push_back( QColor( cmap[i*3+0], cmap[i*3+1], cmap[i*3+2] ) );
-  }
+  if ( m_data.size() == 0 ) return;
 
   // define style of the widget
-  ui->tS_listWidget->setIconSize(QSize(npix,npix));
+  ui->tS_listWidget->setIconSize(QSize(m_npix,m_npix));
 
   // fill the lists with names / icons
-  for ( auto &i : data )
-    ui->tS_listWidget->addItem(new QListWidgetItem(thumbnail->at(i.ithumb),i.disp));
+  for ( auto &i : m_data )
+    ui->tS_listWidget->addItem(new QListWidgetItem(m_thumnails->at(i.ithumb),i.disp));
 
   // set background color, corresponding to the camera index
-  if ( n > 1 )
-    for ( size_t i = 0 ; i < data.size() ; ++i )
-      ui->tS_listWidget->item(i)->setBackground(QBrush(col[data[i].camera]));
+  if ( m_ncam > 1 )
+    for ( size_t i = 0 ; i < m_data.size() ; ++i )
+      ui->tS_listWidget->item(i)->setBackground(QBrush(m_col[m_data[i].camera]));
 
   // restore selection
   // - clear entire selection
-  for ( int i=0; i<ui->tS_listWidget->count(); ++i ) ui->tS_listWidget->item(i)->setSelected(false);
-  // - no rows selected -> set "idx"
-  if  ( rows.size()==0 && idx<data.size()-1 ) rows.push_back(idx);
+  selectionClear(ui->tS_listWidget);
+  // - no rows selected -> set "m_idx"
+  if  ( rows.size()==0 && m_idx<m_data.size()-1 ) rows.push_back(m_idx);
   // - apply previous selection, moved one up
   for ( auto &row : rows ) ui->tS_listWidget->item(row)->setSelected(true);
 
   // change focus
-  QListWidgetItem *item = ui->tS_listWidget->item(idx);
+  QListWidgetItem *item = ui->tS_listWidget->item(m_idx);
   ui->tS_listWidget->scrollToItem(item, QAbstractItemView::EnsureVisible);
 }
 
@@ -699,18 +704,18 @@ void MainWindow::tS_view(void)
 void MainWindow::tW_view()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabWrite ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
 
   // update buttons
-  ui->tW_comboBox     -> setEnabled( data   .size() > 0 );
-  ui->tW_pushButton_write -> setEnabled( data   .size() > 0 );
-  ui->tW_pushButton_clean -> setEnabled( delData.size() > 0 );
+  ui->tW_comboBox         -> setEnabled( m_data   .size() > 0 );
+  ui->tW_pushButton_write -> setEnabled( m_data   .size() > 0 );
+  ui->tW_pushButton_clean -> setEnabled( m_dataDel.size() > 0 );
 
   // check to continue
-  if ( data.size() == 0 ) return;
+  if ( m_data.size() == 0 ) return;
 
-  // get the earliest data as string
-  std::string str(std::ctime(&data[0].time));
+  // get the time earliest of the earliest file as string
+  std::string str(std::ctime(&m_data[0].time));
 
   // show the earliest date
   ui->tW_lineEdit_date->setText( QString::fromStdString(str) );
@@ -721,7 +726,7 @@ void MainWindow::tW_view()
   // - clear the widget
   ui->tW_comboBox->clear();
   // - add folders
-  for ( auto &i : tF_lineEdits )
+  for ( auto &i : m_tF_lineEdits )
     if ( i->text().size() > 0 )
       ui->tW_comboBox->addItem( i->text() );
   // - set index to previous value (if possible)
@@ -731,110 +736,141 @@ void MainWindow::tW_view()
 
 // =================================================================================================
 
-void MainWindow::on_tF_comboBox_currentIndexChanged(int index)
+void MainWindow::tF_unifySelection(size_t ifol)
 {
-  // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabFiles ) return;
+  // get selected items
+  std::vector<size_t> rows = selectedItems(m_tF_listWidgets[ifol]);
 
-  // set all invisible
-  for ( size_t i=0; i<tF_pushButtons_nameSort.size(); ++i ) {
-    tF_listWidgets         [i]->setVisible(false);
-    tF_lineEdits           [i]->setVisible(false);
-    tF_pushButtons_select  [i]->setVisible(false);
-    tF_pushButtons_excl    [i]->setVisible(false);
-    tF_pushButtons_nameSort[i]->setVisible(false);
-  }
-
-  // find the number of folders containing selected photos
-  size_t folder = 0; for ( auto &file : data ) folder = std::max(folder,file.folder);
-
-  // if request number of folders is too low -> correct
-  if ( index < static_cast<int>(folder) )
+  // set selected items of all other folders
+  for ( size_t jfol = 0 ; jfol < m_nfol ; ++jfol )
   {
-    index = static_cast<int>(folder);
-    ui->tF_comboBox->setCurrentIndex(index);
-  }
-
-  // enable requested number of columns
-  for ( int i = 0; i < std::min( index+1, static_cast<int>(tF_pushButtons_nameSort.size()) ) ; ++i )
-  {
-    tF_listWidgets         [i]->setVisible(true);
-    tF_lineEdits           [i]->setVisible(true);
-    tF_pushButtons_select  [i]->setVisible(true);
-    tF_pushButtons_excl    [i]->setVisible(true);
-    tF_pushButtons_nameSort[i]->setVisible(true);
+    if ( jfol != ifol )
+    {
+      // - keep the widget from emitting signals
+      QSignalBlocker blocker( m_tF_listWidgets[jfol] );
+      // - clear entire selection
+      selectionClear(m_tF_listWidgets[jfol]);
+      // - apply selection
+      for ( auto &row : rows )
+        m_tF_listWidgets[jfol]->item(row)->setSelected(true);
+    }
   }
 }
 
 // =================================================================================================
 
-void MainWindow::tF_addFiles(size_t folder)
+void MainWindow::tF_excludeSel(size_t ifol)
+{
+  // get a list with selected items
+  std::vector<size_t> index = selectedItems(m_tF_listWidgets[ifol],false);
+
+  // proceed only for non-empty lists
+  if ( index.size() <= 0 ) return;
+
+  // remove indices which are not part of the current folder
+  {
+    // - allocate items to take from "index"
+    std::vector<size_t> rm;
+    // - determine which items to take from "index"
+    for ( size_t i = index.size() ; i-- > 0 ; )
+      if ( m_data[index[i]].folder != ifol )
+        rm.push_back(i);
+    // - take from "index"
+    for ( auto &i : rm ) index.erase(index.begin()+i);
+  }
+
+  // exclude images: remove from m_data
+  for ( auto &i : index ) m_data.erase(m_data.begin()+i);
+
+  // empty selection
+  selectionClear(m_tF_listWidgets[ifol]);
+
+  // set number current item to close to the selection
+  if ( index[index.size()-1] > 0 ) m_idx = index[index.size()-1]-1;
+  else                             m_idx = 0;
+
+  // emit signal to process the change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::tF_addFiles(size_t ifol)
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabFiles ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Files ) return;
 
-  // if list is not empty: remove previous selection
-  // -----------------------------------------------
+  // if list is not empty: remove previous selection & quit
+  // ------------------------------------------------------
 
-  std::vector<int> rm;
-
-  for ( int i = data.size()-1 ; i >= 0 ; --i )
-    if ( data[i].folder == folder )
-      rm.push_back(i);
-
-  for ( auto &i : rm )
-    data.erase(data.begin()+i);
-
-  // analyze data
-  // ------------
-
-  // update camera index to the smallest possible index, store the number of cameras
-  size_t camera = data_renumCamera();
+  if ( m_data.size() > 0 )
+  {
+    // - allocate list with items to remove from "m_data"
+    std::vector<size_t> rm;
+    // - check "m_data" for occurrences of "ifol"
+    for ( size_t i = m_data.size() ; i-- > 0 ; )
+      if ( m_data[i].folder == ifol )
+        rm.push_back(i);
+    // - "ifol" not empty
+    if ( rm.size() > 0 )
+    {
+      // -- remove all occurrences of "ifol" from "m_data"
+      for ( auto &i : rm ) m_data.erase(m_data.begin()+i);
+      // -- signal change of "m_data"
+      emit dataChanged();
+      // -- quit function
+      return;
+    }
+  }
 
   // select folder -> read files
   // ---------------------------
 
   // select a folder using a dialog
-  // - define dialog
+  // - allocate
   QFileDialog dialog(this);
+  QDir        dir;
+  // - define dialog
   dialog.setFileMode (QFileDialog::Directory);
   dialog.setOption   (QFileDialog::HideNameFilterDetails,false);
-  dialog.setDirectory(workDir);
+  dialog.setDirectory(m_workDir);
   dialog.setViewMode (QFileDialog::List);
   // - launch dialog and read output
-  QDir dir;
   if ( dialog.exec() ) dir = dialog.directory();
   else                 return;
+  // - store new suggested directory
+  try         { m_workDir = dir.filePath("../"); }
+  catch (...) { m_workDir = m_workDir;             }
 
-  // store new suggested directory
-  try         { workDir = dir.filePath("../"); }
-  catch (...) { workDir = workDir;             }
-
-  // set filters
+  // read files: all "*.jpg" files and if it exists "chroto.json"
+  // - set filters
   QStringList filter_jpeg;
   QStringList filter_json;
   filter_jpeg << "*.jpg" << "*.jpeg" << "*.JPG" << "*.JPEG";
   filter_json << "chroto.json";
-  // find all files matching the filters
+  // - find all files matching the filters
   QFileInfoList lst_json = dir.entryInfoList(filter_json,QDir::Files);
   QFileInfoList lst_jpeg = dir.entryInfoList(filter_jpeg,QDir::Files);
-
-  // if "chroto.json" was found -> read data
+  // - read "chroto.json" if it was found
   json jdata;
   if ( lst_json.size()==1 ) {
     std::ifstream inp(QFileInfo(lst_json.at(0)).absoluteFilePath().toStdString());
     inp >> jdata;
   }
 
-  // analyze files -> add to data
-  // ----------------------------
+  // analyze files -> add to "m_data"
+  // --------------------------------
 
+  // read number of images
+  size_t N = static_cast<size_t>( lst_jpeg.size() );
+
+  // allocate local variables
   std::time_t t;
   int rot,modified;
 
   // read all JPG-files, if "chroto.json" exists: overwrite time from JPEG with stored values,
   // segment in the different cameras that were stored in "chroto.json"
-  for ( int i = 0; i < lst_jpeg.size() ; ++i )
+  for ( size_t i = 0; i < N ; ++i )
   {
     // - extract file from list
     QFileInfo finfo = lst_jpeg.at(i);
@@ -852,8 +888,8 @@ void MainWindow::tF_addFiles(size_t folder)
     }
     // - store information to "File" instance
     File file;
-    file.camera    = camera;
-    file.folder    = folder;
+    file.camera    = m_ncam;
+    file.folder    = ifol;
     file.disp      = finfo.fileName();
     file.path      = finfo.absoluteFilePath();
     file.dir       = finfo.absolutePath();
@@ -861,7 +897,7 @@ void MainWindow::tF_addFiles(size_t folder)
     file.time_orig = t;
     file.rotation  = rot;
     file.modified  = modified;
-    file.ithumb    = thumbnail->push_back(file.path,rot); // create new entry in thumbnail list
+    file.ithumb    = m_thumnails->push_back(file.path,rot); // create new entry in m_thumnails list
     // -  if JSON file was found: overwrite information
     if ( lst_json.size()==1 )
     {
@@ -870,20 +906,81 @@ void MainWindow::tF_addFiles(size_t folder)
       file.modified = static_cast<int>        (jdata[finfo.fileName().toStdString()]["modified"]);
     }
     // - store in list
-    data.push_back(file);
+    m_data.push_back(file);
   }
 
-  // set the thumbnail size based on the size of "data"
-  if      ( data.size() <   100 ) { npix = 256; thumbnail->setResolution(64); }
-  if      ( data.size() <   200 ) { npix = 128; thumbnail->setResolution(32); }
-  else if ( data.size() <   500 ) { npix =  64; thumbnail->setResolution(32); }
-  else if ( data.size() <  2000 ) { npix =  32; thumbnail->setResolution(16); }
-  else                            { npix =  16; thumbnail->setResolution(16); }
+  // update app settings
+  // -------------------
+
+  // set the m_thumnails size based on the size of "m_data"
+  if      ( m_data.size() <   100 ) { m_npix = 256; m_thumnails->setResolution(64); }
+  if      ( m_data.size() <   200 ) { m_npix = 128; m_thumnails->setResolution(32); }
+  else if ( m_data.size() <   500 ) { m_npix =  64; m_thumnails->setResolution(32); }
+  else if ( m_data.size() <  2000 ) { m_npix =  32; m_thumnails->setResolution(16); }
+  else                              { m_npix =  16; m_thumnails->setResolution(16); }
 
   // enforce view the first photo
-  idx = 0;
+  m_idx = 0;
 
-  // signal to process change
+  // write to status-bar
+  // - initialize message
+  QString text;
+  text = QString("Read %1 photos").arg(N) + QString(" (total %1 photos).").arg(m_data.size());
+  // - add message to warn the user
+  if ( m_nfol == m_max_fol-1 )
+    text += " The next folder is the last folder. Just sort and write, then read and add more!";
+  // - add to status-bar
+  ui->statusBar->showMessage(text);
+
+  // emit signal to process the change
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::tF_nameSort(size_t ifol)
+{
+  // check to continue
+  if ( m_data.size() == 0 ) return;
+
+  // clear all selected items
+  selectionClearAll();
+
+  // store current order, to retrieve the new position of "m_idx"
+  for ( size_t i = 0 ; i < m_data.size() ; ++i ) m_data[i].index = i;
+
+  // only sort for this folder (items with "m_data[i].sort == false" are left untouched)
+  for ( auto &file : m_data ) {
+    if ( file.folder==ifol ) { file.sort = true ; file.modified = 1; }
+    else                     { file.sort = false;                    }
+  }
+
+  // apply selective sort, based on file-name
+  std::sort(m_data.begin(),m_data.end(),
+    [](File i,File j){
+      if ( i.sort && j.sort ) { return i.path.toStdString()<j.path.toStdString(); }
+      else                    { return i.index             <j.index             ; }
+  });
+
+  // update time such that the sorted list is also in chronological order
+  // N.B. since the real time is unknown an assumption is made
+  for ( size_t i = m_data.size()-1 ; i > 0 ; --i )
+    if ( m_data[i-1].time > m_data[i].time )
+      m_data[i-1].time = m_data[i].time-1;
+
+  // locate new position of "m_idx"
+  for ( size_t i = 0 ; i < m_data.size() ; ++i ) {
+    if ( m_data[i].index == m_idx ) {
+      m_idx = i;
+      emit dataChanged();
+      return;
+    }
+  }
+
+  // nothing found: force to view from the first index
+  m_idx = 0;
+
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -892,10 +989,10 @@ void MainWindow::tF_addFiles(size_t folder)
 void MainWindow::tV_startFullScreen()
 {
   // only act on correct tab, and not full screen mode
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
-  if ( fullScreen ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_fullScreen ) return;
 
-  fullScreen = true;
+  m_fullScreen = true;
 
   ui->tV_pushButton_fullScreen->setText("Minimize");
   ui->tV_label->setWindowFlags(ui->tV_label->windowFlags() | Qt::Window);
@@ -903,6 +1000,7 @@ void MainWindow::tV_startFullScreen()
 
   QApplication::setOverrideCursor(Qt::BlankCursor);
 
+  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -911,10 +1009,10 @@ void MainWindow::tV_startFullScreen()
 void MainWindow::tV_stopFullScreen()
 {
   // only act on correct tab, and on full screen mode
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
-  if ( ! fullScreen ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( ! m_fullScreen ) return;
 
-  fullScreen = false;
+  m_fullScreen = false;
 
   ui->tV_pushButton_fullScreen->setText("Full screen");
   ui->tV_label->setWindowFlags(ui->tV_label->windowFlags() & ~Qt::Window);
@@ -922,6 +1020,7 @@ void MainWindow::tV_stopFullScreen()
 
   QApplication::setOverrideCursor(Qt::ArrowCursor);
 
+  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -930,10 +1029,12 @@ void MainWindow::tV_stopFullScreen()
 void MainWindow::on_tV_pushButton_prev_clicked()
 {
   // only act on correct tab, check index to continue
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
-  if ( idx == 0 ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx == 0 ) return;
 
-  idx -= 1;
+  m_idx -= 1;
+
+  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -942,10 +1043,12 @@ void MainWindow::on_tV_pushButton_prev_clicked()
 void MainWindow::on_tV_pushButton_next_clicked()
 {
   // only act on correct tab, check index to continue
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
-  if ( idx >= data.size()-1 ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx >= m_data.size()-1 ) return;
 
-  idx += 1;
+  m_idx += 1;
+
+  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -954,10 +1057,12 @@ void MainWindow::on_tV_pushButton_next_clicked()
 void MainWindow::on_tV_pushButton_first_clicked()
 {
   // only act on correct tab, check index to continue
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
-  if ( idx == 0 ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx == 0 ) return;
 
-  idx = 0;
+  m_idx = 0;
+
+  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -966,10 +1071,12 @@ void MainWindow::on_tV_pushButton_first_clicked()
 void MainWindow::on_tV_pushButton_last_clicked()
 {
   // only act on correct tab, check index to continue
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
-  if ( idx >= data.size()-1 ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx >= m_data.size()-1 ) return;
 
-  idx = data.size()-1;
+  m_idx = m_data.size()-1;
+
+  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -978,10 +1085,12 @@ void MainWindow::on_tV_pushButton_last_clicked()
 void MainWindow::on_tV_pushButton_excl_clicked()
 {
   // only act on correct tab, check index to continue
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
-  if ( idx >= data.size() ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx >= m_data.size() ) return;
 
-  data.erase(data.begin()+idx);
+  m_data.erase(m_data.begin()+m_idx);
+
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -990,11 +1099,13 @@ void MainWindow::on_tV_pushButton_excl_clicked()
 void MainWindow::on_tV_pushButton_del_clicked()
 {
   // only act on correct tab, check index to continue
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
-  if ( idx >= data.size() ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx >= m_data.size() ) return;
 
-  delData.push_back(data[idx]);
-  data.erase(data.begin()+idx);
+  m_dataDel.push_back(m_data[m_idx]);
+  m_data.erase(m_data.begin()+m_idx);
+
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1003,21 +1114,21 @@ void MainWindow::on_tV_pushButton_del_clicked()
 void MainWindow::on_tV_pushButton_undoDel_clicked()
 {
   // only act on correct tab, check there is something to insert
-  if ( ui->tabWidget->currentIndex() != tabView ) return;
-  if ( delData.size() == 0 ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_dataDel.size() == 0 ) return;
 
-  // insert last item from "delData" in "data"; and remove from "delData"
-  data   .push_back(delData[delData.size()-1]       );
-  delData.erase    (delData.begin()+delData.size()-1);
+  // insert last item from "m_dataDel" in "m_data"; and remove from "m_dataDel"
+  m_data   .push_back(m_dataDel[m_dataDel.size()-1]       );
+  m_dataDel.erase    (m_dataDel.begin()+m_dataDel.size()-1);
 
   // switch to inserted image
-  idx = data.size()-1;
+  m_idx = m_data.size()-1;
 
-  // create new thumbnail, as it was removed
-  auto file = &data[idx];
-  file->ithumb = thumbnail->push_back(file->path,file->rotation);
+  // create new m_thumnails, as it was removed
+  auto file = &m_data[m_idx];
+  file->ithumb = m_thumnails->push_back(file->path,file->rotation);
 
-  // signal change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1026,7 +1137,7 @@ void MainWindow::on_tV_pushButton_undoDel_clicked()
 void MainWindow::on_tS_pushButton_navTop_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   ui->tS_listWidget->scrollToTop();
 }
@@ -1036,7 +1147,7 @@ void MainWindow::on_tS_pushButton_navTop_clicked()
 void MainWindow::on_tS_pushButton_navBottom_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   ui->tS_listWidget->scrollToBottom();
 }
@@ -1046,7 +1157,7 @@ void MainWindow::on_tS_pushButton_navBottom_clicked()
 void MainWindow::on_tS_pushButton_navPgUp_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   int i = ui->tS_listWidget->verticalScrollBar()->value();
   int N = ui->tS_listWidget->verticalScrollBar()->maximum();
@@ -1063,7 +1174,7 @@ void MainWindow::on_tS_pushButton_navPgUp_clicked()
 void MainWindow::on_tS_pushButton_navPgDwn_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   int i = ui->tS_listWidget->verticalScrollBar()->value();
   int N = ui->tS_listWidget->verticalScrollBar()->maximum();
@@ -1080,29 +1191,44 @@ void MainWindow::on_tS_pushButton_navPgDwn_clicked()
 void MainWindow::on_tS_listWidget_itemSelectionChanged()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
-  selLast = -1;
+  m_selLast = -1;
 
   // current selection
   std::vector<size_t> sel = selectedItems(ui->tS_listWidget);
 
   // catch all the obvious cases in which there is not one last selected item
-  if ( sel.size()==0 || selPrev.size()==0 || sel.size()!=selPrev.size()+1 ) {
-    selPrev = sel;
+  if ( sel.size()==0 || m_selPrev.size()==0 || sel.size()!=m_selPrev.size()+1 ) {
+    m_selPrev = sel;
     return;
   }
 
-  std::vector<size_t> diff(sel.size()+selPrev.size());
+  std::vector<size_t> diff(sel.size()+m_selPrev.size());
   std::vector<size_t>::iterator it;
 
-  it = std::set_difference(sel.begin(),sel.end(),selPrev.begin(),selPrev.end(),diff.begin());
+  it = std::set_difference(sel.begin(),sel.end(),m_selPrev.begin(),m_selPrev.end(),diff.begin());
 
   diff.resize(it-diff.begin());
 
-  selPrev = sel;
+  m_selPrev = sel;
 
-  if ( diff.size()==1 ) selLast = diff[0];
+  if ( diff.size()==1 ) m_selLast = diff[0];
+}
+
+// =================================================================================================
+
+void MainWindow::on_tS_listWidget_itemDoubleClicked(QListWidgetItem *item)
+{
+  int row = ui->tS_listWidget->row(item);
+
+  if ( row < 0 ) row = 0;
+
+  m_idx = static_cast<size_t>(row);
+
+  if ( m_idx >= m_data.size() ) m_idx = m_data.size()-1;
+
+  ui->tabWidget->setCurrentIndex( Tab::View );
 }
 
 // =================================================================================================
@@ -1110,7 +1236,7 @@ void MainWindow::on_tS_listWidget_itemSelectionChanged()
 void MainWindow::on_tS_pushButton_split_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // get sorted list of selected items
   std::vector<size_t> rows = selectedItems(ui->tS_listWidget);
@@ -1118,13 +1244,10 @@ void MainWindow::on_tS_pushButton_split_clicked()
   // check to continue
   if ( rows.size() == 0 ) return;
 
-  // find which camera index to use (one more than the current maximum)
-  size_t camera = data_nCamera();
-
   // change camera index
-  for ( auto &i : rows ) data[i].camera = camera;
+  for ( auto &i : rows ) m_data[i].camera = m_ncam;
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1132,22 +1255,58 @@ void MainWindow::on_tS_pushButton_split_clicked()
 
 void MainWindow::on_tS_pushButton_Iexcl_clicked()
 {
-  // only act on correct tab, and non-empty data
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
-  if ( data.size() == 0 ) return;
+  // only act on correct tab, and non-empty m_data
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
+  if ( m_data.size() == 0 ) return;
 
-  listExcl(ui->tS_listWidget,-1);
+  // get a list with selected items
+  std::vector<size_t> index = selectedItems(ui->tS_listWidget,false);
+
+  // proceed only for non-empty lists
+  if  ( index.size() <= 0 ) return;
+
+  // exclude images: remove from m_data
+  for ( auto &i : index ) m_data.erase(m_data.begin()+i);
+
+  // empty selection
+  selectionClear(ui->tS_listWidget);
+
+  // set number current item to close to the selection
+  if ( index[index.size()-1] > 0 ) m_idx = index[index.size()-1]-1;
+  else                             m_idx = 0;
+
+  // emit signal to process the change
+  emit dataChanged();
 }
 
 // =================================================================================================
 
 void MainWindow::on_tS_pushButton_Idel_clicked()
 {
-  // only act on correct tab, and non-empty data
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
-  if ( data.size() == 0 ) return;
+  // only act on correct tab, and non-empty m_data
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
+  if ( m_data.size() == 0 ) return;
 
-  listDel(ui->tS_listWidget);
+  // get a list with selected items
+  std::vector<size_t> index = selectedItems(ui->tS_listWidget,false);
+
+  // proceed only for non-empty lists
+  if  ( index.size() <= 0 ) return;
+
+  // delete images: add to "m_dataDel" (removal when 'clean up' is pressed)
+  for ( auto &i : index ) m_dataDel.push_back(m_data[i]);
+  // delete images: remove from "m_data"
+  for ( auto &i : index ) m_data.erase(m_data.begin()+i);
+
+  // empty selection
+  selectionClear(ui->tS_listWidget);
+
+  // set number current item to close to the selection
+  if ( index[index.size()-1] > 0 ) m_idx = index[index.size()-1]-1;
+  else                             m_idx = 0;
+
+  // emit signal to process the change
+  emit dataChanged();
 }
 
 // =================================================================================================
@@ -1155,7 +1314,7 @@ void MainWindow::on_tS_pushButton_Idel_clicked()
 void MainWindow::on_tS_pushButton_Iup_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // get sorted list of selected items
   std::vector<size_t> rows = selectedItems(ui->tS_listWidget);
@@ -1168,14 +1327,14 @@ void MainWindow::on_tS_pushButton_Iup_clicked()
 
   // move up (earlier)
   for ( auto &i: rows ) {
-    data[i].time    -= data[i].time-data[i-1].time+1;
-    data[i].modified = 1;
+    m_data[i].time    -= m_data[i].time-m_data[i-1].time+1;
+    m_data[i].modified = 1;
   }
 
   // set index
-  idx = rows[rows.size()-1];
+  m_idx = rows[rows.size()-1];
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1184,7 +1343,7 @@ void MainWindow::on_tS_pushButton_Iup_clicked()
 void MainWindow::on_tS_pushButton_Idown_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // get sorted list of selected items
   std::vector<size_t> rows = selectedItems(ui->tS_listWidget,false);
@@ -1193,19 +1352,19 @@ void MainWindow::on_tS_pushButton_Idown_clicked()
   if ( rows.size()==0 ) return;
 
   // top of the list: don't know what to do
-  if ( rows[0] == data.size()-1 )
+  if ( rows[0] == m_data.size()-1 )
     return promptWarning("Selection includes last photo, cannot proceed");
 
   // move up (earlier)
   for ( auto &i: rows ) {
-    data[i].time    += data[i+1].time-data[i].time+1;
-    data[i].modified = 1;
+    m_data[i].time    += m_data[i+1].time-m_data[i].time+1;
+    m_data[i].modified = 1;
   }
 
   // set index
-  idx = rows[0];
+  m_idx = rows[0];
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1214,10 +1373,10 @@ void MainWindow::on_tS_pushButton_Idown_clicked()
 void MainWindow::on_tS_pushButton_Isync_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // check if there is a destination: the last selected image
-  if ( selLast==-1 ) {
+  if ( m_selLast==-1 ) {
     return promptWarning(
       "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
     );
@@ -1231,14 +1390,14 @@ void MainWindow::on_tS_pushButton_Isync_clicked()
 
   // move up (earlier)
   for ( auto &i: rows ) {
-    data[i].time     = data[selLast].time;
-    data[i].modified = 1;
+    m_data[i].time     = m_data[m_selLast].time;
+    m_data[i].modified = 1;
   }
 
   // set index
-  idx = rows[rows.size()-1];
+  m_idx = rows[rows.size()-1];
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1247,7 +1406,7 @@ void MainWindow::on_tS_pushButton_Isync_clicked()
 void MainWindow::on_tS_pushButton_Cup_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // get sorted list of selected items
   std::vector<size_t> rows = selectedItems(ui->tS_listWidget);
@@ -1265,21 +1424,21 @@ void MainWindow::on_tS_pushButton_Cup_clicked()
   size_t row = rows[0];
 
   // not a boundary: don't know what to do
-  if ( data[row-1].camera==data[row].camera )
+  if ( m_data[row-1].camera==m_data[row].camera )
     return promptWarning("Previous photo is not of another camera, cannot proceed");
 
   // get time difference
-  std::time_t dt = data[row].time-data[row-1].time+1;
+  std::time_t dt = m_data[row].time-m_data[row-1].time+1;
 
   // apply to all
-  for ( auto &i : data )
-    if ( i.camera == data[row].camera )
+  for ( auto &i : m_data )
+    if ( i.camera == m_data[row].camera )
       i.time -= dt;
 
   // set index
-  idx = rows[rows.size()-1];
+  m_idx = rows[rows.size()-1];
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1288,7 +1447,7 @@ void MainWindow::on_tS_pushButton_Cup_clicked()
 void MainWindow::on_tS_pushButton_Cdown_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // get sorted list of selected items
   std::vector<size_t> rows = selectedItems(ui->tS_listWidget,false);
@@ -1297,7 +1456,7 @@ void MainWindow::on_tS_pushButton_Cdown_clicked()
   if ( rows.size() == 0 ) return;
 
   // top of the list / more then one item: don't know what to do
-  if ( rows[0] >= data.size()-1 )
+  if ( rows[0] >= m_data.size()-1 )
     return promptWarning("Selection includes last photo, cannot proceed");
   if ( rows.size() > 1 )
     return promptWarning("Selection contains more than one photo, cannot proceed");
@@ -1306,21 +1465,21 @@ void MainWindow::on_tS_pushButton_Cdown_clicked()
   size_t row = rows[0];
 
   // not a boundary: don't know what to do
-  if ( data[row+1].camera == data[row].camera )
+  if ( m_data[row+1].camera == m_data[row].camera )
     return promptWarning("Next photo is not of another camera, cannot proceed");
 
   // get time difference
-  std::time_t dt = data[row+1].time-data[row].time+1;
+  std::time_t dt = m_data[row+1].time-m_data[row].time+1;
 
   // apply to all
-  for ( auto &i : data )
-    if ( i.camera == data[row].camera )
+  for ( auto &i : m_data )
+    if ( i.camera == m_data[row].camera )
       i.time += dt;
 
   // set index
-  idx = rows[0];
+  m_idx = rows[0];
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1329,10 +1488,10 @@ void MainWindow::on_tS_pushButton_Cdown_clicked()
 void MainWindow::on_tS_pushButton_Csync_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // check if there is a destination: the last selected image
-  if ( selLast==-1 ) {
+  if ( m_selLast==-1 ) {
     return promptWarning(
       "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
     );
@@ -1345,34 +1504,34 @@ void MainWindow::on_tS_pushButton_Csync_clicked()
   if ( rows.size() == 0 ) return;
 
   // read number of cameras
-  size_t ncam = 0;
-  for ( auto &i : data )
-    ncam = std::max(ncam,i.camera);
+  size_t NCAM = 0;
+  for ( auto &i : m_data )
+    NCAM = std::max(NCAM,i.camera);
 
   // list cameras
-  std::vector<int> check(ncam+1,0);
+  std::vector<int> check(NCAM+1,0);
   // check if camera occurs
   for ( auto &row : rows ) {
-    if ( check[data[row].camera] )
+    if ( check[m_data[row].camera] )
       return promptWarning("Selection includes several photos from the same camera, cannot proceed");
-    check[data[row].camera] = 1;
+    check[m_data[row].camera] = 1;
   }
 
   // sync
-  size_t ref = selLast;
+  size_t ref = m_selLast;
   for ( auto &row : rows ) {
     if ( row != ref ) {
-      std::time_t dt = data[row].time-data[ref].time;
-      for ( auto &i : data )
-        if ( i.camera == data[row].camera )
+      std::time_t dt = m_data[row].time-m_data[ref].time;
+      for ( auto &i : m_data )
+        if ( i.camera == m_data[row].camera )
           i.time -= dt;
     }
   }
 
   // set index
-  idx = rows[rows.size()-1];
+  m_idx = rows[rows.size()-1];
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1381,7 +1540,7 @@ void MainWindow::on_tS_pushButton_Csync_clicked()
 void MainWindow::on_tS_pushButton_Fup_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // get sorted list of selected items
   std::vector<size_t> rows = selectedItems(ui->tS_listWidget);
@@ -1399,21 +1558,21 @@ void MainWindow::on_tS_pushButton_Fup_clicked()
   size_t row = rows[0];
 
   // not a boundary: don't know what to do
-  if ( data[row-1].folder == data[row].folder )
+  if ( m_data[row-1].folder == m_data[row].folder )
     return promptWarning("Previous photo is not of another folder, cannot proceed");
 
   // get time difference
-  std::time_t dt = data[row].time-data[row-1].time+1;
+  std::time_t dt = m_data[row].time-m_data[row-1].time+1;
 
   // apply to all
-  for ( auto &i : data )
-    if ( i.folder == data[row].folder )
+  for ( auto &i : m_data )
+    if ( i.folder == m_data[row].folder )
       i.time -= dt;
 
   // set index
-  idx = rows[rows.size()-1];
+  m_idx = rows[rows.size()-1];
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1422,7 +1581,7 @@ void MainWindow::on_tS_pushButton_Fup_clicked()
 void MainWindow::on_tS_pushButton_Fdown_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // get sorted list of selected items
   std::vector<size_t> rows = selectedItems(ui->tS_listWidget,false);
@@ -1431,7 +1590,7 @@ void MainWindow::on_tS_pushButton_Fdown_clicked()
   if ( rows.size() == 0 ) return;
 
   // top of the list / more then one item: don't know what to do
-  if ( rows[0] >= data.size()-1 )
+  if ( rows[0] >= m_data.size()-1 )
     return promptWarning("Selection includes last photo, cannot proceed");
   if ( rows.size() > 1 )
     return promptWarning("Selection contains more than one photo, cannot proceed");
@@ -1440,21 +1599,21 @@ void MainWindow::on_tS_pushButton_Fdown_clicked()
   size_t row = rows[0];
 
   // not a boundary: don't know what to do
-  if ( data[row+1].folder == data[row].folder )
+  if ( m_data[row+1].folder == m_data[row].folder )
     return promptWarning("Next photo is not of another folder, cannot proceed");
 
   // get time difference
-  std::time_t dt = data[row+1].time-data[row].time+1;
+  std::time_t dt = m_data[row+1].time-m_data[row].time+1;
 
   // apply to all
-  for ( auto &i : data )
-    if ( i.folder == data[row].folder )
+  for ( auto &i : m_data )
+    if ( i.folder == m_data[row].folder )
       i.time += dt;
 
   // set index
-  idx = rows[0];
+  m_idx = rows[0];
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1464,10 +1623,10 @@ void MainWindow::on_tS_pushButton_Fdown_clicked()
 void MainWindow::on_tS_pushButton_Fsync_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabSort ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // check if there is a destination: the last selected image
-  if ( selLast == -1 ) {
+  if ( m_selLast == -1 ) {
     return promptWarning(
       "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
     );
@@ -1480,34 +1639,34 @@ void MainWindow::on_tS_pushButton_Fsync_clicked()
   if ( rows.size() == 0 ) return;
 
   // read number of folders
-  size_t nfol = 0;
-  for ( auto &i : data )
-    nfol = std::max(nfol,i.folder);
+  size_t NFOL = 0;
+  for ( auto &i : m_data )
+    NFOL = std::max(NFOL,i.folder);
 
   // list folders
-  std::vector<int> check(nfol+1,0);
+  std::vector<int> check(NFOL+1,0);
   // check if folder occurs
   for ( auto &row : rows ) {
-    if ( check[data[row].folder] )
+    if ( check[m_data[row].folder] )
       return promptWarning("Selection includes several photos from the same folder, cannot proceed");
-    check[data[row].folder] = 1;
+    check[m_data[row].folder] = 1;
   }
 
   // sync
-  size_t ref = selLast;
+  size_t ref = m_selLast;
   for ( auto &row : rows ) {
     if ( row != ref ) {
-      std::time_t dt = data[row].time-data[ref].time;
-      for ( auto &i : data )
-        if ( i.folder == data[row].folder )
+      std::time_t dt = m_data[row].time-m_data[ref].time;
+      for ( auto &i : m_data )
+        if ( i.folder == m_data[row].folder )
           i.time -= dt;
     }
   }
 
   // set index
-  idx = rows[rows.size()-1];
+  m_idx = rows[rows.size()-1];
 
-  // signal to process change
+  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1515,10 +1674,10 @@ void MainWindow::on_tS_pushButton_Fsync_clicked()
 
 void MainWindow::on_tW_comboBox_activated(int index)
 {
-  // only act on correct tab, non-empty data, selected folder
-  if ( ui->tabWidget->currentIndex() != tabWrite ) return;
+  // only act on correct tab, non-empty m_data, selected folder
+  if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
   if ( index < 0 ) return;
-  if ( data.size() == 0 ) return;
+  if ( m_data.size() == 0 ) return;
 
   // local variables
   std::time_t dt   = 0; // time difference
@@ -1526,7 +1685,7 @@ void MainWindow::on_tW_comboBox_activated(int index)
 
   // try to find reference image in selected folder, and extract time difference between the
   // time as a result of sorting, and the original time of the image
-  for ( auto &i : data ) {
+  for ( auto &i : m_data ) {
     if ( static_cast<int>(i.folder) == index && !(i.modified) ) {
       if ( i.time > i.time_orig ) {
         dt   = i.time - i.time_orig;
@@ -1543,7 +1702,7 @@ void MainWindow::on_tW_comboBox_activated(int index)
 
   if ( sign == 0 ) {
     promptWarning("All images have been manually modified, consider using different folder");
-    for ( auto &i : data ) {
+    for ( auto &i : m_data ) {
       if ( static_cast<int>(i.folder) == index ) {
         if ( i.time > i.time_orig ) {
           dt   = i.time - i.time_orig;
@@ -1566,11 +1725,11 @@ void MainWindow::on_tW_comboBox_activated(int index)
   }
 
   if ( sign == +1 ) {
-    for ( auto &i : data )
+    for ( auto &i : m_data )
       i.time += dt;
   }
   else if ( sign == -1 ) {
-    for ( auto &i : data )
+    for ( auto &i : m_data )
       i.time -= dt;
   }
 }
@@ -1580,12 +1739,12 @@ void MainWindow::on_tW_comboBox_activated(int index)
 void MainWindow::on_tW_pushButton_path_clicked()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabWrite ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
 
   QFileDialog dialog(this);
   dialog.setFileMode (QFileDialog::Directory);
   dialog.setOption   (QFileDialog::HideNameFilterDetails,false);
-  dialog.setDirectory(workDir);
+  dialog.setDirectory(m_workDir);
   dialog.setViewMode (QFileDialog::List);
 
   QDir dir;
@@ -1595,7 +1754,7 @@ void MainWindow::on_tW_pushButton_path_clicked()
   ui->tW_lineEdit_path->setText(dir.absolutePath());
 
   // store new suggested directory
-  workDir = dir.absolutePath();
+  m_workDir = dir.absolutePath();
 }
 
 // =================================================================================================
@@ -1603,7 +1762,7 @@ void MainWindow::on_tW_pushButton_path_clicked()
 void MainWindow::on_tW_lineEdit_path_editingFinished()
 {
   // only act on correct tab
-  if ( ui->tabWidget->currentIndex() != tabWrite ) return;
+  if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
 
   if ( ui->tW_lineEdit_path->text().length()>0 )
     ui->tW_pushButton_write->setEnabled(true);
@@ -1615,13 +1774,13 @@ void MainWindow::on_tW_lineEdit_path_editingFinished()
 
 void MainWindow::on_tW_pushButton_write_clicked()
 {
-  // only act on correct tab, non-empty data
-  if ( ui->tabWidget->currentIndex() != tabWrite ) return;
-  if ( data.size() == 0 ) return;
+  // only act on correct tab, non-empty m_data
+  if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
+  if ( m_data.size() == 0 ) return;
 
   // number of characters needed the fit the photos
   // (ignore that the removed image might reduce N)
-  int N = QString::number(data.size()).length();
+  int N = QString::number(m_data.size()).length();
 
   // create output directory, if it does not exist
   QDir outdir(ui->tW_lineEdit_path->text());
@@ -1636,7 +1795,8 @@ void MainWindow::on_tW_pushButton_write_clicked()
     return;
   }
   // - "PATH/NAME-%0Xd.jpg"
-  for ( int i=0; i<static_cast<int>(data.size()); ++i ) {
+  for ( size_t i = 0 ; i < m_data.size() ; ++i )
+  {
     QString fname = ui->tW_lineEdit_name->text()+QString("-")+QString("%1.jpg").arg(i,N,10,QChar('0'));
     if ( QFileInfo(outdir.filePath(fname)).isFile() ) {
       this->promptWarning(\
@@ -1646,27 +1806,28 @@ void MainWindow::on_tW_pushButton_write_clicked()
   }
 
   // update list with paths
-  for ( auto &file : data )
-    cleanPaths.push_back(file.dir);
+  for ( auto &file : m_data )
+    m_cleanPaths.push_back(file.dir);
   // convert to unique list
-  cleanPaths.unique();
+  m_cleanPaths.unique();
 
   // write output
   // - allocate JSON-struct
   json j;
   // - loop over photos
-  for ( int i=0; i<static_cast<int>(data.size()); ++i ) {
+  for ( size_t i = 0 ; i < m_data.size() ; ++i )
+  {
     // - format -> filename
     QString fname = ui->tW_lineEdit_name->text()+QString("-")+QString("%1.jpg").arg(i,N,10,QChar('0'));
     QString fpath = outdir.filePath(fname);
     // - store information to JSON-struct
-    j[fname.toStdString()]["modified"] = data[i].modified;
-    j[fname.toStdString()]["camera"  ] = data[i].camera;
-    j[fname.toStdString()]["time"    ] = static_cast<long>(data[i].time);
-    j["camera"][std::to_string(data[i].camera)] = data[i].dir.toStdString();
+    j[fname.toStdString()]["modified"] = m_data[i].modified;
+    j[fname.toStdString()]["camera"  ] = m_data[i].camera;
+    j[fname.toStdString()]["time"    ] = static_cast<long>(m_data[i].time);
+    j["camera"][std::to_string(m_data[i].camera)] = m_data[i].dir.toStdString();
     // - copy or move
-    if ( ui->tW_checkBox_keepOrig->isChecked() ) { QFile::copy(  data[i].path,fpath); }
-    else                                        { QFile::rename(data[i].path,fpath); }
+    if ( ui->tW_checkBox_keepOrig->isChecked() ) { QFile::copy(  m_data[i].path,fpath); }
+    else                                        { QFile::rename(m_data[i].path,fpath); }
   }
 
   // store "PATH/chroto.json"
@@ -1674,14 +1835,14 @@ void MainWindow::on_tW_pushButton_write_clicked()
   std::ofstream o(fpath.toStdString());
   o << std::setw(4) << j << std::endl;
 
-  // clear data-structure
-  while ( data.size()>0 )
-    data.erase(data.begin());
+  // clear m_data-structure
+  while ( m_data.size()>0 )
+    m_data.erase(m_data.begin());
 
   // clear thumbnails
-  thumbnail->empty();
+  m_thumnails->empty();
 
-  // disable button (enabled when data is added)
+  // disable button (enabled when m_data is added)
   ui->tW_pushButton_write->setEnabled(false);
 }
 
@@ -1689,18 +1850,18 @@ void MainWindow::on_tW_pushButton_write_clicked()
 
 void MainWindow::on_tW_pushButton_clean_clicked()
 {
-  // only act on correct tab, non-empty data
-  if ( ui->tabWidget->currentIndex() != tabWrite ) return;
-  if ( delData.size() == 0 ) return;
+  // only act on correct tab, non-empty m_data
+  if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
+  if ( m_dataDel.size() == 0 ) return;
 
   // update list with paths
-  for ( auto &file : delData )
-    cleanPaths.push_back(file.dir);
+  for ( auto &file : m_dataDel )
+    m_cleanPaths.push_back(file.dir);
   // convert to unique list
-  cleanPaths.unique();
+  m_cleanPaths.unique();
 
   // remove deleted photos
-  for ( auto &file : delData )
+  for ( auto &file : m_dataDel )
     QFile::remove(file.path);
 
   // list with useless system files
@@ -1709,7 +1870,7 @@ void MainWindow::on_tW_pushButton_clean_clicked()
   sfiles.push_back("Thumbs.db");
 
   // visit all folders that had been selected
-  for ( auto dir : cleanPaths ) {
+  for ( auto dir : m_cleanPaths ) {
     // - remove useless system files
     for ( auto file : sfiles )
       QFile::remove(QDir(dir).filePath(file));
@@ -1719,10 +1880,11 @@ void MainWindow::on_tW_pushButton_clean_clicked()
   }
 
   // clear lists
-  while ( cleanPaths.size()>0 ) cleanPaths.erase(cleanPaths.begin());
-  while ( delData   .size()>0 ) delData   .erase(delData   .begin());
+  while ( m_cleanPaths.size()>0 ) m_cleanPaths.erase(m_cleanPaths.begin());
+  while ( m_dataDel   .size()>0 ) m_dataDel   .erase(m_dataDel   .begin());
 
-  // disable button (enabled when data is added)
+  // disable button (enabled when m_data is added)
   ui->tW_pushButton_clean->setEnabled(false);
 }
 
+// =================================================================================================
