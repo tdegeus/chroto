@@ -1,8 +1,8 @@
-/*
-See notes in "mainwindow.h"
+/* =================================================================================================
 
 (c - GPLv3) T.W.J. de Geus | tom@geus.me | www.geus.me | github.com/tdegeus/chroto
-*/
+
+================================================================================================= */
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
   // list of thumbnails is deleted only when the worker-thread is deleted (in destructor below)
   connect(&workerThread,&QThread::finished,m_thumnails,&QObject::deleteLater);
 
-  // set basic colormap
+  // set basic colormap (dynamically extended below, if needed)
   m_col.push_back( QColor(  72,   8,   7 ) );
   m_col.push_back( QColor( 109,   1,  78 ) );
   m_col.push_back( QColor( 136,  14,   0 ) );
@@ -311,6 +311,11 @@ void MainWindow::selectionClearAll()
 
 void MainWindow::resetApp(bool prompt)
 {
+  // hide button if compiled without exiv2
+  #ifndef WITHEXIV2
+  ui->tW_checkBox_exif->setVisible(false);
+  #endif
+
   // prompt user for confirmation
   if ( prompt )
     if ( !promptQuestion("This clears everything, to start fresh. Continue?") )
@@ -864,47 +869,45 @@ void MainWindow::tF_addFiles(size_t ifol)
   // read number of images
   size_t N = static_cast<size_t>( lst_jpeg.size() );
 
-  // allocate local variables
-  std::time_t t;
-  int rot,modified;
-
   // read all JPG-files, if "chroto.json" exists: overwrite time from JPEG with stored values,
   // segment in the different cameras that were stored in "chroto.json"
   for ( size_t i = 0; i < N ; ++i )
   {
     // - extract file from list
     QFileInfo finfo = lst_jpeg.at(i);
-    // - try the read the EXIF information; if needed, fall back to basic file information
-    try
-    {
-      modified        = 0;
-      std::tie(t,rot) = jpg2info(finfo.absoluteFilePath().toStdString());
-    }
-    catch (...)
-    {
-      modified        = 1;
-      rot             = 0;
-      t               = finfo.created().toTime_t();
-    }
     // - store information to "File" instance
     File file;
-    file.camera    = m_ncam;
-    file.folder    = ifol;
-    file.disp      = finfo.fileName();
-    file.path      = finfo.absoluteFilePath();
-    file.dir       = finfo.absolutePath();
-    file.time      = t;
-    file.time_orig = t;
-    file.rotation  = rot;
-    file.modified  = modified;
-    file.ithumb    = m_thumnails->push_back(file.path,rot); // create new entry in m_thumnails list
-    // -  if JSON file was found: overwrite information
-    if ( lst_json.size()==1 )
+    file.camera = m_ncam;
+    file.folder = ifol;
+    file.disp   = finfo.fileName();
+    file.path   = finfo.absoluteFilePath();
+    file.dir    = finfo.absolutePath();
+    // - try the read the EXIF information (stored directly); fall back to basic file information
+    if ( !file.readinfo() )
     {
-      file.time     = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"    ]);
-      file.camera  += static_cast<size_t>     (jdata[finfo.fileName().toStdString()]["camera"  ]);
-      file.modified = static_cast<int>        (jdata[finfo.fileName().toStdString()]["modified"]);
+      file.time_mod  = true;
+      file.rotation  = 0;
+      file.time      = finfo.created().toTime_t();
+      file.time_orig = file.time;
     }
+    // -  if JSON file was found: overwrite information
+    if ( lst_json.size() == 1 )
+    {
+      // -- modified time
+      if ( jdata[finfo.fileName().toStdString()].count("time") )
+        file.time = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"]);
+      // --- flag if the time is the original time or not
+      if ( jdata[finfo.fileName().toStdString()].count("modified") )
+        file.time_mod = static_cast<bool>(jdata[finfo.fileName().toStdString()]["modified"]);
+      // --- camera index
+      if ( jdata[finfo.fileName().toStdString()].count("camera") )
+        file.camera  += static_cast<size_t>(jdata[finfo.fileName().toStdString()]["camera"]);
+      // -- rotation
+      if ( jdata[finfo.fileName().toStdString()].count("rotation") )
+        file.rotation = static_cast<int>(jdata[finfo.fileName().toStdString()]["rotation"]);
+    }
+    // create new entry in m_thumnails list
+    file.ithumb = m_thumnails->push_back(file.path,file.rotation);
     // - store in list
     m_data.push_back(file);
   }
@@ -951,8 +954,8 @@ void MainWindow::tF_nameSort(size_t ifol)
 
   // only sort for this folder (items with "m_data[i].sort == false" are left untouched)
   for ( auto &file : m_data ) {
-    if ( file.folder==ifol ) { file.sort = true ; file.modified = 1; }
-    else                     { file.sort = false;                    }
+    if ( file.folder==ifol ) { file.sort = true ; file.time_mod = true; }
+    else                     { file.sort = false;                       }
   }
 
   // apply selective sort, based on file-name
@@ -1130,6 +1133,40 @@ void MainWindow::on_tV_pushButton_undoDel_clicked()
 
   // emit signal to process the change
   emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_tV_pushButton_rotL_clicked()
+{
+  // only act on correct tab, and for correct parameters
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx >= m_data.size() ) return;
+  if ( m_data.size() == 0 ) return;
+
+  // rotate, and signal manual rotation
+  m_data[m_idx].rotation -= 90;
+  m_data[m_idx].rot_mod   = true;
+
+  // signal to redraw image
+  emit indexChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_tV_pushButton_rotR_clicked()
+{
+  // only act on correct tab, and for correct parameters
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx >= m_data.size() ) return;
+  if ( m_data.size() == 0 ) return;
+
+  // rotate, and signal manual rotation
+  m_data[m_idx].rotation += 90;
+  m_data[m_idx].rot_mod   = true;
+
+  // signal to redraw image
+  emit indexChanged();
 }
 
 // =================================================================================================
@@ -1328,7 +1365,7 @@ void MainWindow::on_tS_pushButton_Iup_clicked()
   // move up (earlier)
   for ( auto &i: rows ) {
     m_data[i].time    -= m_data[i].time-m_data[i-1].time+1;
-    m_data[i].modified = 1;
+    m_data[i].time_mod = true;
   }
 
   // set index
@@ -1358,7 +1395,7 @@ void MainWindow::on_tS_pushButton_Idown_clicked()
   // move up (earlier)
   for ( auto &i: rows ) {
     m_data[i].time    += m_data[i+1].time-m_data[i].time+1;
-    m_data[i].modified = 1;
+    m_data[i].time_mod = true;
   }
 
   // set index
@@ -1391,7 +1428,7 @@ void MainWindow::on_tS_pushButton_Isync_clicked()
   // move up (earlier)
   for ( auto &i: rows ) {
     m_data[i].time     = m_data[m_selLast].time;
-    m_data[i].modified = 1;
+    m_data[i].time_mod = true;
   }
 
   // set index
@@ -1686,7 +1723,7 @@ void MainWindow::on_tW_comboBox_activated(int index)
   // try to find reference image in selected folder, and extract time difference between the
   // time as a result of sorting, and the original time of the image
   for ( auto &i : m_data ) {
-    if ( static_cast<int>(i.folder) == index && !(i.modified) ) {
+    if ( static_cast<int>(i.folder) == index && !(i.time_mod) ) {
       if ( i.time > i.time_orig ) {
         dt   = i.time - i.time_orig;
         sign = -1;
@@ -1811,6 +1848,9 @@ void MainWindow::on_tW_pushButton_write_clicked()
   // convert to unique list
   m_cleanPaths.unique();
 
+  // logical to signal that the time and rotation are directly stored to the EXIF-data
+  bool writeTime = ui->tW_checkBox_exif->isVisible() and ui->tW_checkBox_exif->isChecked();
+
   // write output
   // - allocate JSON-struct
   json j;
@@ -1821,13 +1861,25 @@ void MainWindow::on_tW_pushButton_write_clicked()
     QString fname = ui->tW_lineEdit_name->text()+QString("-")+QString("%1.jpg").arg(i,N,10,QChar('0'));
     QString fpath = outdir.filePath(fname);
     // - store information to JSON-struct
-    j[fname.toStdString()]["modified"] = m_data[i].modified;
-    j[fname.toStdString()]["camera"  ] = m_data[i].camera;
-    j[fname.toStdString()]["time"    ] = static_cast<long>(m_data[i].time);
+    // -- if the image is modified w.r.t. the rest of the camera
+    if ( m_data[i].time_mod )
+      j[fname.toStdString()]["modified"] = m_data[i].time_mod;
+    // -- the camera index, if more than one camera
+    if ( m_ncam > 1 )
+      j[fname.toStdString()]["camera"] = m_data[i].camera;
+    // -- the new time, if time is unequal to the original time
+    if ( m_data[i].time != m_data[i].time_orig and !writeTime )
+      j[fname.toStdString()]["time"] = static_cast<long>(m_data[i].time);
+    // -- the rotation, if manually modified
+    if ( m_data[i].rot_mod )
+      j[fname.toStdString()]["rotation"] = m_data[i].rotation;
+    // -- the original path
     j["camera"][std::to_string(m_data[i].camera)] = m_data[i].dir.toStdString();
+    // - write EXIF-data, if selected
+    if ( writeTime ) m_data[i].writeinfo();
     // - copy or move
     if ( ui->tW_checkBox_keepOrig->isChecked() ) { QFile::copy(  m_data[i].path,fpath); }
-    else                                        { QFile::rename(m_data[i].path,fpath); }
+    else                                         { QFile::rename(m_data[i].path,fpath); }
   }
 
   // store "PATH/chroto.json"
@@ -1888,3 +1940,287 @@ void MainWindow::on_tW_pushButton_clean_clicked()
 }
 
 // =================================================================================================
+// Thumbnails class - functions
+// =================================================================================================
+
+QIcon& Thumbnails::at ( size_t i )
+{
+  return m_data[i];
+}
+
+// =================================================================================================
+
+size_t Thumbnails::size ()
+{
+  return m_data.size();
+}
+
+// =================================================================================================
+
+void Thumbnails::requestStop ()
+{
+  m_stop = true;
+}
+
+// =================================================================================================
+
+bool Thumbnails::isBusy ()
+{
+  return m_busy;
+}
+
+// =================================================================================================
+
+size_t Thumbnails::unread()
+{
+  size_t n = 0;
+
+  for ( auto &i : m_isread )
+    if ( !i )
+      ++n;
+
+  return n;
+}
+
+// =================================================================================================
+
+size_t Thumbnails::push_back(QString name, int rot)
+{
+  QPixmap pix(m_npix,m_npix);
+  pix.fill(QColor("white"));
+
+  m_path    .push_back(name);
+  m_data    .push_back(QIcon(pix));
+  m_isread  .push_back(0);
+  m_rotation.push_back(rot);
+
+  return m_data.size()-1;
+}
+
+// =================================================================================================
+
+void Thumbnails::erase(std::vector<size_t> index)
+{
+  m_stop = true;
+
+  std::sort(index.begin(),index.end(),[](size_t i,size_t j){return i>j;});
+
+  for ( auto &i: index ) {
+    m_data    .erase(m_data    .begin()+i);
+    m_path    .erase(m_path    .begin()+i);
+    m_isread  .erase(m_isread  .begin()+i);
+    m_rotation.erase(m_rotation.begin()+i);
+  }
+}
+
+// =================================================================================================
+
+void Thumbnails::empty()
+{
+  m_stop = true;
+
+  while ( m_data    .size()>0 ) m_data    .erase(m_data    .begin());
+  while ( m_path    .size()>0 ) m_path    .erase(m_path    .begin());
+  while ( m_isread  .size()>0 ) m_isread  .erase(m_isread  .begin());
+  while ( m_rotation.size()>0 ) m_rotation.erase(m_rotation.begin());
+
+  m_busy = false;
+  m_npix = 32;
+}
+
+// =================================================================================================
+
+void Thumbnails::setResolution( size_t N )
+{
+  // - check if the resolution is different
+  if ( N == m_npix ) return;
+  // - m_stop the current read
+  m_stop = true;
+  // - overwrite number of pixels in both directions
+  m_npix = N;
+  // - mark all for reading
+  for ( auto &i : m_isread ) i = 0;
+}
+
+// =================================================================================================
+
+void Thumbnails::read()
+{
+  m_busy = true ;
+  m_stop = false;
+
+  // - loop over all photos
+  for ( size_t i=0; i<m_data.size(); ++i )
+  {
+    // -- break the loop if requested externally
+    if ( m_stop || QThread::currentThread()->isInterruptionRequested() ) {
+      m_busy = false;
+      m_stop = false;
+      return;
+    }
+
+    // -- read if not read before: account for pre-specified m_rotation
+    //    (obtained from the EXIF-data in "MainWindow" below)
+    if ( !m_isread[i] )
+    {
+      QMatrix rot;
+      rot.rotate(m_rotation[i]);
+
+      QPixmap pix(m_path[i]);
+      pix.scaled(m_npix,m_npix,Qt::KeepAspectRatio, Qt::FastTransformation);
+
+      if ( m_stop ) {
+        m_busy = false;
+        m_stop = false;
+        return;
+      }
+
+      m_data  [i] = QIcon(QPixmap(pix.transformed(rot)));
+      m_isread[i] = 1;
+    }
+  }
+
+  // - transmit that all images have been read
+  m_busy = false;
+  m_stop = false;
+  emit completed();
+}
+
+// =================================================================================================
+
+bool File::readinfo()
+{
+  // read JPEG-file into a buffer
+  // - open file
+  FILE *fid = std::fopen(path.toStdString().c_str(),"rb");
+  // - check success
+  if (!fid) return false;
+  // - read size
+  fseek(fid, 0, SEEK_END);
+  unsigned long fsize = ftell(fid);
+  rewind(fid);
+  // - read to buffer
+  unsigned char *buf = new unsigned char[fsize];
+  if (fread(buf, 1, fsize, fid) != fsize) {
+    delete[] buf;
+    return false;
+  }
+  // - close file
+  fclose(fid);
+
+  // parse EXIF
+  // - allocate
+  easyexif::EXIFInfo result;
+  // - parse
+  int code = result.parseFrom(buf, fsize);
+  // - release buffer
+  delete[] buf;
+  // - check success
+  if ( code ) return false;
+
+  // interpret time string
+  struct std::tm tm;
+  std::istringstream iss;
+  if      ( result.DateTimeOriginal .size()==19 ) { iss.str(result.DateTimeOriginal ); std::cout << disp.toStdString() << " DateTimeOriginal  = " << result.DateTimeOriginal  ;   }
+  else if ( result.DateTime         .size()==19 ) { iss.str(result.DateTime         ); std::cout << disp.toStdString() << " DateTime          = " << result.DateTime          ;  }
+  else if ( result.DateTimeDigitized.size()==19 ) { iss.str(result.DateTimeDigitized); std::cout << disp.toStdString() << " DateTimeDigitized = " << result.DateTimeDigitized ;  }
+  else    { return false; }
+  iss >> std::get_time(&tm,"%Y:%m:%d %H:%M:%S");
+
+  // store time to class
+  time      = mktime(&tm);
+  time_orig = time;
+
+  std::cout << " time = " << time << std::endl;
+
+  // convert orientation to rotation
+  rotation = 0;
+  if      ( result.Orientation==8 ) rotation = -90;
+  else if ( result.Orientation==6 ) rotation =  90;
+  else if ( result.Orientation==3 ) rotation = 180;
+
+  writeinfo();
+
+  return true;
+}
+
+// =================================================================================================
+
+void File::writeinfo()
+{
+  #ifdef WITHEXIV2
+
+    // do nothing if nothing was changed
+    if ( time == time_orig and !rot_mod ) return;
+
+    // read EXIF-data
+    // - open image
+    Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(path.toStdString());
+    // - check read
+    if ( image.get() == 0 ) return;
+    // - read EXIF-data
+    Exiv2::ExifData &exifData = image->exifData();
+
+    if ( time != time_orig )
+    {
+      // - convert to required format
+      std::tm tm = *std::localtime(&time);
+      // - allocate string stream
+      std::ostringstream oss;
+      // - convert time
+      oss << std::put_time(&tm,"%Y:%m:%d %H:%M:%S");
+      // - convert to string
+      auto str = oss.str();
+      // - create pointer for time
+      Exiv2::Value::AutoPtr v = Exiv2::Value::create(Exiv2::asciiString);
+      // - read time from string (above)
+      v->read(str);
+      // - store time string
+      Exiv2::ExifKey key("Exif.Photo.DateTimeOriginal");
+      exifData.add(key, v.get());
+    }
+
+    if ( rot_mod )
+    {
+      int r = 1;
+      if      ( rotation == -90 ) { r = 8; }
+      else if ( rotation ==  90 ) { r = 6; }
+      else if ( rotation == 180 ) { r = 3; }
+
+      exifData["Exif.Image.Orientation"] = uint16_t(r);
+    }
+
+
+    // - write EXIF-data
+    image->setExifData(exifData);
+    image->writeMetadata();
+
+  #endif
+}
+
+// =================================================================================================
+
+std::vector<size_t> selectedItems(QListWidget* list, bool ascending)
+{
+  // allocate
+  std::vector<size_t> out;
+
+  // fill
+  foreach ( QListWidgetItem *item, list->selectedItems() ) {
+    int i = list->row(item);
+    if ( i>=0 )
+      out.push_back(static_cast<size_t>(i));
+  }
+
+  // sort from low to high / high to low
+  if ( ascending )
+    std::sort(out.begin(),out.end());
+  else
+    std::sort(out.begin(),out.end(),[](size_t i,size_t j){return i>j;});
+
+  // return list
+  return out;
+}
+
+// =================================================================================================
+

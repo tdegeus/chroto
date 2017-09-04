@@ -15,3 +15,8 @@ HEADERS += mainwindow.h ./easyexif/exif.h
 FORMS   += mainwindow.ui
 
 RESOURCES += qdarkstyle/style.qrc
+
+LIBS += -L"$$_PRO_FILE_PWD_/exiv2" -lexiv2
+
+QMAKE_CXXFLAGS += -DWITHEXIV2
+#QMAKE_CXXFLAGS_RELEASE += -DWITHEXIV2

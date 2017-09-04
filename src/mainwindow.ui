@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>856</width>
-    <height>675</height>
+    <width>889</width>
+    <height>646</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -36,7 +36,7 @@
              <x>0</x>
              <y>0</y>
              <width>1910</width>
-             <height>538</height>
+             <height>509</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1054,6 +1054,33 @@
             </property>
            </widget>
           </item>
+          <item>
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="tV_pushButton_rotL">
+            <property name="text">
+             <string>Rotate L</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="tV_pushButton_rotR">
+            <property name="text">
+             <string>Rotate R</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
@@ -1706,6 +1733,16 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="tW_checkBox_exif">
+          <property name="text">
+           <string>Write corrected time (and rotation) directly to EXIF data of the photos</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer_3">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -1729,7 +1766,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>856</width>
+     <width>889</width>
      <height>22</height>
     </rect>
    </property>
