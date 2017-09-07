@@ -113,19 +113,23 @@ signals:
 class File
 {
 public:
-  QString           path      = ""   ; // absolute (complete) file-path of the file
-  QString           dir       = ""   ; // directory name
-  QString           fname     = ""   ; // file name
-  size_t            folder    = 0    ; // folder-index (corresponds to "m_tF_listWidgets")
-  size_t            camera    = 0    ; // camera-index (allows several cameras in one folder)
-  int               rotation  = 0    ; // rotation in degrees
+  // file path and extracts
+  QString path      = ""   ; // absolute (complete) file-path of the file
+  QString dir       = ""   ; // directory name
+  QString fname     = ""   ; // file name
+  size_t  folder    = 0    ; // folder-index (corresponds to "m_tF_listWidgets")
+  size_t  camera    = 0    ; // camera-index (allows several cameras in one folder)
+  // rotation
+  int     rotation  = 0    ; // rotation in degrees
+  // sort support
+  size_t  index     = 0    ; // for sorting: position in list -> locate where "m_idx" went
+  bool    sort      = true ; // for sorting: selectively sort subset
+  bool    time_mod  = false; // signal if time is still in line with the rest of the photos
+  bool    rot_mod   = false; // signal if the photo has been manually rotated
+  size_t  ithumb           ; // index in list with thumbnails
+  //
   date::sys_seconds t0 = date::sys_seconds(std::chrono::duration<int>(0)); // time-taken: no change on sort, can be used as reference
   date::sys_seconds t  = date::sys_seconds(std::chrono::duration<int>(0)); // time-taken: changed on sort
-  size_t            index     = 0    ; // for sorting: position in list -> locate where "m_idx" went
-  bool              sort      = true ; // for sorting: selectively sort subset
-  bool              time_mod  = false; // signal if time is still in line with the rest of the photos
-  bool              rot_mod   = false; // signal if the photo has been manually rotated
-  size_t            ithumb           ; // index in list with thumbnails
 
   File            (const File &) = default;
   File& operator= (const File &) = default;

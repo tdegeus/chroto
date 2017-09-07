@@ -626,7 +626,7 @@ void MainWindow::tV_view()
   // - allocate string stream
   std::ostringstream oss;
   // - convert time
-  oss << date::format("%Y:%m:%d %H:%M:%S\n", m_data[m_idx].t);
+  oss << date::format("%Y:%m:%d %H:%M:%S", m_data[m_idx].t);
   // - convert to string
   auto time_str = oss.str();
 
@@ -728,7 +728,7 @@ void MainWindow::tW_view()
   // - allocate string stream
   std::ostringstream oss;
   // - convert time
-  oss << date::format("%Y:%m:%d %H:%M:%S\n", m_data[0].t);
+  oss << date::format("%Y:%m:%d %H:%M:%S", m_data[0].t);
   // - convert to string
   auto str = oss.str();
 
@@ -895,29 +895,33 @@ void MainWindow::tF_addFiles(size_t ifol)
     // - try the read the EXIF information (stored directly); fall back to basic file information
     if ( !file.readinfo() )
     {
-      file.time_mod = true;
       file.rotation = 0;
       file.t        = date::sys_seconds(std::chrono::duration<std::time_t>(finfo.created().toTime_t()));
-      file.t0       = file.t;
     }
+
     // -  if JSON file was found: overwrite information
     if ( lst_json.size() == 1 )
     {
       // -- modified time
       if ( jdata[finfo.fileName().toStdString()].count("time") )
-        file.t = date::sys_seconds(std::chrono::duration<unsigned long>(
-          static_cast<unsigned long>(jdata[finfo.fileName().toStdString()]["time"])
-        ));
-      // --- flag if the time is the original time or not
-      if ( jdata[finfo.fileName().toStdString()].count("modified") )
-        file.time_mod = static_cast<bool>(jdata[finfo.fileName().toStdString()]["modified"]);
+      {
+        std::string str = jdata[finfo.fileName().toStdString()]["time"];
+        std::istringstream iss{str};
+        iss >> date::parse("%Y:%m:%d %H:%M:%S", file.t);
+      }
       // --- camera index
       if ( jdata[finfo.fileName().toStdString()].count("camera") )
+      {
         file.camera  += static_cast<size_t>(jdata[finfo.fileName().toStdString()]["camera"]);
+      }
       // -- rotation
       if ( jdata[finfo.fileName().toStdString()].count("rotation") )
+      {
         file.rotation = static_cast<int>(jdata[finfo.fileName().toStdString()]["rotation"]);
+      }
     }
+    // store original time to detect changes in time
+    file.t0 = file.t;
     // create new entry in m_thumnails list
     file.ithumb = m_thumnails->push_back(file.path,file.rotation);
     // - store in list
@@ -966,8 +970,8 @@ void MainWindow::tF_nameSort(size_t ifol)
 
   // only sort for this folder (items with "m_data[i].sort == false" are left untouched)
   for ( auto &file : m_data ) {
-    if ( file.folder==ifol ) { file.sort = true ; file.time_mod = true; }
-    else                     { file.sort = false;                       }
+    if ( file.folder==ifol ) file.sort = true ;
+    else                     file.sort = false;
   }
 
   // apply selective sort, based on file-name
@@ -1375,10 +1379,8 @@ void MainWindow::on_tS_pushButton_Iup_clicked()
   if ( rows[0] == 0 ) return promptWarning("Selection includes first photo, cannot proceed");
 
   // move up (earlier)
-  for ( auto &i: rows ) {
-    m_data[i].t       -= m_data[i].t-m_data[i-1].t+std::chrono::duration<int>(1);
-    m_data[i].time_mod = true;
-  }
+  for ( auto &i: rows )
+    m_data[i].t -= m_data[i].t-m_data[i-1].t+std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[rows.size()-1];
@@ -1405,10 +1407,8 @@ void MainWindow::on_tS_pushButton_Idown_clicked()
     return promptWarning("Selection includes last photo, cannot proceed");
 
   // move up (earlier)
-  for ( auto &i: rows ) {
-    m_data[i].t       += m_data[i+1].t-m_data[i].t+std::chrono::duration<int>(1);
-    m_data[i].time_mod = true;
-  }
+  for ( auto &i: rows )
+    m_data[i].t += m_data[i+1].t-m_data[i].t+std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[0];
@@ -1438,10 +1438,8 @@ void MainWindow::on_tS_pushButton_Isync_clicked()
   if ( rows.size() == 0 ) return;
 
   // move up (earlier)
-  for ( auto &i: rows ) {
-    m_data[i].t        = m_data[m_selLast].t;
-    m_data[i].time_mod = true;
-  }
+  for ( auto &i: rows )
+    m_data[i].t = m_data[m_selLast].t;
 
   // set index
   m_idx = rows[rows.size()-1];
@@ -1721,7 +1719,7 @@ void MainWindow::on_tW_comboBox_activated(int index)
   // try to find reference image in selected folder, and extract time difference between the
   // time as a result of sorting, and the original time of the image
   for ( auto &i : m_data ) {
-    if ( static_cast<int>(i.folder) == index && !(i.time_mod) ) {
+    if ( static_cast<int>(i.folder) == index ) {
       if ( i.t > i.t0 ) {
         dt   = i.t - i.t0;
         sign = -1;
@@ -1859,20 +1857,23 @@ void MainWindow::on_tW_pushButton_write_clicked()
     QString fname = ui->tW_lineEdit_name->text()+QString("-")+QString("%1.jpg").arg(i,N,10,QChar('0'));
     QString fpath = outdir.filePath(fname);
     // - store information to JSON-struct
-    // -- if the image is modified w.r.t. the rest of the camera
-    if ( m_data[i].time_mod )
-      j[fname.toStdString()]["modified"] = m_data[i].time_mod;
     // -- the camera index, if more than one camera
     if ( m_ncam > 1 )
       j[fname.toStdString()]["camera"] = m_data[i].camera;
     // -- the new time, if time is unequal to the original time
-    if ( m_data[i].t != m_data[i].t0 and !writeTime )
-      j[fname.toStdString()]["time"] = static_cast<unsigned long>(m_data[i].t.time_since_epoch().count());
+    if ( m_data[i].t != m_data[i].t0 and !writeTime ) {
+      // - allocate string stream
+      std::ostringstream oss;
+      // - convert time
+      oss << date::format("%Y:%m:%d %H:%M:%S", m_data[i].t);
+      // - convert to string
+      auto str = oss.str();
+      // - add to JSON file
+      j[fname.toStdString()]["time"] = str;
+    }
     // -- the rotation, if manually modified
     if ( m_data[i].rot_mod )
       j[fname.toStdString()]["rotation"] = m_data[i].rotation;
-    // -- the original path
-    j["camera"][std::to_string(m_data[i].camera)] = m_data[i].dir.toStdString();
     // - write EXIF-data, if selected
     if ( writeTime ) m_data[i].writeinfo();
     // - copy or move
@@ -2165,7 +2166,7 @@ void File::writeinfo()
       // - allocate string stream
       std::ostringstream oss;
       // - convert time
-      oss << date::format("%Y:%m:%d %H:%M:%S\n", t);
+      oss << date::format("%Y:%m:%d %H:%M:%S", t);
       // - convert to string
       auto str = oss.str();
       // - write to EXIF-data
