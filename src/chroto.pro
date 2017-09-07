@@ -10,7 +10,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp mainwindow.cpp ./easyexif/exif.cpp
 
-HEADERS += mainwindow.h ./easyexif/exif.h
+HEADERS += mainwindow.h ./easyexif/exif.h ./date/date.h
 
 FORMS   += mainwindow.ui
 

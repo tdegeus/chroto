@@ -20,12 +20,10 @@
 #include <QThread>
 #include <QDateTime>
 #include <QListWidget>
-#include <QLabel>
 #include <QShortcut>
 #include <QTextStream>
 
-#include <QTreeView>
-
+// TODO: check to exclude
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -35,9 +33,11 @@
 #include <ctime>
 #include <sstream>
 #include <algorithm>
+#include <chrono>
 
 #include "cppcolormap/cppcolormap.h"
 #include "easyexif/exif.h"
+#include "date/date.h"
 #include "json/json.hpp"
 
 #ifdef WITHEXIV2
@@ -113,19 +113,19 @@ signals:
 class File
 {
 public:
-  QString     dir       = ""   ; // directory in which the file is stored
-  QString     path      = ""   ; // absolute file-path to the file
-  QString     disp      = ""   ; // display name
-  size_t      folder    = 0    ; // folder-index (corresponds to "m_tF_listWidgets")
-  size_t      camera    = 0    ; // camera-index (allows several cameras in one folder)
-  int         rotation  = 0    ; // rotation in degrees
-  std::time_t time_orig = 0    ; // time-taken: no change on sort, can be used as reference
-  std::time_t time      = 0    ; // time-taken: changed on sort
-  size_t      index     = 0    ; // for sorting: position in list -> locate where "m_idx" went
-  bool        sort      = true ; // for sorting: selectively sort subset
-  bool        time_mod  = false; // signal if time is still in line with the rest of the photos
-  bool        rot_mod   = false; // signal if the photo has been manually rotated
-  size_t      ithumb           ; // index in list with thumbnails
+  QString           path      = ""   ; // absolute (complete) file-path of the file
+  QString           dir       = ""   ; // directory name
+  QString           fname     = ""   ; // file name
+  size_t            folder    = 0    ; // folder-index (corresponds to "m_tF_listWidgets")
+  size_t            camera    = 0    ; // camera-index (allows several cameras in one folder)
+  int               rotation  = 0    ; // rotation in degrees
+  date::sys_seconds t0 = date::sys_seconds(std::chrono::duration<int>(0)); // time-taken: no change on sort, can be used as reference
+  date::sys_seconds t  = date::sys_seconds(std::chrono::duration<int>(0)); // time-taken: changed on sort
+  size_t            index     = 0    ; // for sorting: position in list -> locate where "m_idx" went
+  bool              sort      = true ; // for sorting: selectively sort subset
+  bool              time_mod  = false; // signal if time is still in line with the rest of the photos
+  bool              rot_mod   = false; // signal if the photo has been manually rotated
+  size_t            ithumb           ; // index in list with thumbnails
 
   File            (const File &) = default;
   File& operator= (const File &) = default;

@@ -451,8 +451,8 @@ void MainWindow::dataUpdate()
     // - sort chronologically (if the times are identical retain existing order)
     std::sort(m_data.begin(),m_data.end(),
       [](File i,File j){
-        if ( i.time==j.time ) return i.index<j.index;
-        else                  return i.time <j.time ;
+        if ( i.t == j.t ) return i.index < j.index;
+        else              return i.t     < j.t;
     });
     // - locate new position of "m_idx"
     for ( size_t i=0; i<m_data.size(); ++i ) {
@@ -462,9 +462,9 @@ void MainWindow::dataUpdate()
       }
     }
     // - make sure that all photos are at least one second apart (to allow image insertion)
-    for ( size_t i=0; i<m_data.size()-1; ++i )
-      if ( m_data[i+1].time <= m_data[i].time )
-        m_data[i+1].time = m_data[i].time+1;
+    for ( size_t i = 0 ; i < m_data.size()-1 ; ++i )
+      if ( m_data[i+1].t <= m_data[i].t )
+        m_data[i+1].t = m_data[i].t+std::chrono::duration<int>(1);
   }
 
   // remove thumbnails that are not in "m_data", update index in "m_data" accordingly
@@ -558,8 +558,8 @@ void MainWindow::tF_view()
       if ( m_data[i].folder == ifol )
       {
         // --- write file and folder name
-        m_tF_listWidgets[ifol]->addItem(m_data[i].disp);
-        m_tF_lineEdits  [ifol]->setText(m_data[i].dir );
+        m_tF_listWidgets[ifol]->addItem(m_data[i].fname);
+        m_tF_lineEdits  [ifol]->setText(m_data[i].dir  );
         // -- set color
         if ( m_ncam > 1 )
           m_tF_listWidgets[ifol]->item(i)->setBackground(QBrush(m_col[m_data[i].camera]));
@@ -623,7 +623,12 @@ void MainWindow::tV_view()
   if ( m_data.size() == 0 ) return;
 
   // get the time as string
-  std::string time_str(std::ctime(&m_data[m_idx].time));
+  // - allocate string stream
+  std::ostringstream oss;
+  // - convert time
+  oss << date::format("%Y:%m:%d %H:%M:%S\n", m_data[m_idx].t);
+  // - convert to string
+  auto time_str = oss.str();
 
   // write basic information
   ui->tV_label_index ->setText(QString("%1 / ").arg(m_idx)+QString("%1").arg(m_data.size()));
@@ -684,7 +689,7 @@ void MainWindow::tS_view(void)
 
   // fill the lists with names / icons
   for ( auto &i : m_data )
-    ui->tS_listWidget->addItem(new QListWidgetItem(m_thumnails->at(i.ithumb),i.disp));
+    ui->tS_listWidget->addItem(new QListWidgetItem(m_thumnails->at(i.ithumb),i.fname));
 
   // set background color, corresponding to the camera index
   if ( m_ncam > 1 )
@@ -720,7 +725,12 @@ void MainWindow::tW_view()
   if ( m_data.size() == 0 ) return;
 
   // get the time earliest of the earliest file as string
-  std::string str(std::ctime(&m_data[0].time));
+  // - allocate string stream
+  std::ostringstream oss;
+  // - convert time
+  oss << date::format("%Y:%m:%d %H:%M:%S\n", m_data[0].t);
+  // - convert to string
+  auto str = oss.str();
 
   // show the earliest date
   ui->tW_lineEdit_date->setText( QString::fromStdString(str) );
@@ -879,23 +889,25 @@ void MainWindow::tF_addFiles(size_t ifol)
     File file;
     file.camera = m_ncam;
     file.folder = ifol;
-    file.disp   = finfo.fileName();
+    file.fname  = finfo.fileName();
     file.path   = finfo.absoluteFilePath();
     file.dir    = finfo.absolutePath();
     // - try the read the EXIF information (stored directly); fall back to basic file information
     if ( !file.readinfo() )
     {
-      file.time_mod  = true;
-      file.rotation  = 0;
-      file.time      = finfo.created().toTime_t();
-      file.time_orig = file.time;
+      file.time_mod = true;
+      file.rotation = 0;
+      file.t        = date::sys_seconds(std::chrono::duration<std::time_t>(finfo.created().toTime_t()));
+      file.t0       = file.t;
     }
     // -  if JSON file was found: overwrite information
     if ( lst_json.size() == 1 )
     {
       // -- modified time
       if ( jdata[finfo.fileName().toStdString()].count("time") )
-        file.time = static_cast<std::time_t>(jdata[finfo.fileName().toStdString()]["time"]);
+        file.t = date::sys_seconds(std::chrono::duration<unsigned long>(
+          static_cast<unsigned long>(jdata[finfo.fileName().toStdString()]["time"])
+        ));
       // --- flag if the time is the original time or not
       if ( jdata[finfo.fileName().toStdString()].count("modified") )
         file.time_mod = static_cast<bool>(jdata[finfo.fileName().toStdString()]["modified"]);
@@ -968,8 +980,8 @@ void MainWindow::tF_nameSort(size_t ifol)
   // update time such that the sorted list is also in chronological order
   // N.B. since the real time is unknown an assumption is made
   for ( size_t i = m_data.size()-1 ; i > 0 ; --i )
-    if ( m_data[i-1].time > m_data[i].time )
-      m_data[i-1].time = m_data[i].time-1;
+    if ( m_data[i-1].t > m_data[i].t )
+      m_data[i-1].t = m_data[i].t-std::chrono::duration<int>(1);
 
   // locate new position of "m_idx"
   for ( size_t i = 0 ; i < m_data.size() ; ++i ) {
@@ -1364,7 +1376,7 @@ void MainWindow::on_tS_pushButton_Iup_clicked()
 
   // move up (earlier)
   for ( auto &i: rows ) {
-    m_data[i].time    -= m_data[i].time-m_data[i-1].time+1;
+    m_data[i].t       -= m_data[i].t-m_data[i-1].t+std::chrono::duration<int>(1);
     m_data[i].time_mod = true;
   }
 
@@ -1394,7 +1406,7 @@ void MainWindow::on_tS_pushButton_Idown_clicked()
 
   // move up (earlier)
   for ( auto &i: rows ) {
-    m_data[i].time    += m_data[i+1].time-m_data[i].time+1;
+    m_data[i].t       += m_data[i+1].t-m_data[i].t+std::chrono::duration<int>(1);
     m_data[i].time_mod = true;
   }
 
@@ -1427,7 +1439,7 @@ void MainWindow::on_tS_pushButton_Isync_clicked()
 
   // move up (earlier)
   for ( auto &i: rows ) {
-    m_data[i].time     = m_data[m_selLast].time;
+    m_data[i].t        = m_data[m_selLast].t;
     m_data[i].time_mod = true;
   }
 
@@ -1464,13 +1476,10 @@ void MainWindow::on_tS_pushButton_Cup_clicked()
   if ( m_data[row-1].camera==m_data[row].camera )
     return promptWarning("Previous photo is not of another camera, cannot proceed");
 
-  // get time difference
-  std::time_t dt = m_data[row].time-m_data[row-1].time+1;
-
-  // apply to all
+  // apply time difference to all
   for ( auto &i : m_data )
     if ( i.camera == m_data[row].camera )
-      i.time -= dt;
+      i.t -= m_data[row].t-m_data[row-1].t+std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[rows.size()-1];
@@ -1505,13 +1514,10 @@ void MainWindow::on_tS_pushButton_Cdown_clicked()
   if ( m_data[row+1].camera == m_data[row].camera )
     return promptWarning("Next photo is not of another camera, cannot proceed");
 
-  // get time difference
-  std::time_t dt = m_data[row+1].time-m_data[row].time+1;
-
-  // apply to all
+  // apply time difference to all
   for ( auto &i : m_data )
     if ( i.camera == m_data[row].camera )
-      i.time += dt;
+      i.t += m_data[row+1].t-m_data[row].t+std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[0];
@@ -1558,10 +1564,9 @@ void MainWindow::on_tS_pushButton_Csync_clicked()
   size_t ref = m_selLast;
   for ( auto &row : rows ) {
     if ( row != ref ) {
-      std::time_t dt = m_data[row].time-m_data[ref].time;
       for ( auto &i : m_data )
         if ( i.camera == m_data[row].camera )
-          i.time -= dt;
+          i.t -= m_data[row].t-m_data[ref].t;
     }
   }
 
@@ -1598,13 +1603,10 @@ void MainWindow::on_tS_pushButton_Fup_clicked()
   if ( m_data[row-1].folder == m_data[row].folder )
     return promptWarning("Previous photo is not of another folder, cannot proceed");
 
-  // get time difference
-  std::time_t dt = m_data[row].time-m_data[row-1].time+1;
-
-  // apply to all
+  // apply time difference to all
   for ( auto &i : m_data )
     if ( i.folder == m_data[row].folder )
-      i.time -= dt;
+      i.t -= m_data[row].t-m_data[row-1].t+std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[rows.size()-1];
@@ -1639,13 +1641,10 @@ void MainWindow::on_tS_pushButton_Fdown_clicked()
   if ( m_data[row+1].folder == m_data[row].folder )
     return promptWarning("Next photo is not of another folder, cannot proceed");
 
-  // get time difference
-  std::time_t dt = m_data[row+1].time-m_data[row].time+1;
-
-  // apply to all
+  // apply time difference to all
   for ( auto &i : m_data )
     if ( i.folder == m_data[row].folder )
-      i.time += dt;
+      i.t += m_data[row+1].t-m_data[row].t+std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[0];
@@ -1693,10 +1692,9 @@ void MainWindow::on_tS_pushButton_Fsync_clicked()
   size_t ref = m_selLast;
   for ( auto &row : rows ) {
     if ( row != ref ) {
-      std::time_t dt = m_data[row].time-m_data[ref].time;
       for ( auto &i : m_data )
         if ( i.folder == m_data[row].folder )
-          i.time -= dt;
+          i.t -= m_data[row].t-m_data[ref].t;
     }
   }
 
@@ -1717,20 +1715,20 @@ void MainWindow::on_tW_comboBox_activated(int index)
   if ( m_data.size() == 0 ) return;
 
   // local variables
-  std::time_t dt   = 0; // time difference
+  std::chrono::duration<int> dt = std::chrono::duration<int>(0); // time difference
   int         sign = 0; // sign of the time difference (std::time_t can only be positive)
 
   // try to find reference image in selected folder, and extract time difference between the
   // time as a result of sorting, and the original time of the image
   for ( auto &i : m_data ) {
     if ( static_cast<int>(i.folder) == index && !(i.time_mod) ) {
-      if ( i.time > i.time_orig ) {
-        dt   = i.time - i.time_orig;
+      if ( i.t > i.t0 ) {
+        dt   = i.t - i.t0;
         sign = -1;
         break;
       }
-      else if ( i.time <= i.time_orig ) {
-        dt   = i.time_orig - i.time;
+      else if ( i.t <= i.t0 ) {
+        dt   = i.t0 - i.t;
         sign = +1;
         break;
       }
@@ -1741,13 +1739,13 @@ void MainWindow::on_tW_comboBox_activated(int index)
     promptWarning("All images have been manually modified, consider using different folder");
     for ( auto &i : m_data ) {
       if ( static_cast<int>(i.folder) == index ) {
-        if ( i.time > i.time_orig ) {
-          dt   = i.time - i.time_orig;
+        if ( i.t > i.t0 ) {
+          dt   = i.t - i.t0;
           sign = -1;
           break;
         }
-        else if ( i.time <= i.time_orig ) {
-          dt   = i.time_orig - i.time;
+        else if ( i.t <= i.t0 ) {
+          dt   = i.t0 - i.t;
           sign = +1;
           break;
         }
@@ -1763,11 +1761,11 @@ void MainWindow::on_tW_comboBox_activated(int index)
 
   if ( sign == +1 ) {
     for ( auto &i : m_data )
-      i.time += dt;
+      i.t += dt;
   }
   else if ( sign == -1 ) {
     for ( auto &i : m_data )
-      i.time -= dt;
+      i.t -= dt;
   }
 }
 
@@ -1868,8 +1866,8 @@ void MainWindow::on_tW_pushButton_write_clicked()
     if ( m_ncam > 1 )
       j[fname.toStdString()]["camera"] = m_data[i].camera;
     // -- the new time, if time is unequal to the original time
-    if ( m_data[i].time != m_data[i].time_orig and !writeTime )
-      j[fname.toStdString()]["time"] = static_cast<long>(m_data[i].time);
+    if ( m_data[i].t != m_data[i].t0 and !writeTime )
+      j[fname.toStdString()]["time"] = static_cast<unsigned long>(m_data[i].t.time_since_epoch().count());
     // -- the rotation, if manually modified
     if ( m_data[i].rot_mod )
       j[fname.toStdString()]["rotation"] = m_data[i].rotation;
@@ -2118,20 +2116,18 @@ bool File::readinfo()
   // - check success
   if ( code ) return false;
 
-  // interpret time string
-  struct std::tm tm;
+  // get time string
   std::istringstream iss;
-  if      ( result.DateTimeOriginal .size()==19 ) { iss.str(result.DateTimeOriginal ); std::cout << disp.toStdString() << " DateTimeOriginal  = " << result.DateTimeOriginal  ;   }
-  else if ( result.DateTime         .size()==19 ) { iss.str(result.DateTime         ); std::cout << disp.toStdString() << " DateTime          = " << result.DateTime          ;  }
-  else if ( result.DateTimeDigitized.size()==19 ) { iss.str(result.DateTimeDigitized); std::cout << disp.toStdString() << " DateTimeDigitized = " << result.DateTimeDigitized ;  }
+  if      ( result.DateTimeOriginal .size() > 0 ) iss.str(result.DateTimeOriginal );
+  else if ( result.DateTime         .size() > 0 ) iss.str(result.DateTime         );
+  else if ( result.DateTimeDigitized.size() > 0 ) iss.str(result.DateTimeDigitized);
   else    { return false; }
-  iss >> std::get_time(&tm,"%Y:%m:%d %H:%M:%S");
 
-  // store time to class
-  time      = mktime(&tm);
-  time_orig = time;
+  // interpret time string
+  iss >> date::parse("%Y:%m:%d %H:%M:%S", t);
 
-  std::cout << " time = " << time << std::endl;
+  // copy time
+  t0 = t;
 
   // convert orientation to rotation
   rotation = 0;
@@ -2151,7 +2147,7 @@ void File::writeinfo()
   #ifdef WITHEXIV2
 
     // do nothing if nothing was changed
-    if ( time == time_orig and !rot_mod ) return;
+    if ( t == t0 and !rot_mod ) return;
 
     // read EXIF-data
     // - open image
@@ -2159,39 +2155,38 @@ void File::writeinfo()
     // - check read
     if ( image.get() == 0 ) return;
     // - read EXIF-data
+    image->readMetadata();
+    // - create pointer
     Exiv2::ExifData &exifData = image->exifData();
 
-    if ( time != time_orig )
+    // change time (if needed)
+    if ( t != t0 )
     {
-      // - convert to required format
-      std::tm tm = *std::localtime(&time);
       // - allocate string stream
       std::ostringstream oss;
       // - convert time
-      oss << std::put_time(&tm,"%Y:%m:%d %H:%M:%S");
+      oss << date::format("%Y:%m:%d %H:%M:%S\n", t);
       // - convert to string
       auto str = oss.str();
-      // - create pointer for time
-      Exiv2::Value::AutoPtr v = Exiv2::Value::create(Exiv2::asciiString);
-      // - read time from string (above)
-      v->read(str);
-      // - store time string
-      Exiv2::ExifKey key("Exif.Photo.DateTimeOriginal");
-      exifData.add(key, v.get());
+      // - write to EXIF-data
+      exifData["Exif.Photo.DateTimeOriginal"] = str;
     }
 
+    // change rotation (if needed)
     if ( rot_mod )
     {
-      int r = 1;
-      if      ( rotation == -90 ) { r = 8; }
-      else if ( rotation ==  90 ) { r = 6; }
-      else if ( rotation == 180 ) { r = 3; }
-
+      // - allocate variable
+      int r;
+      // - convert rotation of EXIF-value
+      if      ( rotation == -90 ) r = 8;
+      else if ( rotation ==  90 ) r = 6;
+      else if ( rotation == 180 ) r = 3;
+      else                        r = 1;
+      // - write to EXIF-data
       exifData["Exif.Image.Orientation"] = uint16_t(r);
     }
 
-
-    // - write EXIF-data
+    // write EXIF-data
     image->setExifData(exifData);
     image->writeMetadata();
 
