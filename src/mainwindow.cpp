@@ -1898,7 +1898,7 @@ void MainWindow::on_tW_pushButton_write_clicked()
   for ( size_t i = 0 ; i < m_data.size() ; ++i )
   {
     // - format -> filename
-    QString fname = ui->tW_lineEdit_name->text()+QString("-")+QString("%1.jpg").arg(i,N,10,QChar('0'));
+    QString fname = ui->tW_lineEdit_name->text()+QString("-")+QString("%1.jpg").arg(i+1,N,10,QChar('0'));
     QString fpath = outdir.filePath(fname);
     // - store information to JSON-struct
     // -- the camera index, if more than one camera
