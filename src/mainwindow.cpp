@@ -326,8 +326,8 @@ void MainWindow::resetApp(bool prompt)
   while ( m_dataDel.size()>0 ) { m_dataDel.pop_back(); }
 
   // Tab::Write : (re)set all widgets to default
-  ui->tW_lineEdit_date     -> clear();
-  ui->tW_lineEdit_path     -> clear();
+  ui->tW_lineEdit_date     -> setText("");
+  ui->tW_lineEdit_path     -> setText("");
   ui->tW_lineEdit_name     -> setText("sorted");
   ui->tW_checkBox_keepOrig -> setChecked(false);
   ui->tW_pushButton_write  -> setEnabled(false);
@@ -1067,6 +1067,29 @@ void MainWindow::on_tV_dateTimeEdit_editingFinished()
 
   // open a dialog to prompt how to apply the change in time (not,photo,camera,folder,all)
   DateTimeChangedDialog dialog;
+  // set time to guide the user
+  // - original time
+  {
+    // -- allocate string stream
+    std::ostringstream oss;
+    // -- convert time
+    oss << date::format("%a %Y:%m:%d %H:%M:%S", m_data[m_idx].t);
+    // -- convert to string
+    auto str = oss.str();
+    // -- apply to widget
+    dialog.setTimeOld(QString::fromStdString( str ));
+  }
+  // - new time
+  {
+    // -- allocate string stream
+    std::ostringstream oss;
+    // -- convert time
+    oss << date::format("%a %Y:%m:%d %H:%M:%S", t);
+    // -- convert to string
+    auto str = oss.str();
+    // -- apply to widget
+    dialog.setTimeNew(QString::fromStdString( str ));
+  }
 
   // launch dialog
   dialog.exec();
@@ -1121,6 +1144,29 @@ void MainWindow::on_tV_pushButton_fromJpeg_clicked()
 
   // open a dialog to prompt how to apply the change in time (not,photo,camera,folder,all)
   DateTimeChangedDialog dialog;
+  // set time to guide the user
+  // - original time
+  {
+    // -- allocate string stream
+    std::ostringstream oss;
+    // -- convert time
+    oss << date::format("%a %Y:%m:%d %H:%M:%S", m_data[m_idx].t);
+    // -- convert to string
+    auto str = oss.str();
+    // -- apply to widget
+    dialog.setTimeOld(QString::fromStdString( str ));
+  }
+  // - new time
+  {
+    // -- allocate string stream
+    std::ostringstream oss;
+    // -- convert time
+    oss << date::format("%a %Y:%m:%d %H:%M:%S", m_data[m_idx].t0);
+    // -- convert to string
+    auto str = oss.str();
+    // -- apply to widget
+    dialog.setTimeNew(QString::fromStdString( str ));
+  }
 
   // launch dialog
   dialog.exec();
@@ -1825,8 +1871,8 @@ void MainWindow::on_tW_pushButton_path_clicked()
   dialog.setViewMode (QFileDialog::List);
 
   QDir dir;
-  if (dialog.exec())
-    dir = dialog.directory();
+  if ( dialog.exec() ) dir = dialog.directory();
+  else return;
 
   ui->tW_lineEdit_path->setText(dir.absolutePath());
 

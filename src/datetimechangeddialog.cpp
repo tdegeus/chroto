@@ -1,5 +1,13 @@
+/* =================================================================================================
+
+(c - GPLv3) T.W.J. de Geus | tom@geus.me | www.geus.me | github.com/tdegeus/chroto
+
+================================================================================================= */
+
 #include "datetimechangeddialog.h"
 #include "ui_datetimechangeddialog.h"
+
+// =================================================================================================
 
 DateTimeChangedDialog::DateTimeChangedDialog(QWidget *parent) :
   QDialog(parent),
@@ -20,12 +28,32 @@ DateTimeChangedDialog::DateTimeChangedDialog(QWidget *parent) :
   connect( ui->pushButton_all   , SIGNAL(clicked(bool)), this, SLOT(close()) );
 }
 
+// =================================================================================================
+
 DateTimeChangedDialog::~DateTimeChangedDialog()
 {
   delete ui;
 }
 
+// =================================================================================================
+
 size_t DateTimeChangedDialog::getResponse()
 {
   return m_response;
 }
+
+// =================================================================================================
+
+void DateTimeChangedDialog::setTimeNew(const QString &name)
+{
+  ui->label_t->setText(name);
+}
+
+// =================================================================================================
+
+void DateTimeChangedDialog::setTimeOld(const QString &name)
+{
+  ui->label_t0->setText(name);
+}
+
+// =================================================================================================
