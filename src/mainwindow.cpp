@@ -625,7 +625,7 @@ void MainWindow::tV_view()
 
   // write basic information
   ui->tV_label_index ->setText(QString("%1 / ").arg(m_idx+1)+QString("%1").arg(m_data.size()));
-  ui->tV_label_folder->setText(m_data[m_idx].path);
+  ui->tV_label_folder->setText(m_data[m_idx].disp);
 
   // set the current time of the photo
   // - prevent signal emission
@@ -691,7 +691,7 @@ void MainWindow::tS_view(void)
 
   // fill the lists with names / icons
   for ( auto &i : m_data )
-    ui->tS_listWidget->addItem(new QListWidgetItem(m_thumnails->at(i.ithumb),i.fname));
+    ui->tS_listWidget->addItem(new QListWidgetItem(m_thumnails->at(i.ithumb),i.disp));
 
   // set background color, corresponding to the camera index
   if ( m_ncam > 1 )
@@ -916,6 +916,19 @@ void MainWindow::tF_addFiles(size_t ifol)
 
   // update app settings
   // -------------------
+
+  // find the display name
+  if ( m_data.size() > 0 )
+  {
+    // - initialize common path
+    std::string path = m_data[0].path.toStdString();
+    // - compute common path
+    for ( auto &i : m_data )
+      path = commonPath(path,i.path.toStdString());
+    // - remove path from names
+    for ( auto &i : m_data )
+      i.disp = QString::fromStdString( removePath(path,i.path.toStdString()) );
+  }
 
   // set the m_thumnails size based on the size of "m_data"
   if      ( m_data.size() <   100 ) { m_npix = 256; m_thumnails->setResolution(64); }
@@ -2244,6 +2257,55 @@ std::vector<size_t> selectedItems(QListWidget* list, bool ascending)
     std::sort(out.begin(),out.end(),[](size_t i,size_t j){return i>j;});
 
   // return list
+  return out;
+}
+
+// =================================================================================================
+
+std::string commonPath ( const std::string &path , const std::string &name )
+{
+  size_t i,N;
+
+  // copy input to output (which will be modified)
+  std::string out_path = path;
+
+  // find index for which there is still overlap: 'path[:i] == name[:i]'
+  // - zero-initialize
+  i = 0;
+  // - loop until there is no more overlap
+  while ( true )
+  {
+    if ( i >= path.size() or i >= name.size() ) break;
+    if ( path[i] != name[i] ) break;
+    ++i;
+  }
+
+  // remove from the end of the path
+  // - number of items to remove
+  N = out_path.size() - i;
+  // - remove items
+  for ( size_t j = 0 ; j < N ; ++j )
+    out_path.erase(out_path.begin()+out_path.size()-1);
+
+  // returned reduced path
+  return out_path;
+}
+
+// =================================================================================================
+
+std::string removePath ( const std::string &path , const std::string &name )
+{
+  // copy input to output (which will be modified)
+  std::string out = name;
+
+  // check
+  if ( path.size() > name.size() ) return out;
+
+  // remove path from name
+  for ( size_t i = 0 ; i < path.size() ; ++i )
+    out.erase(out.begin());
+
+  // return
   return out;
 }
 

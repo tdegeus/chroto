@@ -3,6 +3,11 @@
 Notes for developers
 ********************
 
+Todo:
+
+* Better display name
+* Resize calender
+
 Getting started
 ===============
 

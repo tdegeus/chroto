@@ -114,6 +114,7 @@ public:
   QString path      = ""   ; // absolute (complete) file-path of the file
   QString dir       = ""   ; // directory name
   QString fname     = ""   ; // file name
+  QString disp      = ""   ; // display name, constructed from (parts of) the path and the filename
   size_t  folder    = 0    ; // folder-index (corresponds to "m_tF_listWidgets")
   size_t  camera    = 0    ; // camera-index (allows several cameras in one folder)
   // rotation
@@ -142,6 +143,12 @@ public:
 
 // return selected item in a "QListWidget" as a list of indices (rows)
 std::vector<size_t> selectedItems(QListWidget* list, bool ascending=true);
+
+// find the common path between to names
+std::string commonPath ( const std::string &path , const std::string &name );
+
+// remove "path" from the beginning of "name" (no checks, purely based on length)
+std::string removePath ( const std::string &path , const std::string &name );
 
 // =================================================================================================
 // MainWindow: everything starts and ends here
