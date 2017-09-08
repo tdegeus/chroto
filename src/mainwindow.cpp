@@ -884,7 +884,7 @@ void MainWindow::tF_addFiles(size_t ifol)
     if ( !file.readinfo() )
     {
       file.rotation = 0;
-      file.t        = date::sys_seconds(std::chrono::duration<std::time_t>(finfo.created().toTime_t()));
+      file.t = date::sys_seconds(std::chrono::duration<std::time_t>(finfo.created().toTime_t()));
     }
 
     // -  if JSON file was found: overwrite information
@@ -908,8 +908,6 @@ void MainWindow::tF_addFiles(size_t ifol)
         file.rotation = static_cast<int>(jdata[finfo.fileName().toStdString()]["rotation"]);
       }
     }
-    // store original time to detect changes in time
-    file.t0 = file.t;
     // create new entry in m_thumnails list
     file.ithumb = m_thumnails->push_back(file.path,file.rotation);
     // - store in list
@@ -1035,6 +1033,25 @@ void MainWindow::tV_stopFullScreen()
 
 void MainWindow::on_tV_dateTimeEdit_editingFinished()
 {
+  // only act on correct tab, check index to continue
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx >= m_data.size()-1 ) return;
+
+  // read the time shift from the new date
+  // - read new date
+  QDateTime tm = ui->tV_dateTimeEdit->dateTime();
+  // - do not account for any time zone
+  tm.setTimeSpec(Qt::UTC);
+  // - convert to correct format
+  date::sys_seconds t = date::sys_seconds(
+    std::chrono::duration<qint64>(tm.toSecsSinceEpoch())
+  );
+  // - convert to time shift
+  std::chrono::duration<int> dt = t - m_data[m_idx].t;
+
+  // check if time is different
+  if ( t == m_data[m_idx].t ) return;
+
   // open a dialog to prompt how to apply the change in time (not,photo,camera,folder,all)
   DateTimeChangedDialog dialog;
 
@@ -1047,18 +1064,6 @@ void MainWindow::on_tV_dateTimeEdit_editingFinished()
     emit indexChanged();
     return;
   }
-
-  // read the new data
-  QDateTime tm = ui->tV_dateTimeEdit->dateTime();
-  // - do not account for any time zone
-  tm.setTimeSpec(Qt::UTC);
-  // - convert to correct format
-  date::sys_seconds t = date::sys_seconds(
-    std::chrono::duration<qint64>(tm.toSecsSinceEpoch())
-  );
-
-  // read the time shift
-  std::chrono::duration<int> dt = t - m_data[m_idx].t;
 
   // apply time shift to all (relevant) photos
   if ( dialog.getResponse() == CalResponse::Camera )
@@ -1078,6 +1083,59 @@ void MainWindow::on_tV_dateTimeEdit_editingFinished()
     for ( size_t i = 0 ; i < m_data.size() ; ++i )
       m_data[i].t += dt;
   }
+}
+
+// =================================================================================================
+
+void MainWindow::on_tV_pushButton_fromJpeg_clicked()
+{
+  // only act on correct tab, check index to continue
+  if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+  if ( m_idx >= m_data.size()-1 ) return;
+
+  // check if photo contains valid time information
+  if ( m_data[m_idx].t0.time_since_epoch().count() == 0 )
+  {
+    promptWarning("JPEG does not contain a valid time string, set time manually");
+    return;
+  }
+
+  // check if time is different
+  if ( m_data[m_idx].t == m_data[m_idx].t0 ) return;
+
+  // read the time shift
+  std::chrono::duration<int> dt = m_data[m_idx].t0 - m_data[m_idx].t;
+
+  // open a dialog to prompt how to apply the change in time (not,photo,camera,folder,all)
+  DateTimeChangedDialog dialog;
+
+  // launch dialog
+  dialog.exec();
+
+  // cancel -> do nothing
+  if ( dialog.getResponse() == CalResponse::Cancel ) return;
+
+  // apply time shift to all (relevant) photos
+  if ( dialog.getResponse() == CalResponse::Camera )
+  {
+    for ( size_t i = 0 ; i < m_data.size() ; ++i )
+      if ( m_data[i].camera == m_data[m_idx].camera )
+        m_data[i].t += dt;
+  }
+  else if ( dialog.getResponse() == CalResponse::Folder )
+  {
+    for ( size_t i = 0 ; i < m_data.size() ; ++i )
+      if ( m_data[i].folder == m_data[m_idx].folder )
+        m_data[i].t += dt;
+  }
+  else if ( dialog.getResponse() == CalResponse::All )
+  {
+    for ( size_t i = 0 ; i < m_data.size() ; ++i )
+      m_data[i].t += dt;
+  }
+
+  // refresh view with new time
+  emit indexChanged();
 }
 
 // =================================================================================================
@@ -2090,6 +2148,12 @@ bool File::readinfo()
   // - check success
   if ( code ) return false;
 
+  // convert orientation to rotation
+  rotation = 0;
+  if      ( result.Orientation==8 ) rotation = -90;
+  else if ( result.Orientation==6 ) rotation =  90;
+  else if ( result.Orientation==3 ) rotation = 180;
+
   // get time string
   std::istringstream iss;
   if      ( result.DateTimeOriginal .size() > 0 ) iss.str(result.DateTimeOriginal );
@@ -2098,18 +2162,10 @@ bool File::readinfo()
   else    { return false; }
 
   // interpret time string
-  iss >> date::parse("%Y:%m:%d %H:%M:%S", t);
+  try { iss >> date::parse("%Y:%m:%d %H:%M:%S", t); } catch ( ... ) { return false; }
 
   // copy time
   t0 = t;
-
-  // convert orientation to rotation
-  rotation = 0;
-  if      ( result.Orientation==8 ) rotation = -90;
-  else if ( result.Orientation==6 ) rotation =  90;
-  else if ( result.Orientation==3 ) rotation = 180;
-
-  writeinfo();
 
   return true;
 }
@@ -2190,5 +2246,4 @@ std::vector<size_t> selectedItems(QListWidget* list, bool ascending)
   // return list
   return out;
 }
-
 

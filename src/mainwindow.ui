@@ -21,7 +21,7 @@
        <enum>Qt::ClickFocus</enum>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -1055,6 +1055,13 @@
             </property>
             <property name="timeSpec">
              <enum>Qt::LocalTime</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="tV_pushButton_fromJpeg">
+            <property name="text">
+             <string>From JPEG</string>
             </property>
            </widget>
           </item>

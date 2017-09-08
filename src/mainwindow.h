@@ -26,15 +26,10 @@
 
 #include "datetimechangeddialog.h"
 
-// TODO: check to exclude
 #include <iostream>
 #include <iomanip>
-#include <fstream>
-#include <cstdlib>
 #include <vector>
 #include <string>
-#include <ctime>
-#include <sstream>
 #include <algorithm>
 #include <chrono>
 
@@ -45,7 +40,6 @@
 
 #ifdef WITHEXIV2
   #include "exiv2/exiv2.hpp"
-  #include <cassert>
 #endif
 
 using json = nlohmann::json;
@@ -130,9 +124,9 @@ public:
   bool    time_mod  = false; // signal if time is still in line with the rest of the photos
   bool    rot_mod   = false; // signal if the photo has been manually rotated
   size_t  ithumb           ; // index in list with thumbnails
-  //
-  date::sys_seconds t0 = date::sys_seconds(std::chrono::duration<int>(0)); // time-taken: no change on sort, can be used as reference
-  date::sys_seconds t  = date::sys_seconds(std::chrono::duration<int>(0)); // time-taken: changed on sort
+  // time
+  date::sys_seconds t0 = date::sys_seconds(std::chrono::duration<int>(0)); // read from file
+  date::sys_seconds t  = date::sys_seconds(std::chrono::duration<int>(0)); // updated on sort
 
   File            (const File &) = default;
   File& operator= (const File &) = default;
@@ -200,6 +194,7 @@ private slots:
 
   // Tab::View : navigation / (un)delete / exclude
   void on_tV_dateTimeEdit_editingFinished(); // change the data of one or batch of photos
+  void on_tV_pushButton_fromJpeg_clicked (); // set time to original
   void on_tV_pushButton_prev_clicked     (); // set "m_idx -= 1"
   void on_tV_pushButton_next_clicked     (); // set "m_idx += 1"
   void on_tV_pushButton_first_clicked    (); // set "m_idx  = 0"
