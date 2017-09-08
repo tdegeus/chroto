@@ -17,8 +17,11 @@
    <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <widget class="QTabWidget" name="tabWidget">
+      <property name="focusPolicy">
+       <enum>Qt::ClickFocus</enum>
+      </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -1025,12 +1028,33 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="tV_label_time">
-            <property name="text">
-             <string>time taken</string>
+           <widget class="QDateTimeEdit" name="tV_dateTimeEdit">
+            <property name="enabled">
+             <bool>true</bool>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::ClickFocus</enum>
+            </property>
+            <property name="displayFormat">
+             <string>yyyy-M-d HH:mm</string>
+            </property>
+            <property name="calendarPopup">
+             <bool>false</bool>
+            </property>
+            <property name="timeSpec">
+             <enum>Qt::LocalTime</enum>
             </property>
            </widget>
           </item>
@@ -1096,6 +1120,9 @@
             <width>402</width>
             <height>268</height>
            </size>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::NoFocus</enum>
           </property>
           <property name="text">
            <string/>
@@ -1585,29 +1612,15 @@
          </spacer>
         </item>
         <item>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Select time reference:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="tW_comboBox">
-            <property name="toolTip">
-             <string>Select folder to use as time reference. This can fix the absolute time to the (most) correct value, to simplify future sorts with this set</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
            <widget class="QLabel" name="label">
             <property name="text">
              <string>Earliest date:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item>
            <widget class="QLineEdit" name="tW_lineEdit_date">
             <property name="enabled">
              <bool>true</bool>

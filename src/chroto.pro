@@ -8,11 +8,14 @@ TEMPLATE = app
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
-SOURCES += main.cpp mainwindow.cpp ./easyexif/exif.cpp
+SOURCES += main.cpp mainwindow.cpp ./easyexif/exif.cpp \
+    datetimechangeddialog.cpp
 
-HEADERS += mainwindow.h ./easyexif/exif.h ./date/date.h
+HEADERS += mainwindow.h ./easyexif/exif.h ./date/date.h \
+    datetimechangeddialog.h
 
-FORMS   += mainwindow.ui
+FORMS   += mainwindow.ui \
+    datetimechangeddialog.ui
 
 RESOURCES += qdarkstyle/style.qrc
 

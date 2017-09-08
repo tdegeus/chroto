@@ -22,6 +22,9 @@
 #include <QListWidget>
 #include <QShortcut>
 #include <QTextStream>
+#include <QDateTime>
+
+#include "datetimechangeddialog.h"
 
 // TODO: check to exclude
 #include <iostream>
@@ -196,15 +199,16 @@ private slots:
   void tV_stopFullScreen();
 
   // Tab::View : navigation / (un)delete / exclude
-  void on_tV_pushButton_prev_clicked   (); // set "m_idx -= 1"
-  void on_tV_pushButton_next_clicked   (); // set "m_idx += 1"
-  void on_tV_pushButton_first_clicked  (); // set "m_idx  = 0"
-  void on_tV_pushButton_last_clicked   (); // set "m_idx  = m_data.size()-1"
-  void on_tV_pushButton_excl_clicked   (); // exclude image (take from "m_data")
-  void on_tV_pushButton_del_clicked    (); // delete  image (take from "m_data", add to "m_dataDel")
-  void on_tV_pushButton_undoDel_clicked(); // re-insert latest image from "m_dataDel" into "m_data"
-  void on_tV_pushButton_rotL_clicked   (); // rotate the photo counter-clockwise
-  void on_tV_pushButton_rotR_clicked   (); // rotate the photo clockwise
+  void on_tV_dateTimeEdit_editingFinished(); // change the data of one or batch of photos
+  void on_tV_pushButton_prev_clicked     (); // set "m_idx -= 1"
+  void on_tV_pushButton_next_clicked     (); // set "m_idx += 1"
+  void on_tV_pushButton_first_clicked    (); // set "m_idx  = 0"
+  void on_tV_pushButton_last_clicked     (); // set "m_idx  = m_data.size()-1"
+  void on_tV_pushButton_excl_clicked     (); // exclude image (take from "m_data")
+  void on_tV_pushButton_del_clicked      (); // delete image (take from "m_data" add to "m_dataDel")
+  void on_tV_pushButton_undoDel_clicked  (); // re-insert last image from "m_dataDel" into "m_data"
+  void on_tV_pushButton_rotL_clicked     (); // rotate the photo counter-clockwise
+  void on_tV_pushButton_rotR_clicked     (); // rotate the photo clockwise
 
   // Tab::Sort : view image in Tab::View on double-click
   void on_tS_listWidget_itemDoubleClicked(QListWidgetItem *item);
@@ -237,7 +241,6 @@ private slots:
   void on_tW_lineEdit_path_editingFinished(); // manually edit output path
   void on_tW_pushButton_write_clicked     (); // write sorted batch to output folder
   void on_tW_pushButton_clean_clicked     (); // remove "m_dataDel" from disk, remove empty folders
-  void on_tW_comboBox_activated(int index);   // set time reference based on folder
 
 signals:
   void thumbnailRead(); // start reading the thumbnails

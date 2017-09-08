@@ -615,6 +615,7 @@ void MainWindow::tV_view()
   ui->tV_pushButton_fullScreen -> setEnabled( m_data   .size() > 0                            );
   ui->tV_pushButton_del        -> setEnabled( m_data   .size() > 0                            );
   ui->tV_pushButton_excl       -> setEnabled( m_data   .size() > 0                            );
+  ui->tV_dateTimeEdit          -> setEnabled( m_data   .size() > 0                            );
 
   // clear currently viewed photos
   ui->tV_label->clear();
@@ -622,18 +623,19 @@ void MainWindow::tV_view()
   // check to continue
   if ( m_data.size() == 0 ) return;
 
-  // get the time as string
-  // - allocate string stream
-  std::ostringstream oss;
-  // - convert time
-  oss << date::format("%Y:%m:%d %H:%M:%S", m_data[m_idx].t);
-  // - convert to string
-  auto time_str = oss.str();
-
   // write basic information
-  ui->tV_label_index ->setText(QString("%1 / ").arg(m_idx)+QString("%1").arg(m_data.size()));
-  ui->tV_label_time  ->setText(QString::fromStdString(time_str).trimmed());
+  ui->tV_label_index ->setText(QString("%1 / ").arg(m_idx+1)+QString("%1").arg(m_data.size()));
   ui->tV_label_folder->setText(m_data[m_idx].path);
+
+  // set the current time of the photo
+  // - prevent signal emission
+  QSignalBlocker blocker( ui->tV_dateTimeEdit );
+  // - convert the Qt format
+  QDateTime t;
+  t.setTimeSpec(Qt::UTC);
+  t.setSecsSinceEpoch(m_data[m_idx].t.time_since_epoch().count());
+  // - store to widget
+  ui->tV_dateTimeEdit->setDateTime(t);
 
   // view current photo "m_idx"
   QPixmap    p(m_data[m_idx].path);
@@ -717,7 +719,6 @@ void MainWindow::tW_view()
   if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
 
   // update buttons
-  ui->tW_comboBox         -> setEnabled( m_data   .size() > 0 );
   ui->tW_pushButton_write -> setEnabled( m_data   .size() > 0 );
   ui->tW_pushButton_clean -> setEnabled( m_dataDel.size() > 0 );
 
@@ -734,19 +735,6 @@ void MainWindow::tW_view()
 
   // show the earliest date
   ui->tW_lineEdit_date->setText( QString::fromStdString(str) );
-
-  // update the list with folders to use as reference
-  // - store current index
-  int cur = ui->tW_comboBox->currentIndex();
-  // - clear the widget
-  ui->tW_comboBox->clear();
-  // - add folders
-  for ( auto &i : m_tF_lineEdits )
-    if ( i->text().size() > 0 )
-      ui->tW_comboBox->addItem( i->text() );
-  // - set index to previous value (if possible)
-  if ( cur < ui->tW_comboBox->count() )
-    ui->tW_comboBox->setCurrentIndex(cur);
 }
 
 // =================================================================================================
@@ -1041,6 +1029,55 @@ void MainWindow::tV_stopFullScreen()
 
   // emit signal to process the change
   emit indexChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_tV_dateTimeEdit_editingFinished()
+{
+  // open a dialog to prompt how to apply the change in time (not,photo,camera,folder,all)
+  DateTimeChangedDialog dialog;
+
+  // launch dialog
+  dialog.exec();
+
+  // cancel -> do nothing, and signal to refresh the view to view the original date
+  if ( dialog.getResponse() == CalResponse::Cancel )
+  {
+    emit indexChanged();
+    return;
+  }
+
+  // read the new data
+  QDateTime tm = ui->tV_dateTimeEdit->dateTime();
+  // - do not account for any time zone
+  tm.setTimeSpec(Qt::UTC);
+  // - convert to correct format
+  date::sys_seconds t = date::sys_seconds(
+    std::chrono::duration<qint64>(tm.toSecsSinceEpoch())
+  );
+
+  // read the time shift
+  std::chrono::duration<int> dt = t - m_data[m_idx].t;
+
+  // apply time shift to all (relevant) photos
+  if ( dialog.getResponse() == CalResponse::Camera )
+  {
+    for ( size_t i = 0 ; i < m_data.size() ; ++i )
+      if ( m_data[i].camera == m_data[m_idx].camera )
+        m_data[i].t += dt;
+  }
+  else if ( dialog.getResponse() == CalResponse::Folder )
+  {
+    for ( size_t i = 0 ; i < m_data.size() ; ++i )
+      if ( m_data[i].folder == m_data[m_idx].folder )
+        m_data[i].t += dt;
+  }
+  else if ( dialog.getResponse() == CalResponse::All )
+  {
+    for ( size_t i = 0 ; i < m_data.size() ; ++i )
+      m_data[i].t += dt;
+  }
 }
 
 // =================================================================================================
@@ -1705,70 +1742,6 @@ void MainWindow::on_tS_pushButton_Fsync_clicked()
 
 // =================================================================================================
 
-void MainWindow::on_tW_comboBox_activated(int index)
-{
-  // only act on correct tab, non-empty m_data, selected folder
-  if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
-  if ( index < 0 ) return;
-  if ( m_data.size() == 0 ) return;
-
-  // local variables
-  std::chrono::duration<int> dt = std::chrono::duration<int>(0); // time difference
-  int         sign = 0; // sign of the time difference (std::time_t can only be positive)
-
-  // try to find reference image in selected folder, and extract time difference between the
-  // time as a result of sorting, and the original time of the image
-  for ( auto &i : m_data ) {
-    if ( static_cast<int>(i.folder) == index ) {
-      if ( i.t > i.t0 ) {
-        dt   = i.t - i.t0;
-        sign = -1;
-        break;
-      }
-      else if ( i.t <= i.t0 ) {
-        dt   = i.t0 - i.t;
-        sign = +1;
-        break;
-      }
-    }
-  }
-
-  if ( sign == 0 ) {
-    promptWarning("All images have been manually modified, consider using different folder");
-    for ( auto &i : m_data ) {
-      if ( static_cast<int>(i.folder) == index ) {
-        if ( i.t > i.t0 ) {
-          dt   = i.t - i.t0;
-          sign = -1;
-          break;
-        }
-        else if ( i.t <= i.t0 ) {
-          dt   = i.t0 - i.t;
-          sign = +1;
-          break;
-        }
-      }
-    }
-  }
-
-  // change the time of the sorted set
-  if ( sign == 0 ) {
-    promptWarning("Folder contains no image that can serve as reference, please select another");
-    return;
-  }
-
-  if ( sign == +1 ) {
-    for ( auto &i : m_data )
-      i.t += dt;
-  }
-  else if ( sign == -1 ) {
-    for ( auto &i : m_data )
-      i.t -= dt;
-  }
-}
-
-// =================================================================================================
-
 void MainWindow::on_tW_pushButton_path_clicked()
 {
   // only act on correct tab
@@ -2218,5 +2191,4 @@ std::vector<size_t> selectedItems(QListWidget* list, bool ascending)
   return out;
 }
 
-// =================================================================================================
 
