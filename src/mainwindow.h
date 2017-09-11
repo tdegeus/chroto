@@ -32,6 +32,7 @@
 #include <string>
 #include <algorithm>
 #include <chrono>
+#include <cassert>
 
 #include "cppcolormap/cppcolormap.h"
 #include "easyexif/exif.h"
@@ -134,7 +135,7 @@ public:
   File(){}
 
   bool readinfo();
-  void writeinfo();
+  bool writeinfo();
 };
 
 // =================================================================================================
@@ -144,11 +145,12 @@ public:
 // return selected item in a "QListWidget" as a list of indices (rows)
 std::vector<size_t> selectedItems(QListWidget* list, bool ascending=true);
 
-// find the common path between to names
-std::string commonPath ( const std::string &path , const std::string &name );
+// find the common path between to names (and rewind until a specific deliminator, e.g. "/")
+std::string commonPath(const std::string &path, const std::string &name);
+std::string commonPath(const std::string &path, const std::string &name, const std::string &delim);
 
 // remove "path" from the beginning of "name" (no checks, purely based on length)
-std::string removePath ( const std::string &path , const std::string &name );
+std::string removePath(const std::string &path, const std::string &name);
 
 // =================================================================================================
 // MainWindow: everything starts and ends here

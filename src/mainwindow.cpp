@@ -924,7 +924,7 @@ void MainWindow::tF_addFiles(size_t ifol)
     std::string path = m_data[0].path.toStdString();
     // - compute common path
     for ( auto &i : m_data )
-      path = commonPath(path,i.path.toStdString());
+      path = commonPath(path,i.path.toStdString(),"/");
     // - remove path from names
     for ( auto &i : m_data )
       i.disp = QString::fromStdString( removePath(path,i.path.toStdString()) );
@@ -1934,9 +1934,6 @@ void MainWindow::on_tW_pushButton_write_clicked()
   // convert to unique list
   m_cleanPaths.unique();
 
-  // logical to signal that the time and rotation are directly stored to the EXIF-data
-  bool writeTime = ui->tW_checkBox_exif->isVisible() and ui->tW_checkBox_exif->isChecked();
-
   // write output
   // - allocate JSON-struct
   json j;
@@ -1946,12 +1943,16 @@ void MainWindow::on_tW_pushButton_write_clicked()
     // - format -> filename
     QString fname = ui->tW_lineEdit_name->text()+QString("-")+QString("%1.jpg").arg(i+1,N,10,QChar('0'));
     QString fpath = outdir.filePath(fname);
+    // - write EXIF-data directly to JPEG
+    if ( ui->tW_checkBox_exif->isVisible() and ui->tW_checkBox_exif->isChecked() )
+      m_data[i].writeinfo();
     // - store information to JSON-struct
     // -- the camera index, if more than one camera
     if ( m_ncam > 1 )
       j[fname.toStdString()]["camera"] = m_data[i].camera;
     // -- the new time, if time is unequal to the original time
-    if ( m_data[i].t != m_data[i].t0 and !writeTime ) {
+    if ( m_data[i].t != m_data[i].t0 )
+    {
       // - allocate string stream
       std::ostringstream oss;
       // - convert time
@@ -1964,8 +1965,6 @@ void MainWindow::on_tW_pushButton_write_clicked()
     // -- the rotation, if manually modified
     if ( m_data[i].rot_mod )
       j[fname.toStdString()]["rotation"] = m_data[i].rotation;
-    // - write EXIF-data, if selected
-    if ( writeTime ) m_data[i].writeinfo();
     // - copy or move
     if ( ui->tW_checkBox_keepOrig->isChecked() ) { QFile::copy(  m_data[i].path,fpath); }
     else                                         { QFile::rename(m_data[i].path,fpath); }
@@ -2179,105 +2178,170 @@ void Thumbnails::read()
 
 bool File::readinfo()
 {
-  // read JPEG-file into a buffer
-  // - open file
-  FILE *fid = std::fopen(path.toStdString().c_str(),"rb");
-  // - check success
-  if (!fid) return false;
-  // - read size
-  fseek(fid, 0, SEEK_END);
-  unsigned long fsize = ftell(fid);
-  rewind(fid);
-  // - read to buffer
-  unsigned char *buf = new unsigned char[fsize];
-  if (fread(buf, 1, fsize, fid) != fsize) {
+  #ifdef WITHEXIV2
+    try
+    {
+
+      Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(path.toStdString().c_str());
+
+      if ( image.get() == 0 ) return false;
+
+      image->readMetadata();
+
+      Exiv2::ExifData &exifData = image->exifData();
+
+      if ( exifData.empty() ) return false;
+
+      try
+      {
+        Exiv2::Exifdatum& tag = exifData["Exif.Photo.DateTimeOriginal"];
+        std::string str = tag.toString();
+
+        std::istringstream iss{str};
+        iss >> date::parse("%Y:%m:%d %H:%M:%S", t);
+
+        t0 = t;
+      }
+      catch ( ... )
+      {
+        return false;
+      }
+
+      try
+      {
+        Exiv2::Exifdatum &tag = exifData["Exif.Image.Orientation"];
+        long rot = tag.toLong();
+
+        rotation = 0;
+        if      ( rot==8 ) rotation = -90;
+        else if ( rot==6 ) rotation =  90;
+        else if ( rot==3 ) rotation = 180;
+      }
+      catch ( ... )
+      {
+        return false;
+      }
+
+      return true;
+    }
+    catch ( ... )
+    {
+  #endif
+
+    // read JPEG-file into a buffer
+    // - open file
+    FILE *fid = std::fopen(path.toStdString().c_str(),"rb");
+    // - check success
+    if (!fid) return false;
+    // - read size
+    fseek(fid, 0, SEEK_END);
+    unsigned long fsize = ftell(fid);
+    rewind(fid);
+    // - read to buffer
+    unsigned char *buf = new unsigned char[fsize];
+    if (fread(buf, 1, fsize, fid) != fsize) {
+      delete[] buf;
+      return false;
+    }
+    // - close file
+    fclose(fid);
+
+    // parse EXIF
+    // - allocate
+    easyexif::EXIFInfo result;
+    // - parse
+    int code = result.parseFrom(buf, fsize);
+    // - release buffer
     delete[] buf;
-    return false;
-  }
-  // - close file
-  fclose(fid);
+    // - check success
+    if ( code ) return false;
 
-  // parse EXIF
-  // - allocate
-  easyexif::EXIFInfo result;
-  // - parse
-  int code = result.parseFrom(buf, fsize);
-  // - release buffer
-  delete[] buf;
-  // - check success
-  if ( code ) return false;
+    // convert orientation to rotation
+    rotation = 0;
+    if      ( result.Orientation==8 ) rotation = -90;
+    else if ( result.Orientation==6 ) rotation =  90;
+    else if ( result.Orientation==3 ) rotation = 180;
 
-  // convert orientation to rotation
-  rotation = 0;
-  if      ( result.Orientation==8 ) rotation = -90;
-  else if ( result.Orientation==6 ) rotation =  90;
-  else if ( result.Orientation==3 ) rotation = 180;
+    // get time string
+    std::istringstream iss;
+    if      ( result.DateTimeOriginal .size() > 0 ) iss.str(result.DateTimeOriginal );
+    else if ( result.DateTime         .size() > 0 ) iss.str(result.DateTime         );
+    else if ( result.DateTimeDigitized.size() > 0 ) iss.str(result.DateTimeDigitized);
+    else    { return false; }
 
-  // get time string
-  std::istringstream iss;
-  if      ( result.DateTimeOriginal .size() > 0 ) iss.str(result.DateTimeOriginal );
-  else if ( result.DateTime         .size() > 0 ) iss.str(result.DateTime         );
-  else if ( result.DateTimeDigitized.size() > 0 ) iss.str(result.DateTimeDigitized);
-  else    { return false; }
+    // interpret time string
+    try { iss >> date::parse("%Y:%m:%d %H:%M:%S", t); } catch ( ... ) { return false; }
 
-  // interpret time string
-  try { iss >> date::parse("%Y:%m:%d %H:%M:%S", t); } catch ( ... ) { return false; }
+    // copy time
+    t0 = t;
 
-  // copy time
-  t0 = t;
+    return true;
 
-  return true;
+  #ifdef WITHEXIV2
+    }
+  #endif
 }
 
 // =================================================================================================
 
-void File::writeinfo()
+bool File::writeinfo()
 {
   #ifdef WITHEXIV2
 
     // do nothing if nothing was changed
-    if ( t == t0 and !rot_mod ) return;
+    if ( t == t0 and !rot_mod ) return true;
 
-    // read EXIF-data
-    // - open image
-    Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(path.toStdString());
-    // - check read
-    if ( image.get() == 0 ) return;
-    // - read EXIF-data
-    image->readMetadata();
-    // - create pointer
-    Exiv2::ExifData &exifData = image->exifData();
-
-    // change time (if needed)
-    if ( t != t0 )
+    try
     {
-      // - allocate string stream
-      std::ostringstream oss;
-      // - convert time
-      oss << date::format("%Y:%m:%d %H:%M:%S", t);
-      // - convert to string
-      auto str = oss.str();
-      // - write to EXIF-data
-      exifData["Exif.Photo.DateTimeOriginal"] = str;
-    }
+      // read EXIF-data
+      // - open image
+      Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(path.toStdString());
+      // - check read
+      if ( image.get() == 0 ) return false;
+      // - read EXIF-data
+      image->readMetadata();
+      // - create pointer
+      Exiv2::ExifData &exifData = image->exifData();
+      // - check
+      if ( exifData.empty() ) return false;
 
-    // change rotation (if needed)
-    if ( rot_mod )
+      // change time (if needed)
+      if ( t != t0 )
+      {
+        // - allocate string stream
+        std::ostringstream oss;
+        // - convert time
+        oss << date::format("%Y:%m:%d %H:%M:%S", t);
+        // - convert to string
+        auto str = oss.str();
+        // - write to EXIF-data
+        exifData["Exif.Photo.DateTimeOriginal"] = str;
+      }
+
+      // change rotation (if needed)
+      if ( rot_mod )
+      {
+        // - allocate variable
+        int r;
+        // - convert rotation of EXIF-value
+        if      ( rotation == -90 ) r = 8;
+        else if ( rotation ==  90 ) r = 6;
+        else if ( rotation == 180 ) r = 3;
+        else                        r = 1;
+        // - write to EXIF-data
+        exifData["Exif.Image.Orientation"] = uint16_t(r);
+      }
+
+      // write EXIF-data
+      image->setExifData(exifData);
+      image->writeMetadata();
+
+      return true;
+    }
+    catch ( ... )
     {
-      // - allocate variable
-      int r;
-      // - convert rotation of EXIF-value
-      if      ( rotation == -90 ) r = 8;
-      else if ( rotation ==  90 ) r = 6;
-      else if ( rotation == 180 ) r = 3;
-      else                        r = 1;
-      // - write to EXIF-data
-      exifData["Exif.Image.Orientation"] = uint16_t(r);
+      return false;
     }
-
-    // write EXIF-data
-    image->setExifData(exifData);
-    image->writeMetadata();
 
   #endif
 }
@@ -2308,7 +2372,7 @@ std::vector<size_t> selectedItems(QListWidget* list, bool ascending)
 
 // =================================================================================================
 
-std::string commonPath ( const std::string &path , const std::string &name )
+std::string commonPath (const std::string &path, const std::string &name)
 {
   size_t i,N;
 
@@ -2339,7 +2403,45 @@ std::string commonPath ( const std::string &path , const std::string &name )
 
 // =================================================================================================
 
-std::string removePath ( const std::string &path , const std::string &name )
+std::string commonPath (const std::string &path, const std::string &name, const std::string &delim)
+{
+  assert( delim.size() == 1 );
+
+  size_t i,N;
+
+  // copy input to output (which will be modified)
+  std::string out_path = path;
+
+  // find index for which there is still overlap: 'path[:i] == name[:i]'
+  // - zero-initialize
+  i = 0;
+  // - loop until there is no more overlap
+  while ( true )
+  {
+    if ( i >= path.size() or i >= name.size() ) break;
+    if ( path[i] != name[i] ) break;
+    ++i;
+  }
+
+  // rewind until deliminator
+  for (  ; i > 0 ; --i )
+    if ( path[i] == delim[0] )
+      break;
+
+  // remove from the end of the path
+  // - number of items to remove
+  N = out_path.size() - i - 1;
+  // - remove items
+  for ( size_t j = 0 ; j < N ; ++j )
+    out_path.erase(out_path.begin()+out_path.size()-1);
+
+  // returned reduced path
+  return out_path;
+}
+
+// =================================================================================================
+
+std::string removePath (const std::string &path, const std::string &name)
 {
   // copy input to output (which will be modified)
   std::string out = name;
