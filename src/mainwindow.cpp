@@ -1937,6 +1937,9 @@ void MainWindow::on_tW_pushButton_write_clicked()
   // write output
   // - allocate JSON-struct
   json j;
+  // - logical to write EXIF-data directly to JPEG
+  bool writeExif = ( ui->tW_checkBox_exif->isVisible() and ui->tW_checkBox_exif->isChecked() );
+  bool written;
   // - loop over photos
   for ( size_t i = 0 ; i < m_data.size() ; ++i )
   {
@@ -1944,14 +1947,28 @@ void MainWindow::on_tW_pushButton_write_clicked()
     QString fname = ui->tW_lineEdit_name->text()+QString("-")+QString("%1.jpg").arg(i+1,N,10,QChar('0'));
     QString fpath = outdir.filePath(fname);
     // - write EXIF-data directly to JPEG
-    if ( ui->tW_checkBox_exif->isVisible() and ui->tW_checkBox_exif->isChecked() )
+    if ( writeExif )
+    {
+      // -- write
       m_data[i].writeinfo();
+      // -- temporary copy of file definition
+      File f = m_data[i];
+      // -- re-read EXIF-data
+      written = f.readinfo();
+      // -- check if the storage of the time was successful
+      if ( written ) written = f.t == m_data[i].t;
+    }
+    else
+    {
+      // -- EXIF-data not written -> do not check, always write to JSON
+      written = false;
+    }
     // - store information to JSON-struct
     // -- the camera index, if more than one camera
     if ( m_ncam > 1 )
       j[fname.toStdString()]["camera"] = m_data[i].camera;
     // -- the new time, if time is unequal to the original time
-    if ( m_data[i].t != m_data[i].t0 )
+    if ( m_data[i].t != m_data[i].t0 and !written )
     {
       // - allocate string stream
       std::ostringstream oss;
@@ -1963,7 +1980,7 @@ void MainWindow::on_tW_pushButton_write_clicked()
       j[fname.toStdString()]["time"] = str;
     }
     // -- the rotation, if manually modified
-    if ( m_data[i].rot_mod )
+    if ( m_data[i].rot_mod and !written )
       j[fname.toStdString()]["rotation"] = m_data[i].rotation;
     // - copy or move
     if ( ui->tW_checkBox_keepOrig->isChecked() ) { QFile::copy(  m_data[i].path,fpath); }
@@ -2178,9 +2195,14 @@ void Thumbnails::read()
 
 bool File::readinfo()
 {
+  // read data/time and rotation:
+  // - try to read using "exiv2", fall back on "easyexif"
+  // - if "exiv2" is not present at compile time the first step is completely ignored
   #ifdef WITHEXIV2
     try
     {
+      // read using "exiv2"
+      // ------------------
 
       Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(path.toStdString().c_str());
 
@@ -2192,6 +2214,7 @@ bool File::readinfo()
 
       if ( exifData.empty() ) return false;
 
+      // read the data/time
       try
       {
         Exiv2::Exifdatum& tag = exifData["Exif.Photo.DateTimeOriginal"];
@@ -2207,6 +2230,7 @@ bool File::readinfo()
         return false;
       }
 
+      // read the rotation
       try
       {
         Exiv2::Exifdatum &tag = exifData["Exif.Image.Orientation"];
@@ -2228,54 +2252,57 @@ bool File::readinfo()
     {
   #endif
 
-    // read JPEG-file into a buffer
-    // - open file
-    FILE *fid = std::fopen(path.toStdString().c_str(),"rb");
-    // - check success
-    if (!fid) return false;
-    // - read size
-    fseek(fid, 0, SEEK_END);
-    unsigned long fsize = ftell(fid);
-    rewind(fid);
-    // - read to buffer
-    unsigned char *buf = new unsigned char[fsize];
-    if (fread(buf, 1, fsize, fid) != fsize) {
+      // read using "easyexif"
+      // ---------------------
+
+      // read JPEG-file into a buffer
+      // - open file
+      FILE *fid = std::fopen(path.toStdString().c_str(),"rb");
+      // - check success
+      if (!fid) return false;
+      // - read size
+      fseek(fid, 0, SEEK_END);
+      unsigned long fsize = ftell(fid);
+      rewind(fid);
+      // - read to buffer
+      unsigned char *buf = new unsigned char[fsize];
+      if (fread(buf, 1, fsize, fid) != fsize) {
+        delete[] buf;
+        return false;
+      }
+      // - close file
+      fclose(fid);
+
+      // parse EXIF
+      // - allocate
+      easyexif::EXIFInfo result;
+      // - parse
+      int code = result.parseFrom(buf, fsize);
+      // - release buffer
       delete[] buf;
-      return false;
-    }
-    // - close file
-    fclose(fid);
+      // - check success
+      if ( code ) return false;
 
-    // parse EXIF
-    // - allocate
-    easyexif::EXIFInfo result;
-    // - parse
-    int code = result.parseFrom(buf, fsize);
-    // - release buffer
-    delete[] buf;
-    // - check success
-    if ( code ) return false;
+      // convert orientation to rotation
+      rotation = 0;
+      if      ( result.Orientation==8 ) rotation = -90;
+      else if ( result.Orientation==6 ) rotation =  90;
+      else if ( result.Orientation==3 ) rotation = 180;
 
-    // convert orientation to rotation
-    rotation = 0;
-    if      ( result.Orientation==8 ) rotation = -90;
-    else if ( result.Orientation==6 ) rotation =  90;
-    else if ( result.Orientation==3 ) rotation = 180;
+      // get time string
+      std::istringstream iss;
+      if      ( result.DateTimeOriginal .size() > 0 ) iss.str(result.DateTimeOriginal );
+      else if ( result.DateTime         .size() > 0 ) iss.str(result.DateTime         );
+      else if ( result.DateTimeDigitized.size() > 0 ) iss.str(result.DateTimeDigitized);
+      else    { return false; }
 
-    // get time string
-    std::istringstream iss;
-    if      ( result.DateTimeOriginal .size() > 0 ) iss.str(result.DateTimeOriginal );
-    else if ( result.DateTime         .size() > 0 ) iss.str(result.DateTime         );
-    else if ( result.DateTimeDigitized.size() > 0 ) iss.str(result.DateTimeDigitized);
-    else    { return false; }
+      // interpret time string
+      try { iss >> date::parse("%Y:%m:%d %H:%M:%S", t); } catch ( ... ) { return false; }
 
-    // interpret time string
-    try { iss >> date::parse("%Y:%m:%d %H:%M:%S", t); } catch ( ... ) { return false; }
+      // copy time
+      t0 = t;
 
-    // copy time
-    t0 = t;
-
-    return true;
+      return true;
 
   #ifdef WITHEXIV2
     }
