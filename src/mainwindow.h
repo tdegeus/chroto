@@ -23,6 +23,7 @@
 #include <QShortcut>
 #include <QTextStream>
 #include <QDateTime>
+#include <QApplication>
 
 #include "datetimechangeddialog.h"
 

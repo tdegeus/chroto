@@ -908,10 +908,17 @@ void MainWindow::tF_addFiles(size_t ifol)
         file.rotation = static_cast<int>(jdata[finfo.fileName().toStdString()]["rotation"]);
       }
     }
-    // create new entry in m_thumnails list
+    // - create new entry in m_thumnails list
     file.ithumb = m_thumnails->push_back(file.path,file.rotation);
     // - store in list
     m_data.push_back(file);
+
+    // show progress
+    QString text;
+    int     frac = static_cast<int>(static_cast<double>(i+1)/static_cast<double>(N));
+    text = QString("Reading, %1\% complete").arg(frac);
+    ui->statusBar->showMessage(text);
+    qApp->processEvents();
   }
 
   // update app settings
@@ -1985,7 +1992,19 @@ void MainWindow::on_tW_pushButton_write_clicked()
     // - copy or move
     if ( ui->tW_checkBox_keepOrig->isChecked() ) { QFile::copy(  m_data[i].path,fpath); }
     else                                         { QFile::rename(m_data[i].path,fpath); }
+
+    // show progress
+    QString text;
+    int     frac = static_cast<int>(static_cast<double>(i+1)/static_cast<double>(m_data.size()));
+    text = QString("Writing, %1\% complete").arg(frac);
+    ui->statusBar->showMessage(text);
+    qApp->processEvents();
   }
+
+  // write message
+  QString text;
+  text = QString("Written %1 files").arg(m_data.size());
+  ui->statusBar->showMessage(text);
 
   // store "PATH/chroto.json"
   QString fpath = outdir.filePath("chroto.json");
@@ -2035,6 +2054,11 @@ void MainWindow::on_tW_pushButton_clean_clicked()
     if ( QDir(dir).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).isEmpty() )
       QDir(dir).removeRecursively();
   }
+
+  // write message
+  QString text;
+  text = QString("Deleted %1 files").arg(m_dataDel.size());
+  ui->statusBar->showMessage(text);
 
   // clear lists
   while ( m_cleanPaths.size()>0 ) m_cleanPaths.erase(m_cleanPaths.begin());
