@@ -729,7 +729,7 @@ void MainWindow::tW_view()
   // - allocate string stream
   std::ostringstream oss;
   // - convert time
-  oss << date::format("%Y:%m:%d %H:%M:%S", m_data[0].t);
+  oss << date::format("%Y-%m-%d", m_data[0].t);
   // - convert to string
   auto str = oss.str();
 
@@ -843,7 +843,7 @@ void MainWindow::tF_addFiles(size_t ifol)
   else                 return;
   // - store new suggested directory
   try         { m_workDir = dir.filePath("../"); }
-  catch (...) { m_workDir = m_workDir;             }
+  catch (...) { m_workDir = m_workDir;           }
 
   // read files: all "*.jpg" files and if it exists "chroto.json"
   // - set filters
