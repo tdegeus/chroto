@@ -450,7 +450,7 @@ void MainWindow::dataUpdate()
     for ( size_t i = 0 ; i < m_data.size() ; ++i ) m_data[i].index = i;
     // - sort chronologically (if the times are identical retain existing order)
     std::sort(m_data.begin(),m_data.end(),
-      [](OldFile i,OldFile j){
+      [](File i,File j){
         if ( i.t == j.t ) return i.index < j.index;
         else              return i.t     < j.t;
     });
@@ -873,8 +873,8 @@ void MainWindow::tF_addFiles(size_t ifol)
   {
     // - extract file from list
     QFileInfo finfo = lst_jpeg.at(i);
-    // - store information to "OldFile" instance
-    OldFile file;
+    // - store information to "File" instance
+    File file;
     file.camera = m_ncam;
     file.folder = ifol;
     file.fname  = finfo.fileName();
@@ -982,7 +982,7 @@ void MainWindow::tF_nameSort(size_t ifol)
 
   // apply selective sort, based on file-name
   std::sort(m_data.begin(),m_data.end(),
-    [](OldFile i,OldFile j){
+    [](File i,File j){
       if ( i.sort && j.sort ) { return i.path.toStdString()<j.path.toStdString(); }
       else                    { return i.index             <j.index             ; }
   });
@@ -1959,7 +1959,7 @@ void MainWindow::on_tW_pushButton_write_clicked()
       // -- write
       m_data[i].writeinfo();
       // -- temporary copy of file definition
-      OldFile f = m_data[i];
+      File f = m_data[i];
       // -- re-read EXIF-data
       written = f.readinfo();
       // -- check if the storage of the time was successful
@@ -2066,408 +2066,6 @@ void MainWindow::on_tW_pushButton_clean_clicked()
 
   // disable button (enabled when m_data is added)
   ui->tW_pushButton_clean->setEnabled(false);
-}
-
-// =================================================================================================
-// File class - functions
-// =================================================================================================
-
-QIcon File::thumbnail()
-{
-  if ( m_thumb_r ) return m_thumb;
-
-  QPixmap out(m_npix,m_npix);
-  out.fill(QColor("white"));
-
-  return QIcon(out);
-}
-
-// =================================================================================================
-
-bool File::readinfo()
-{
-  // read data/time and rotation:
-  // - try to read using "exiv2", fall back on "easyexif"
-  // - if "exiv2" is not present at compile time the first step is completely ignored
-  #ifdef WITHEXIV2
-    try
-    {
-      // read using "exiv2"
-      // ------------------
-
-      Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(m_path.toStdString().c_str());
-
-      if ( image.get() == 0 ) return false;
-
-      image->readMetadata();
-
-      Exiv2::ExifData &exifData = image->exifData();
-
-      if ( exifData.empty() ) return false;
-
-      // read the data/time
-      try
-      {
-        Exiv2::Exifdatum& tag = exifData["Exif.Photo.DateTimeOriginal"];
-        std::string str = tag.toString();
-
-        std::istringstream iss{str};
-        iss >> date::parse("%Y:%m:%d %H:%M:%S", m_t);
-
-        m_t0 = m_t;
-      }
-      catch ( ... )
-      {
-        return false;
-      }
-
-      // read the rotation
-      try
-      {
-        Exiv2::Exifdatum &tag = exifData["Exif.Image.Orientation"];
-        long rot = tag.toLong();
-
-        m_rot = 0;
-        if      ( rot==8 ) m_rot = -90;
-        else if ( rot==6 ) m_rot =  90;
-        else if ( rot==3 ) m_rot = 180;
-      }
-      catch ( ... )
-      {
-        return false;
-      }
-
-      return true;
-    }
-    catch ( ... )
-    {
-  #endif
-
-      // read using "easyexif"
-      // ---------------------
-
-      // read JPEG-file into a buffer
-      // - open file
-      FILE *fid = std::fopen(m_path.toStdString().c_str(),"rb");
-      // - check success
-      if (!fid) return false;
-      // - read size
-      fseek(fid, 0, SEEK_END);
-      unsigned long fsize = ftell(fid);
-      rewind(fid);
-      // - read to buffer
-      unsigned char *buf = new unsigned char[fsize];
-      if (fread(buf, 1, fsize, fid) != fsize) {
-        delete[] buf;
-        return false;
-      }
-      // - close file
-      fclose(fid);
-
-      // parse EXIF
-      // - allocate
-      easyexif::EXIFInfo result;
-      // - parse
-      int code = result.parseFrom(buf, fsize);
-      // - release buffer
-      delete[] buf;
-      // - check success
-      if ( code ) return false;
-
-      // convert orientation to rotation
-      m_rot = 0;
-      if      ( result.Orientation==8 ) m_rot = -90;
-      else if ( result.Orientation==6 ) m_rot =  90;
-      else if ( result.Orientation==3 ) m_rot = 180;
-
-      // get time string
-      std::istringstream iss;
-      if      ( result.DateTimeOriginal .size() > 0 ) iss.str(result.DateTimeOriginal );
-      else if ( result.DateTime         .size() > 0 ) iss.str(result.DateTime         );
-      else if ( result.DateTimeDigitized.size() > 0 ) iss.str(result.DateTimeDigitized);
-      else    { return false; }
-
-      // interpret time string
-      try { iss >> date::parse("%Y:%m:%d %H:%M:%S", m_t); } catch ( ... ) { return false; }
-
-      // copy time
-      m_t0 = m_t;
-
-      return true;
-
-  #ifdef WITHEXIV2
-    }
-  #endif
-}
-
-// =================================================================================================
-
-bool File::writeinfo()
-{
-  #ifdef WITHEXIV2
-
-    // do nothing if nothing was changed
-    if ( !timeModified() and !rotationModified() ) return true;
-
-    try
-    {
-      // read EXIF-data
-      // - open image
-      Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(m_path.toStdString());
-      // - check read
-      if ( image.get() == 0 ) return false;
-      // - read EXIF-data
-      image->readMetadata();
-      // - create pointer
-      Exiv2::ExifData &exifData = image->exifData();
-      // - check
-      if ( exifData.empty() ) return false;
-
-      // change time (if needed)
-      if ( timeModified() )
-      {
-        // - allocate string stream
-        std::ostringstream oss;
-        // - convert time
-        oss << date::format("%Y:%m:%d %H:%M:%S", m_t);
-        // - convert to string
-        auto str = oss.str();
-        // - write to EXIF-data
-        exifData["Exif.Photo.DateTimeOriginal"] = str;
-      }
-
-      // change rotation (if needed)
-      if ( rotationModified() )
-      {
-        // - allocate variable
-        int r;
-        // - convert rotation of EXIF-value
-        if      ( m_rot == -90 ) r = 8;
-        else if ( m_rot ==  90 ) r = 6;
-        else if ( m_rot == 180 ) r = 3;
-        else                     r = 1;
-        // - write to EXIF-data
-        exifData["Exif.Image.Orientation"] = uint16_t(r);
-      }
-
-      // write EXIF-data
-      image->setExifData(exifData);
-      image->writeMetadata();
-
-      return true;
-    }
-    catch ( ... )
-    {
-      return false;
-    }
-
-  #endif
-}
-
-// =================================================================================================
-// Files class - functions
-// =================================================================================================
-
-void Files::push_back(File file)
-{
-  m_data.push_back(file);
-
-  m_ncam = std::max(m_ncam,file.camera()+1);
-  m_nfol = std::max(m_nfol,file.folder()+1);
-}
-
-// =================================================================================================
-
-void Files::erase(std::vector<size_t> index)
-{
-  m_stop = true;
-
-  std::sort(index.begin(),index.end(),[](size_t i,size_t j){return i>j;});
-
-  for ( auto &i : index ) m_data.erase(m_data.begin()+i);
-}
-
-// =================================================================================================
-
-void Files::empty()
-{
-  m_stop = true;
-
-  while ( m_data.size()>0 ) m_data.erase(m_data.begin());
-
-  m_busy = false;
-}
-
-// =================================================================================================
-
-void Files::setThumbnailResolution( size_t N )
-{
-  for ( auto &i : m_data ) i.setThumbnailResolution(N);
-}
-
-// =================================================================================================
-
-void Files::read()
-{
-  m_busy = true ;
-  m_stop = false;
-
-  // - loop over all photos
-  for ( auto &i : m_data )
-  {
-    // -- break the loop if requested externally
-    if ( m_stop || QThread::currentThread()->isInterruptionRequested() ) {
-      m_busy = false;
-      m_stop = false;
-      return;
-    }
-
-    // -- read if not read before: account for pre-specified m_rotation
-    //    (obtained from the EXIF-data in "MainWindow" below)
-    if ( !i.thumbnailRead() )
-    {
-      QMatrix rot;
-      rot.rotate(i.rotation());
-
-      size_t  N = i.thumbnailResolution();
-      QPixmap pix(i.path());
-      pix.scaled(N,N,Qt::KeepAspectRatio, Qt::FastTransformation);
-
-      if ( m_stop ) {
-        m_busy = false;
-        m_stop = false;
-        return;
-      }
-
-      i.setThumbnail(QIcon(QPixmap(pix.transformed(rot))));
-    }
-  }
-
-  // - transmit that all images have been read
-  m_busy = false;
-  m_stop = false;
-  emit completed();
-}
-
-// =================================================================================================
-
-size_t Files::sort(size_t idx)
-{
-  if ( m_data.size() == 0 ) return 0;
-
-  // store current order, to retrieve the new position of "idx"
-  for ( size_t i = 0 ; i < m_data.size() ; ++i ) m_data[i].setIndex(i);
-
-  // sort chronologically (if the times are identical retain existing order)
-  std::sort(m_data.begin(),m_data.end(),
-    [](File i,File j){
-      if ( i.time() == j.time() ) return i.index() < j.index();
-      else                        return i.time () < j.time ();
-  });
-
-  // make sure that all photos are at least one second apart (to allow image insertion)
-  for ( size_t i = 0 ; i < m_data.size()-1 ; ++i )
-    if ( m_data[i+1].time() <= m_data[i].time() )
-      m_data[i+1].setTime(m_data[i].time()+std::chrono::duration<int>(1));
-
-  // locate new position of "idx"
-  for ( size_t i = 0 ; i < m_data.size() ; ++i )
-    if ( m_data[i].index() == idx )
-      return i;
-
-  return 0;
-}
-
-// =================================================================================================
-
-size_t Files::sortName(size_t idx, size_t folder)
-{
-  if ( m_data.size() == 0 ) return 0;
-
-  // only sort for this folder
-  for ( auto &i : m_data ) {
-    if ( i.folder() == folder ) i.setSort(true );
-    else                        i.setSort(false);
-  }
-
-  // store current order, to retrieve the new position of "idx"
-  for ( size_t i = 0 ; i < m_data.size() ; ++i ) m_data[i].setIndex(i);
-
-  // apply selective sort, based on file-name
-  std::sort(m_data.begin(),m_data.end(),
-    [](File i,File j){
-      if ( i.sort() and j.sort() ) return i.path().toStdString() < j.path().toStdString();
-      else                         return i.index()              < j.index()             ;
-  });
-
-  // update time such that the sorted list is also in chronological order
-  // N.B. since the real time is unknown an assumption is made
-  for ( size_t i = 0 ; i < m_data.size()-1 ; ++i )
-    if ( m_data[i+1].time() <= m_data[i].time() )
-      m_data[i+1].setTime(m_data[i].time()+std::chrono::duration<int>(1));
-
-  // locate new position of "idx"
-  for ( size_t i = 0 ; i < m_data.size() ; ++i )
-    if ( m_data[i].index() == idx )
-      return i;
-
-  return 0;
-}
-
-// =================================================================================================
-
-void Files::renumberCamera()
-{
-  if ( m_data.size() == 0 ) return;
-
-  // logical list: 1 == camera is currently in use; 0 == camera is not in use (default)
-  std::vector<int> cam( m_data.size() , 0 );
-  // fill
-  for ( auto &i : m_data ) cam[i.camera()] = 1;
-  // convert to indices, step 1/2: first index starts at 0
-  cam[0] -= 1;
-  // convert to indices, step 2/2: cumulative sum
-  for ( size_t i=1; i<cam.size(); ++i ) cam[i] += cam[i-1];
-  // renumber m_data
-  for ( auto &i : m_data ) i.setCamera(cam[i.camera()]);
-  // store the number of cameras
-  m_ncam = ( *std::max_element(cam.begin(),cam.end()) ) + 1;
-}
-
-// =================================================================================================
-
-void Files::renumberFolder()
-{
-  if ( m_data.size() == 0 ) return;
-
-  // logical list: 1 == folder is currently in use; 0 == folder is not in use (default)
-  std::vector<int> fol( m_data.size() , 0 );
-  // fill
-  for ( auto &i : m_data ) fol[i.folder()] = 1;
-  // convert to indices, step 1/2: first index starts at 0
-  fol[0] -= 1;
-  // convert to indices, step 2/2: cumulative sum
-  for ( size_t i=1; i<fol.size(); ++i ) fol[i] += fol[i-1];
-  // renumber m_data
-  for ( auto &i : m_data ) i.setFolder(fol[i.folder()]);
-  // store the number of cameras
-  m_nfol = ( *std::max_element(fol.begin(), fol.end() ) ) + 1;
-}
-
-// =================================================================================================
-
-void Files::setDispName()
-{
-  if ( m_data.size() == 0 ) return;
-
-  // initialize common path
-  std::string path = m_data[0].path().toStdString();
-  // compute common path
-  for ( auto &i : m_data )
-    path = commonPath(path,i.path().toStdString(),"/");
-  // remove path from names
-  for ( auto &i : m_data )
-    i.setDispName( QString::fromStdString( removePath(path,i.path().toStdString()) ) );
 }
 
 // =================================================================================================
@@ -2619,7 +2217,7 @@ void Thumbnails::read()
 
 // =================================================================================================
 
-bool OldFile::readinfo()
+bool File::readinfo()
 {
   // read data/time and rotation:
   // - try to read using "exiv2", fall back on "easyexif"
@@ -2737,7 +2335,7 @@ bool OldFile::readinfo()
 
 // =================================================================================================
 
-bool OldFile::writeinfo()
+bool File::writeinfo()
 {
   #ifdef WITHEXIV2
 

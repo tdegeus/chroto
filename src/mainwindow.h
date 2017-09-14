@@ -45,156 +45,6 @@
 #endif
 
 using json = nlohmann::json;
-using Time = date::sys_seconds;
-
-// =================================================================================================
-// File : class containing all information of one image
-// =================================================================================================
-
-class File
-{
-private:
-  QString m_path    = ""   ; // absolute (complete) file-path of the file
-  QString m_dir     = ""   ; // directory name
-  QString m_name    = ""   ; // file name
-  QString m_disp    = ""   ; // display name, constructed from (parts of) the path and the filename
-  size_t  m_fol     = 0    ; // folder-index (corresponds to "m_tF_listWidgets")
-  size_t  m_cam     = 0    ; // camera-index (allows several cameras in one folder)
-  int     m_rot     = 0    ; // rotation in degrees
-  bool    m_rot_mod = false; //
-  size_t  m_idx     = 0    ; // for sorting: position in list -> locate where "m_idx" went
-  bool    m_sort    = true ; // for sorting: selectively sort subset
-  QIcon   m_thumb          ; // thumbnail
-  bool    m_thumb_r = false; // logical, true only if the thumbnail was read
-  size_t  m_npix    = 32   ; // size of the thumbnail
-  Time    m_t0      = Time(std::chrono::duration<int>(0)); // read from file
-  Time    m_t       = Time(std::chrono::duration<int>(0)); // updated on sort
-
-public:
-  File            (const File &) = default;
-  File& operator= (const File &) = default;
-  File(){}
-
-  QString path()                            { return m_path; }
-  QString dirName()                         { return m_dir; }
-  QString fileName()                        { return m_name; }
-  QString dispName()                        { return m_disp; }
-  void    setDirName(QString name)          { m_dir  = name; }
-  void    setFileName(QString name)         { m_name = name; }
-  void    setDispName(QString name)         { m_disp = name; }
-  size_t  folder()                          { return m_fol; }
-  void    setFolder(size_t i)               { m_fol = i; }
-  size_t  camera()                          { return m_cam; }
-  void    setCamera(size_t i)               { m_cam = i; }
-  size_t  rotation()                        { return m_rot; }
-  bool    rotationModified()                { return m_rot_mod; }
-  Time    time()                            { return m_t; }
-  void    setTime(Time t)                   { m_t = t; }
-  Time    timeOrig()                        { return m_t0; }
-  bool    timeModified()                    { return m_t != m_t0; }
-  QIcon   thumbnail();
-  bool    thumbnailRead()                   { return m_thumb_r; }
-  size_t  thumbnailResolution()             { return m_npix; }
-  void    setThumbnailResolution(size_t N)  { m_npix  = N    ; m_thumb_r = false; }
-  void    setThumbnail(QIcon thumb)         { m_thumb = thumb; m_thumb_r = false; }
-  size_t  index()                           { return m_idx; }
-  void    setIndex(size_t idx)              { m_idx = idx; }
-  bool    sort()                            { return m_sort; }
-  void    setSort(bool sort)                { m_sort = sort; }
-  bool    readinfo();
-  bool    writeinfo();
-};
-
-// =================================================================================================
-// Files : collection of flags
-// =================================================================================================
-
-class Files: public QObject
-{
-  Q_OBJECT
-
-private:
-  std::vector<File> m_data;
-  bool   m_busy=false;
-  bool   m_stop=false;
-  size_t m_ncam=0;
-  size_t m_nfol=0;
-
-public:
-
-  File&       operator[](size_t i)       { return m_data[i]; }
-  const File& operator[](size_t i) const { return m_data[i]; }
-
-  const File* data () const { return m_data.data ();  }
-  auto        begin()       { return m_data.begin();  }
-  auto        end  ()       { return m_data.end  ();  }
-  size_t      size ()       { return m_data.size ();  }
-
-  void push_back(File file);
-
-  void requestStop() { m_stop = true; }
-  bool isBusy()      { return m_busy; }
-  bool unread()      { for ( auto &i: m_data) if ( !i.thumbnailRead() ) return true; return false; }
-
-  void erase(std::vector<size_t> index); // remove items from the lists
-
-  void empty(); // remove all items from the lists
-
-  void setThumbnailResolution(size_t N); // overwrite the size of the thumbnails
-
-  size_t sort(size_t idx);
-
-  size_t sortName(size_t idx, size_t folder);
-
-  void renumberCamera();
-  void renumberFolder();
-
-  void setDispName();
-
-public slots:
-
-  // read all thumbnails
-  void read();
-
-signals:
-
-  // signal that all thumbnails have been read
-  void completed();
-};
-
-
-// =================================================================================================
-// OldFile : class containing all information of one image
-// =================================================================================================
-
-class OldFile
-{
-public:
-  // file path and extracts
-  QString path      = ""   ; // absolute (complete) file-path of the file
-  QString dir       = ""   ; // directory name
-  QString fname     = ""   ; // file name
-  QString disp      = ""   ; // display name, constructed from (parts of) the path and the filename
-  size_t  folder    = 0    ; // folder-index (corresponds to "m_tF_listWidgets")
-  size_t  camera    = 0    ; // camera-index (allows several cameras in one folder)
-  // rotation
-  int     rotation  = 0    ; // rotation in degrees
-  // sort support
-  size_t  index     = 0    ; // for sorting: position in list -> locate where "m_idx" went
-  bool    sort      = true ; // for sorting: selectively sort subset
-  bool    rot_mod   = false; // signal if the photo has been manually rotated
-  size_t  ithumb           ; // index in list with thumbnails
-  // time
-  date::sys_seconds t0 = date::sys_seconds(std::chrono::duration<int>(0)); // read from file
-  date::sys_seconds t  = date::sys_seconds(std::chrono::duration<int>(0)); // updated on sort
-
-  OldFile            (const OldFile &) = default;
-  OldFile& operator= (const OldFile &) = default;
-  OldFile(){}
-
-  bool readinfo();
-  bool writeinfo();
-};
 
 // =================================================================================================
 // Thumbnails : class containing a list of thumbnails that are read in the background
@@ -255,7 +105,39 @@ signals:
 
 };
 
+// =================================================================================================
+// File : class containing all information of one image
+// =================================================================================================
 
+class File
+{
+public:
+  // file path and extracts
+  QString path      = ""   ; // absolute (complete) file-path of the file
+  QString dir       = ""   ; // directory name
+  QString fname     = ""   ; // file name
+  QString disp      = ""   ; // display name, constructed from (parts of) the path and the filename
+  size_t  folder    = 0    ; // folder-index (corresponds to "m_tF_listWidgets")
+  size_t  camera    = 0    ; // camera-index (allows several cameras in one folder)
+  // rotation
+  int     rotation  = 0    ; // rotation in degrees
+  // sort support
+  size_t  index     = 0    ; // for sorting: position in list -> locate where "m_idx" went
+  bool    sort      = true ; // for sorting: selectively sort subset
+  bool    time_mod  = false; // signal if time is still in line with the rest of the photos
+  bool    rot_mod   = false; // signal if the photo has been manually rotated
+  size_t  ithumb           ; // index in list with thumbnails
+  // time
+  date::sys_seconds t0 = date::sys_seconds(std::chrono::duration<int>(0)); // read from file
+  date::sys_seconds t  = date::sys_seconds(std::chrono::duration<int>(0)); // updated on sort
+
+  File            (const File &) = default;
+  File& operator= (const File &) = default;
+  File(){}
+
+  bool readinfo();
+  bool writeinfo();
+};
 
 // =================================================================================================
 // support functions
@@ -390,8 +272,8 @@ private:
 
   // data
   Thumbnails         *m_thumnails;  // class containing all thumbnails
-  std::vector<OldFile>   m_data;       // array with photos + information
-  std::vector<OldFile>   m_dataDel;    // deleted photos
+  std::vector<File>   m_data;       // array with photos + information
+  std::vector<File>   m_dataDel;    // deleted photos
   std::list<QString>  m_cleanPaths; // list with input paths (checked to clean later on)
 
   // list with widgets on "Tab::Files"
