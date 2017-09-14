@@ -79,11 +79,17 @@ public:
   QString dirName()                         { return m_dir; }
   QString fileName()                        { return m_name; }
   QString dispName()                        { return m_disp; }
+  void    setDirName(QString name)          { m_dir  = name; }
+  void    setFileName(QString name)         { m_name = name; }
+  void    setDispName(QString name)         { m_disp = name; }
   size_t  folder()                          { return m_fol; }
+  void    setFolder(size_t i)               { m_fol = i; }
   size_t  camera()                          { return m_cam; }
+  void    setCamera(size_t i)               { m_cam = i; }
   size_t  rotation()                        { return m_rot; }
   bool    rotationModified()                { return m_rot_mod; }
   Time    time()                            { return m_t; }
+  void    setTime(Time t)                   { m_t = t; }
   Time    timeOrig()                        { return m_t0; }
   bool    timeModified()                    { return m_t != m_t0; }
   QIcon   thumbnail();
@@ -91,6 +97,10 @@ public:
   size_t  thumbnailResolution()             { return m_npix; }
   void    setThumbnailResolution(size_t N)  { m_npix  = N    ; m_thumb_r = false; }
   void    setThumbnail(QIcon thumb)         { m_thumb = thumb; m_thumb_r = false; }
+  size_t  index()                           { return m_idx; }
+  void    setIndex(size_t idx)              { m_idx = idx; }
+  bool    sort()                            { return m_sort; }
+  void    setSort(bool sort)                { m_sort = sort; }
   bool    readinfo();
   bool    writeinfo();
 };
@@ -105,19 +115,22 @@ class Files: public QObject
 
 private:
   std::vector<File> m_data;
-  bool m_busy=false;
-  bool m_stop=false;
+  bool   m_busy=false;
+  bool   m_stop=false;
+  size_t m_ncam=0;
+  size_t m_nfol=0;
 
 public:
 
   File&       operator[](size_t i)       { return m_data[i]; }
   const File& operator[](size_t i) const { return m_data[i]; }
 
-  const File* data     (         ) const { return m_data.data ();  }
-  auto        begin    (         )       { return m_data.begin();  }
-  auto        end      (         )       { return m_data.end  ();  }
-  size_t      size     (         )       { return m_data.size ();  }
-  void        push_back(File file)       { m_data.push_back(file); }
+  const File* data () const { return m_data.data ();  }
+  auto        begin()       { return m_data.begin();  }
+  auto        end  ()       { return m_data.end  ();  }
+  size_t      size ()       { return m_data.size ();  }
+
+  void push_back(File file);
 
   void requestStop() { m_stop = true; }
   bool isBusy()      { return m_busy; }
@@ -128,6 +141,15 @@ public:
   void empty(); // remove all items from the lists
 
   void setThumbnailResolution(size_t N); // overwrite the size of the thumbnails
+
+  size_t sort(size_t idx);
+
+  size_t sortName(size_t idx, size_t folder);
+
+  void renumberCamera();
+  void renumberFolder();
+
+  void setDispName();
 
 public slots:
 

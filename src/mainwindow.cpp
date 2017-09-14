@@ -2083,81 +2083,6 @@ QIcon File::thumbnail()
 }
 
 // =================================================================================================
-// Files class - functions
-// =================================================================================================
-
-void Files::erase(std::vector<size_t> index)
-{
-  m_stop = true;
-
-  std::sort(index.begin(),index.end(),[](size_t i,size_t j){return i>j;});
-
-  for ( auto &i : index ) m_data.erase(m_data.begin()+i);
-}
-
-// =================================================================================================
-
-void Files::empty()
-{
-  m_stop = true;
-
-  while ( m_data.size()>0 ) m_data.erase(m_data.begin());
-
-  m_busy = false;
-}
-
-// =================================================================================================
-
-void Files::setThumbnailResolution( size_t N )
-{
-  for ( auto &i : m_data ) i.setThumbnailResolution(N);
-}
-
-// =================================================================================================
-
-void Files::read()
-{
-  m_busy = true ;
-  m_stop = false;
-
-  // - loop over all photos
-  for ( auto &i : m_data )
-  {
-    // -- break the loop if requested externally
-    if ( m_stop || QThread::currentThread()->isInterruptionRequested() ) {
-      m_busy = false;
-      m_stop = false;
-      return;
-    }
-
-    // -- read if not read before: account for pre-specified m_rotation
-    //    (obtained from the EXIF-data in "MainWindow" below)
-    if ( !i.thumbnailRead() )
-    {
-      QMatrix rot;
-      rot.rotate(i.rotation());
-
-      size_t  N = i.thumbnailResolution();
-      QPixmap pix(i.path());
-      pix.scaled(N,N,Qt::KeepAspectRatio, Qt::FastTransformation);
-
-      if ( m_stop ) {
-        m_busy = false;
-        m_stop = false;
-        return;
-      }
-
-      i.setThumbnail(QIcon(QPixmap(pix.transformed(rot))));
-    }
-  }
-
-  // - transmit that all images have been read
-  m_busy = false;
-  m_stop = false;
-  emit completed();
-}
-
-// =================================================================================================
 
 bool File::readinfo()
 {
@@ -2337,6 +2262,212 @@ bool File::writeinfo()
     }
 
   #endif
+}
+
+// =================================================================================================
+// Files class - functions
+// =================================================================================================
+
+void Files::push_back(File file)
+{
+  m_data.push_back(file);
+
+  m_ncam = std::max(m_ncam,file.camera()+1);
+  m_nfol = std::max(m_nfol,file.folder()+1);
+}
+
+// =================================================================================================
+
+void Files::erase(std::vector<size_t> index)
+{
+  m_stop = true;
+
+  std::sort(index.begin(),index.end(),[](size_t i,size_t j){return i>j;});
+
+  for ( auto &i : index ) m_data.erase(m_data.begin()+i);
+}
+
+// =================================================================================================
+
+void Files::empty()
+{
+  m_stop = true;
+
+  while ( m_data.size()>0 ) m_data.erase(m_data.begin());
+
+  m_busy = false;
+}
+
+// =================================================================================================
+
+void Files::setThumbnailResolution( size_t N )
+{
+  for ( auto &i : m_data ) i.setThumbnailResolution(N);
+}
+
+// =================================================================================================
+
+void Files::read()
+{
+  m_busy = true ;
+  m_stop = false;
+
+  // - loop over all photos
+  for ( auto &i : m_data )
+  {
+    // -- break the loop if requested externally
+    if ( m_stop || QThread::currentThread()->isInterruptionRequested() ) {
+      m_busy = false;
+      m_stop = false;
+      return;
+    }
+
+    // -- read if not read before: account for pre-specified m_rotation
+    //    (obtained from the EXIF-data in "MainWindow" below)
+    if ( !i.thumbnailRead() )
+    {
+      QMatrix rot;
+      rot.rotate(i.rotation());
+
+      size_t  N = i.thumbnailResolution();
+      QPixmap pix(i.path());
+      pix.scaled(N,N,Qt::KeepAspectRatio, Qt::FastTransformation);
+
+      if ( m_stop ) {
+        m_busy = false;
+        m_stop = false;
+        return;
+      }
+
+      i.setThumbnail(QIcon(QPixmap(pix.transformed(rot))));
+    }
+  }
+
+  // - transmit that all images have been read
+  m_busy = false;
+  m_stop = false;
+  emit completed();
+}
+
+// =================================================================================================
+
+size_t Files::sort(size_t idx)
+{
+  if ( m_data.size() == 0 ) return 0;
+
+  // store current order, to retrieve the new position of "idx"
+  for ( size_t i = 0 ; i < m_data.size() ; ++i ) m_data[i].setIndex(i);
+
+  // sort chronologically (if the times are identical retain existing order)
+  std::sort(m_data.begin(),m_data.end(),
+    [](File i,File j){
+      if ( i.time() == j.time() ) return i.index() < j.index();
+      else                        return i.time () < j.time ();
+  });
+
+  // make sure that all photos are at least one second apart (to allow image insertion)
+  for ( size_t i = 0 ; i < m_data.size()-1 ; ++i )
+    if ( m_data[i+1].time() <= m_data[i].time() )
+      m_data[i+1].setTime(m_data[i].time()+std::chrono::duration<int>(1));
+
+  // locate new position of "idx"
+  for ( size_t i = 0 ; i < m_data.size() ; ++i )
+    if ( m_data[i].index() == idx )
+      return i;
+
+  return 0;
+}
+
+// =================================================================================================
+
+size_t Files::sortName(size_t idx, size_t folder)
+{
+  if ( m_data.size() == 0 ) return 0;
+
+  // only sort for this folder
+  for ( auto &i : m_data ) {
+    if ( i.folder() == folder ) i.setSort(true );
+    else                        i.setSort(false);
+  }
+
+  // store current order, to retrieve the new position of "idx"
+  for ( size_t i = 0 ; i < m_data.size() ; ++i ) m_data[i].setIndex(i);
+
+  // apply selective sort, based on file-name
+  std::sort(m_data.begin(),m_data.end(),
+    [](File i,File j){
+      if ( i.sort() and j.sort() ) return i.path().toStdString() < j.path().toStdString();
+      else                         return i.index()              < j.index()             ;
+  });
+
+  // update time such that the sorted list is also in chronological order
+  // N.B. since the real time is unknown an assumption is made
+  for ( size_t i = 0 ; i < m_data.size()-1 ; ++i )
+    if ( m_data[i+1].time() <= m_data[i].time() )
+      m_data[i+1].setTime(m_data[i].time()+std::chrono::duration<int>(1));
+
+  // locate new position of "idx"
+  for ( size_t i = 0 ; i < m_data.size() ; ++i )
+    if ( m_data[i].index() == idx )
+      return i;
+
+  return 0;
+}
+
+// =================================================================================================
+
+void Files::renumberCamera()
+{
+  if ( m_data.size() == 0 ) return;
+
+  // logical list: 1 == camera is currently in use; 0 == camera is not in use (default)
+  std::vector<int> cam( m_data.size() , 0 );
+  // fill
+  for ( auto &i : m_data ) cam[i.camera()] = 1;
+  // convert to indices, step 1/2: first index starts at 0
+  cam[0] -= 1;
+  // convert to indices, step 2/2: cumulative sum
+  for ( size_t i=1; i<cam.size(); ++i ) cam[i] += cam[i-1];
+  // renumber m_data
+  for ( auto &i : m_data ) i.setCamera(cam[i.camera()]);
+  // store the number of cameras
+  m_ncam = ( *std::max_element(cam.begin(),cam.end()) ) + 1;
+}
+
+// =================================================================================================
+
+void Files::renumberFolder()
+{
+  if ( m_data.size() == 0 ) return;
+
+  // logical list: 1 == folder is currently in use; 0 == folder is not in use (default)
+  std::vector<int> fol( m_data.size() , 0 );
+  // fill
+  for ( auto &i : m_data ) fol[i.folder()] = 1;
+  // convert to indices, step 1/2: first index starts at 0
+  fol[0] -= 1;
+  // convert to indices, step 2/2: cumulative sum
+  for ( size_t i=1; i<fol.size(); ++i ) fol[i] += fol[i-1];
+  // renumber m_data
+  for ( auto &i : m_data ) i.setFolder(fol[i.folder()]);
+  // store the number of cameras
+  m_nfol = ( *std::max_element(fol.begin(), fol.end() ) ) + 1;
+}
+
+// =================================================================================================
+
+void Files::setDispName()
+{
+  if ( m_data.size() == 0 ) return;
+
+  // initialize common path
+  std::string path = m_data[0].path().toStdString();
+  // compute common path
+  for ( auto &i : m_data )
+    path = commonPath(path,i.path().toStdString(),"/");
+  // remove path from names
+  for ( auto &i : m_data )
+    i.setDispName( QString::fromStdString( removePath(path,i.path().toStdString()) ) );
 }
 
 // =================================================================================================
