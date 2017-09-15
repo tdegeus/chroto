@@ -258,8 +258,7 @@ bool MainWindow::promptQuestion(QString msg)
 
   reply = QMessageBox::question(this,tr("chroto"),msg,QMessageBox::Yes|QMessageBox::No);
 
-  if (reply == QMessageBox::Yes)
-    return true;
+  if (reply == QMessageBox::Yes) return true;
 
   return false;
 }
@@ -285,7 +284,6 @@ void MainWindow::selection2idx(QListWidget *list)
   // change current item
   m_idx = idx;
 
-  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -354,7 +352,6 @@ void MainWindow::resetApp(bool prompt)
   // write instruction to status-bar
   instruction();
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -469,7 +466,8 @@ void MainWindow::tF_view()
   if ( ui->tabWidget->currentIndex() != Tab::Files ) return;
 
   // handle visibility: only the first "m_nfol + 1" folders will be visible
-  for ( size_t ifol = 0 ; ifol < m_max_fol ; ++ifol ) {
+  for ( size_t ifol = 0 ; ifol < m_max_fol ; ++ifol )
+  {
     m_tF_listWidgets         [ifol]->setVisible(ifol<=m_nfol);
     m_tF_labels_N            [ifol]->setVisible(ifol<=m_nfol);
     m_tF_lineEdits           [ifol]->setVisible(ifol<=m_nfol);
@@ -479,7 +477,8 @@ void MainWindow::tF_view()
   }
 
   // enable all buttons of folders containing photos, rename selection button
-  for ( size_t ifol = 0 ; ifol < m_nfol ; ++ifol ) {
+  for ( size_t ifol = 0 ; ifol < m_nfol ; ++ifol )
+  {
     m_tF_listWidgets         [ifol]->setEnabled(true);
     m_tF_labels_N            [ifol]->setEnabled(true);
     m_tF_lineEdits           [ifol]->setEnabled(true);
@@ -490,7 +489,8 @@ void MainWindow::tF_view()
   }
 
   // enable selection button of the next folder and rename it, disable all other widgets
-  for ( size_t ifol = m_nfol ; ifol < m_max_fol ; ++ifol ) {
+  for ( size_t ifol = m_nfol ; ifol < m_max_fol ; ++ifol )
+  {
     m_tF_listWidgets         [ifol]->setEnabled(false);
     m_tF_labels_N            [ifol]->setEnabled(false);
     m_tF_lineEdits           [ifol]->setEnabled(false);
@@ -505,8 +505,10 @@ void MainWindow::tF_view()
   for ( auto line : m_tF_lineEdits ) line->clear();
 
   // empty listWidgets
-  for ( auto list : m_tF_listWidgets ) {
-    while ( list->count()>0 ) {
+  for ( auto list : m_tF_listWidgets )
+  {
+    while ( list->count()>0 )
+    {
       QListWidgetItem *item = list->takeItem(0);
       delete item;
     }
@@ -650,7 +652,8 @@ void MainWindow::tS_view(void)
   for ( auto &i : old ) rows.push_back(renum[i]);
 
   // empty the list
-  while ( ui->tS_listWidget->count() > 0 ) {
+  while ( ui->tS_listWidget->count() > 0 )
+  {
     QListWidgetItem *item = ui->tS_listWidget->takeItem(0);
     delete item;
   }
@@ -766,7 +769,6 @@ void MainWindow::tF_excludeSel(size_t ifol)
   if ( index[index.size()-1] > 0 ) m_idx = index[index.size()-1]-1;
   else                             m_idx = 0;
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -830,7 +832,8 @@ void MainWindow::tF_addFiles(size_t ifol)
   QFileInfoList lst_jpeg = dir.entryInfoList(filter_jpeg,QDir::Files);
   // - read "chroto.json" if it was found
   json jdata;
-  if ( lst_json.size()==1 ) {
+  if ( lst_json.size()==1 )
+  {
     std::ifstream inp(QFileInfo(lst_json.at(0)).absoluteFilePath().toStdString());
     inp >> jdata;
   }
@@ -855,7 +858,7 @@ void MainWindow::tF_addFiles(size_t ifol)
     file.path   = finfo.absoluteFilePath();
     file.dir    = finfo.absolutePath();
     // - try the read the EXIF information (stored directly); fall back to basic file information
-    if ( !file.readinfo() )
+    if ( !file.readEXIF() )
     {
       file.rotation = 0;
       file.t = date::sys_seconds(std::chrono::duration<std::time_t>(finfo.created().toTime_t()));
@@ -919,7 +922,6 @@ void MainWindow::tF_addFiles(size_t ifol)
   // - add to status-bar
   ui->statusBar->showMessage(text);
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -927,13 +929,10 @@ void MainWindow::tF_addFiles(size_t ifol)
 
 void MainWindow::tF_nameSort(size_t ifol)
 {
-  // clear all selected items
   selectionClearAll();
 
-  // sort by name
   m_idx = m_data.sortName(ifol,m_idx);
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -941,7 +940,6 @@ void MainWindow::tF_nameSort(size_t ifol)
 
 void MainWindow::tV_startFullScreen()
 {
-  // only act on correct tab, and not full screen mode
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
   if ( m_fullScreen ) return;
 
@@ -953,7 +951,6 @@ void MainWindow::tV_startFullScreen()
 
   QApplication::setOverrideCursor(Qt::BlankCursor);
 
-  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -961,7 +958,6 @@ void MainWindow::tV_startFullScreen()
 
 void MainWindow::tV_stopFullScreen()
 {
-  // only act on correct tab, and on full screen mode
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
   if ( ! m_fullScreen ) return;
 
@@ -973,7 +969,6 @@ void MainWindow::tV_stopFullScreen()
 
   QApplication::setOverrideCursor(Qt::ArrowCursor);
 
-  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -981,9 +976,9 @@ void MainWindow::tV_stopFullScreen()
 
 void MainWindow::on_tV_dateTimeEdit_editingFinished()
 {
-  // only act on correct tab, check index to continue
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-  if ( m_idx >= m_data.size()-1 ) return;
+
+  assert( m_idx < m_data.size() );
 
   // read the time shift from the new date
   // - read new date
@@ -1060,7 +1055,6 @@ void MainWindow::on_tV_dateTimeEdit_editingFinished()
 
 void MainWindow::on_tV_pushButton_fromJpeg_clicked()
 {
-  // only act on correct tab, check index to continue
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
   if ( m_idx >= m_data.size()-1 ) return;
 
@@ -1136,13 +1130,12 @@ void MainWindow::on_tV_pushButton_fromJpeg_clicked()
 
 void MainWindow::on_tV_pushButton_prev_clicked()
 {
-  // only act on correct tab, check index to continue
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-  if ( m_idx == 0 ) return;
+
+  assert( m_idx > 0 );
 
   m_idx -= 1;
 
-  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -1150,13 +1143,12 @@ void MainWindow::on_tV_pushButton_prev_clicked()
 
 void MainWindow::on_tV_pushButton_next_clicked()
 {
-  // only act on correct tab, check index to continue
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-  if ( m_idx >= m_data.size()-1 ) return;
+
+  assert( m_idx < m_data.size()-1 );
 
   m_idx += 1;
 
-  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -1164,13 +1156,12 @@ void MainWindow::on_tV_pushButton_next_clicked()
 
 void MainWindow::on_tV_pushButton_first_clicked()
 {
-  // only act on correct tab, check index to continue
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-  if ( m_idx == 0 ) return;
+
+  assert( m_idx > 0 );
 
   m_idx = 0;
 
-  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -1178,13 +1169,12 @@ void MainWindow::on_tV_pushButton_first_clicked()
 
 void MainWindow::on_tV_pushButton_last_clicked()
 {
-  // only act on correct tab, check index to continue
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-  if ( m_idx >= m_data.size()-1 ) return;
+
+  assert( m_idx < m_data.size()-1 );
 
   m_idx = m_data.size()-1;
 
-  // emit signal to process the change
   emit indexChanged();
 }
 
@@ -1192,16 +1182,16 @@ void MainWindow::on_tV_pushButton_last_clicked()
 
 void MainWindow::on_tV_pushButton_excl_clicked()
 {
-  // only act on correct tab, check index to continue
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-  if ( m_idx >= m_data.size() ) return;
+
+  assert( m_idx < m_data.size() );
 
   // stop reading thumbnails (in thread)
   m_data.requestStop();
 
+  // erase from "m_data"
   m_data.erase({m_idx});
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1209,9 +1199,9 @@ void MainWindow::on_tV_pushButton_excl_clicked()
 
 void MainWindow::on_tV_pushButton_del_clicked()
 {
-  // only act on correct tab, check index to continue
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-  if ( m_idx >= m_data.size() ) return;
+
+  assert( m_idx < m_data.size() );
 
   // stop reading thumbnails (in thread)
   m_data.requestStop();
@@ -1222,7 +1212,6 @@ void MainWindow::on_tV_pushButton_del_clicked()
   // correct index if needed
   m_idx = std::min( m_idx , m_data.size()-1 );
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1230,9 +1219,9 @@ void MainWindow::on_tV_pushButton_del_clicked()
 
 void MainWindow::on_tV_pushButton_undoDel_clicked()
 {
-  // only act on correct tab, check there is something to insert
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-  if ( m_dataDel.size() == 0 ) return;
+
+  assert( m_dataDel.size() > 0 );
 
   // stop reading thumbnails (in thread)
   m_data.requestStop();
@@ -1243,7 +1232,6 @@ void MainWindow::on_tV_pushButton_undoDel_clicked()
   // switch to inserted image
   m_idx = m_data.size()-1;
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1252,8 +1240,12 @@ void MainWindow::on_tV_pushButton_undoDel_clicked()
 void MainWindow::on_tV_pushButton_rotL_clicked()
 {
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+
   assert( m_idx < m_data.size() );
   assert( m_data.size() > 0 );
+
+  // stop reading thumbnails (in thread)
+  m_data.requestStop();
 
   // rotate, and signal manual rotation
   m_data[m_idx].setRotation(m_data[m_idx].rotation-90);
@@ -1267,8 +1259,12 @@ void MainWindow::on_tV_pushButton_rotL_clicked()
 void MainWindow::on_tV_pushButton_rotR_clicked()
 {
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
+
   assert( m_idx < m_data.size() );
   assert( m_data.size() > 0 );
+
+  // stop reading thumbnails (in thread)
+  m_data.requestStop();
 
   // rotate, and signal manual rotation
   m_data[m_idx].setRotation(m_data[m_idx].rotation+90);
@@ -1386,7 +1382,6 @@ void MainWindow::on_tS_pushButton_split_clicked()
   // change camera index
   for ( auto &i : rows ) m_data[i].camera = m_ncam;
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1394,9 +1389,9 @@ void MainWindow::on_tS_pushButton_split_clicked()
 
 void MainWindow::on_tS_pushButton_Iexcl_clicked()
 {
-  // only act on correct tab, and non-empty m_data
   if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
-  if ( m_data.size() == 0 ) return;
+
+  assert( m_data.size() > 0 );
 
   // stop reading thumbnails (in thread)
   m_data.requestStop();
@@ -1417,7 +1412,6 @@ void MainWindow::on_tS_pushButton_Iexcl_clicked()
   if ( index[index.size()-1] > 0 ) m_idx = index[index.size()-1]-1;
   else                             m_idx = 0;
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1425,9 +1419,9 @@ void MainWindow::on_tS_pushButton_Iexcl_clicked()
 
 void MainWindow::on_tS_pushButton_Idel_clicked()
 {
-  // only act on correct tab, and non-empty m_data
   if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
-  if ( m_data.size() == 0 ) return;
+
+  assert( m_data.size() > 0 );
 
   // stop reading thumbnails (in thread)
   m_data.requestStop();
@@ -1448,7 +1442,6 @@ void MainWindow::on_tS_pushButton_Idel_clicked()
   if ( index[index.size()-1] > 0 ) m_idx = index[index.size()-1]-1;
   else                             m_idx = 0;
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1468,13 +1461,11 @@ void MainWindow::on_tS_pushButton_Iup_clicked()
   if ( rows[0] == 0 ) return promptWarning("Selection includes first photo, cannot proceed");
 
   // move up (earlier)
-  for ( auto &i: rows )
-    m_data[i].t -= m_data[i].t-m_data[i-1].t+std::chrono::duration<int>(1);
+  for ( auto &i: rows )  m_data[i].t -= m_data[i].t - m_data[i-1].t + std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[rows.size()-1];
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1495,13 +1486,11 @@ void MainWindow::on_tS_pushButton_Idown_clicked()
     return promptWarning("Selection includes last photo, cannot proceed");
 
   // move up (earlier)
-  for ( auto &i: rows )
-    m_data[i].t += m_data[i+1].t-m_data[i].t+std::chrono::duration<int>(1);
+  for ( auto &i: rows ) m_data[i].t += m_data[i+1].t - m_data[i].t + std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[0];
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1512,7 +1501,8 @@ void MainWindow::on_tS_pushButton_Isync_clicked()
   if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // check if there is a destination: the last selected image
-  if ( m_selLast==-1 ) {
+  if ( m_selLast==-1 )
+  {
     return promptWarning(
       "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
     );
@@ -1525,13 +1515,11 @@ void MainWindow::on_tS_pushButton_Isync_clicked()
   if ( rows.size() == 0 ) return;
 
   // move up (earlier)
-  for ( auto &i: rows )
-    m_data[i].t = m_data[m_selLast].t;
+  for ( auto &i: rows ) m_data[i].t = m_data[m_selLast].t;
 
   // set index
   m_idx = rows[rows.size()-1];
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1568,7 +1556,6 @@ void MainWindow::on_tS_pushButton_Cup_clicked()
   // set index
   m_idx = rows[rows.size()-1];
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1605,7 +1592,6 @@ void MainWindow::on_tS_pushButton_Cdown_clicked()
   // set index
   m_idx = rows[0];
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1616,7 +1602,8 @@ void MainWindow::on_tS_pushButton_Csync_clicked()
   if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // check if there is a destination: the last selected image
-  if ( m_selLast==-1 ) {
+  if ( m_selLast==-1 )
+  {
     return promptWarning(
       "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
     );
@@ -1656,7 +1643,6 @@ void MainWindow::on_tS_pushButton_Csync_clicked()
   // set index
   m_idx = rows[rows.size()-1];
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1688,12 +1674,11 @@ void MainWindow::on_tS_pushButton_Fup_clicked()
   // apply time difference to all
   for ( auto &i : m_data )
     if ( i.folder == m_data[row].folder )
-      i.t -= m_data[row].t-m_data[row-1].t+std::chrono::duration<int>(1);
+      i.t -= m_data[row].t - m_data[row-1].t + std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[rows.size()-1];
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1725,12 +1710,11 @@ void MainWindow::on_tS_pushButton_Fdown_clicked()
   // apply time difference to all
   for ( auto &i : m_data )
     if ( i.folder == m_data[row].folder )
-      i.t += m_data[row+1].t-m_data[row].t+std::chrono::duration<int>(1);
+      i.t += m_data[row+1].t - m_data[row].t + std::chrono::duration<int>(1);
 
   // set index
   m_idx = rows[0];
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1742,7 +1726,8 @@ void MainWindow::on_tS_pushButton_Fsync_clicked()
   if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
 
   // check if there is a destination: the last selected image
-  if ( m_selLast == -1 ) {
+  if ( m_selLast == -1 )
+  {
     return promptWarning(
       "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
     );
@@ -1775,14 +1760,13 @@ void MainWindow::on_tS_pushButton_Fsync_clicked()
     {
       for ( auto &i : m_data )
         if ( i.folder == m_data[row].folder )
-          i.t -= m_data[row].t-m_data[ref].t;
+          i.t -= m_data[row].t - m_data[ref].t;
     }
   }
 
   // set index
   m_idx = rows[rows.size()-1];
 
-  // emit signal to process the change
   emit dataChanged();
 }
 
@@ -1823,7 +1807,8 @@ void MainWindow::on_tW_lineEdit_path_editingFinished()
 void MainWindow::on_tW_pushButton_write_clicked()
 {
   if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
-  if ( m_data.size() == 0 ) return;
+
+  assert( m_data.size() > 0 );
 
   // stop reading thumbnails (in thread)
   m_data.requestStop();
@@ -1855,12 +1840,11 @@ void MainWindow::on_tW_pushButton_write_clicked()
     }
   }
 
-  // disable button (enabled when new data is added)
+  // disable button (after writing all data is removed)
   ui->tW_pushButton_write->setEnabled(false);
 
   // update list with paths
-  for ( auto &file : m_data )
-    m_cleanPaths.push_back(file.dir);
+  for ( auto &file : m_data ) m_cleanPaths.push_back(file.dir);
   // convert to unique list
   m_cleanPaths.unique();
 
@@ -1881,11 +1865,11 @@ void MainWindow::on_tW_pushButton_write_clicked()
     if ( writeExif )
     {
       // -- write
-      m_data[i].writeinfo();
+      m_data[i].writeEXIF();
       // -- temporary copy of file definition
       File f = m_data[i];
       // -- re-read EXIF-data
-      written = f.readinfo();
+      written = f.readEXIF();
       // -- check if the storage of the time was successful
       if ( written ) written = f.t == m_data[i].t;
     }
@@ -1943,7 +1927,6 @@ void MainWindow::on_tW_pushButton_write_clicked()
     o << std::setw(2) << j << std::endl;
   }
 
-  // empty data
   m_data.empty();
 }
 
@@ -1953,7 +1936,10 @@ void MainWindow::on_tW_pushButton_clean_clicked()
 {
   if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
 
-  if ( m_dataDel.size() == 0 ) return;
+  assert( m_dataDel.size() > 0 );
+
+  // disable button (after this function "m_dataDel" will be empty)
+  ui->tW_pushButton_clean->setEnabled(false);
 
   // update list with paths
   for ( auto &file : m_dataDel ) m_cleanPaths.push_back(file.dir);
@@ -1961,8 +1947,7 @@ void MainWindow::on_tW_pushButton_clean_clicked()
   m_cleanPaths.unique();
 
   // remove deleted photos
-  for ( auto &file : m_dataDel )
-    QFile::remove(file.path);
+  for ( auto &file : m_dataDel ) QFile::remove(file.path);
 
   // list with useless system files
   std::vector<QString> sfiles;
@@ -1973,8 +1958,7 @@ void MainWindow::on_tW_pushButton_clean_clicked()
   for ( auto dir : m_cleanPaths )
   {
     // - remove useless system files
-    for ( auto file : sfiles )
-      QFile::remove(QDir(dir).filePath(file));
+    for ( auto file : sfiles )  QFile::remove(QDir(dir).filePath(file));
     // - remove empty folders
     if ( QDir(dir).entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).isEmpty() )
       QDir(dir).removeRecursively();
@@ -1988,9 +1972,6 @@ void MainWindow::on_tW_pushButton_clean_clicked()
   // clear lists
   while ( m_cleanPaths.size()>0 ) m_cleanPaths.pop_back();
   m_dataDel.empty();
-
-  // disable button (enabled when m_data is added)
-  ui->tW_pushButton_clean->setEnabled(false);
 }
 
 // =================================================================================================
@@ -2022,7 +2003,7 @@ void File::setRotation(int rot)
 
 // =================================================================================================
 
-bool File::readinfo()
+bool File::readEXIF()
 {
   // read data/time and rotation:
   // - try to read using "exiv2", fall back on "easyexif"
@@ -2140,7 +2121,7 @@ bool File::readinfo()
 
 // =================================================================================================
 
-bool File::writeinfo()
+bool File::writeEXIF()
 {
   #ifdef WITHEXIV2
 

@@ -73,18 +73,17 @@ public:
   QIcon   thumb            ; // thumbnail
   bool    thumb_r   = false; // signal if thumbnail has been read
   size_t  thumb_pix = 32   ; // size of the thumbnail (used only when reading)
-  Time    t0        = Time(std::chrono::duration<int>(0)); // read from file
-  Time    t         = Time(std::chrono::duration<int>(0)); // updated on sort
+  Time    t0        = Time(std::chrono::duration<int>(0)); // time, as read from file
+  Time    t         = Time(std::chrono::duration<int>(0)); // time, constantly updated on sort
 
   File            (const File &) = default;
   File& operator= (const File &) = default;
   File(){}
 
-  bool readinfo();
-  bool writeinfo();
-
+  bool  readEXIF();
+  bool  writeEXIF();
   QIcon thumbnail();
-  void setRotation(int rot);
+  void  setRotation(int rot);
 };
 
 // =================================================================================================
