@@ -97,20 +97,20 @@ class Files
 private:
 
   std::vector<File> m_data;
-  size_t m_ncam=0;
-  size_t m_nfol=0;
-  Thumbnails *m_thumnails;
+  size_t            m_ncam=0;
+  size_t            m_nfol=0;
+  Thumbnails       *m_thumnails;
 
 public:
 
   File&       operator[](size_t i)       { return m_data[i]; }
   const File& operator[](size_t i) const { return m_data[i]; }
 
-  std::vector<File>* ptr  ()       { return &m_data;        }
-  const File*        data () const { return m_data.data (); }
-  auto               begin()       { return m_data.begin(); }
-  auto               end  ()       { return m_data.end  (); }
-  size_t             size ()       { return m_data.size (); }
+  std::vector<File>* ptr  ()       { return &m_data;         }
+  const File*        data () const { return  m_data.data (); }
+  auto               begin()       { return  m_data.begin(); }
+  auto               end  ()       { return  m_data.end  (); }
+  size_t             size ()       { return  m_data.size (); }
 
   void   push_back(File file);
   void   pop_back();

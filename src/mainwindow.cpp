@@ -321,9 +321,8 @@ void MainWindow::resetApp(bool prompt)
     if ( !promptQuestion("This clears everything, to start fresh. Continue?") )
       return;
 
-  // remove all data
-  m_data   .empty();
-  m_dataDel.empty();
+  // stop reading thumbnails (in thread)
+  m_data.requestStop();
 
   // Tab::Write : (re)set all widgets to default
   ui->tW_lineEdit_date     -> setText("");
@@ -341,6 +340,10 @@ void MainWindow::resetApp(bool prompt)
   m_idx        =   0   ;
   m_selLast    =  -1   ;
   m_workDir    = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+
+  // remove all data
+  m_data   .empty();
+  m_dataDel.empty();
 
   // enforce opening on the correct tab
   // - avoid emitting "QTabWidget::currentChanged" signal
@@ -388,8 +391,8 @@ void MainWindow::instruction()
 
 void MainWindow::dataUpdate()
 {
-  // request to stop reading thumbnails (to lose fewer time below)
-  m_thumnails->requestStop();
+  // stop reading thumbnails (in thread)
+  m_data.requestStop();
 
   // initialize counters
   m_ncam = 0;
@@ -738,6 +741,7 @@ void MainWindow::tF_excludeSel(size_t ifol)
   // proceed only for non-empty lists
   if ( index.size() <= 0 ) return;
 
+  // stop reading thumbnails (in thread)
   m_data.requestStop();
 
   // remove indices which are not part of the current folder
@@ -1192,6 +1196,7 @@ void MainWindow::on_tV_pushButton_excl_clicked()
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
   if ( m_idx >= m_data.size() ) return;
 
+  // stop reading thumbnails (in thread)
   m_data.requestStop();
 
   m_data.erase({m_idx});
@@ -1208,6 +1213,7 @@ void MainWindow::on_tV_pushButton_del_clicked()
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
   if ( m_idx >= m_data.size() ) return;
 
+  // stop reading thumbnails (in thread)
   m_data.requestStop();
 
   // take from "m_data", insert in "m_dataDel"
@@ -1228,6 +1234,7 @@ void MainWindow::on_tV_pushButton_undoDel_clicked()
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
   if ( m_dataDel.size() == 0 ) return;
 
+  // stop reading thumbnails (in thread)
   m_data.requestStop();
 
   // take last item from "m_dataDel", insert in "m_data"
@@ -1391,6 +1398,7 @@ void MainWindow::on_tS_pushButton_Iexcl_clicked()
   if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
   if ( m_data.size() == 0 ) return;
 
+  // stop reading thumbnails (in thread)
   m_data.requestStop();
 
   // get a list with selected items
@@ -1421,6 +1429,7 @@ void MainWindow::on_tS_pushButton_Idel_clicked()
   if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
   if ( m_data.size() == 0 ) return;
 
+  // stop reading thumbnails (in thread)
   m_data.requestStop();
 
   // get a list with selected items
@@ -1816,6 +1825,7 @@ void MainWindow::on_tW_pushButton_write_clicked()
   if ( ui->tabWidget->currentIndex() != Tab::Write ) return;
   if ( m_data.size() == 0 ) return;
 
+  // stop reading thumbnails (in thread)
   m_data.requestStop();
 
   // number of characters needed the fit the photos
@@ -1844,6 +1854,9 @@ void MainWindow::on_tW_pushButton_write_clicked()
       return;
     }
   }
+
+  // disable button (enabled when new data is added)
+  ui->tW_pushButton_write->setEnabled(false);
 
   // update list with paths
   for ( auto &file : m_data )
@@ -1932,9 +1945,6 @@ void MainWindow::on_tW_pushButton_write_clicked()
 
   // empty data
   m_data.empty();
-
-  // disable button (enabled when m_data is added)
-  ui->tW_pushButton_write->setEnabled(false);
 }
 
 // =================================================================================================
