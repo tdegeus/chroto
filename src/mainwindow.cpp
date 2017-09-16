@@ -1131,8 +1131,7 @@ void MainWindow::on_tV_pushButton_fromJpeg_clicked()
 void MainWindow::on_tV_pushButton_prev_clicked()
 {
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-
-  assert( m_idx > 0 );
+  if ( m_idx <= 0 ) return;
 
   m_idx -= 1;
 
@@ -1144,8 +1143,7 @@ void MainWindow::on_tV_pushButton_prev_clicked()
 void MainWindow::on_tV_pushButton_next_clicked()
 {
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-
-  assert( m_idx < m_data.size()-1 );
+  if ( m_idx >= m_data.size()-1 ) return;
 
   m_idx += 1;
 
@@ -1157,8 +1155,7 @@ void MainWindow::on_tV_pushButton_next_clicked()
 void MainWindow::on_tV_pushButton_first_clicked()
 {
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-
-  assert( m_idx > 0 );
+  if ( m_idx <= 0 ) return;
 
   m_idx = 0;
 
@@ -1170,8 +1167,7 @@ void MainWindow::on_tV_pushButton_first_clicked()
 void MainWindow::on_tV_pushButton_last_clicked()
 {
   if ( ui->tabWidget->currentIndex() != Tab::View ) return;
-
-  assert( m_idx < m_data.size()-1 );
+  if ( m_idx >= m_data.size()-1 ) return;
 
   m_idx = m_data.size()-1;
 
