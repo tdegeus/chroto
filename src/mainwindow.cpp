@@ -1969,7 +1969,20 @@ void MainWindow::on_tW_pushButton_clean_clicked()
   m_cleanPaths.unique();
 
   // remove deleted photos
-  for ( auto &file : m_dataDel ) QFile::remove(file.path);
+  // - store number (for progress)
+  size_t N = m_dataDel.size();
+  // - loop
+  for ( size_t i = 0 ; i < N ; ++i )
+  {
+    // -- remove from disk
+    QFile::remove(m_dataDel[i].path);
+    // -- show progress
+    QString text;
+    int frac = static_cast<int>(static_cast<double>(i+1)/static_cast<double>(N)*100.);
+    text = QString("Deleting, %1\% complete").arg(frac);
+    ui->statusBar->showMessage(text);
+    qApp->processEvents();
+  }
 
   // list with useless system files
   std::vector<QString> sfiles;
