@@ -1032,7 +1032,11 @@ void MainWindow::on_tV_dateTimeEdit_editingFinished()
   }
 
   // apply time shift to all (relevant) photos
-  if ( dialog.getResponse() == CalResponse::Camera )
+  if ( dialog.getResponse() == CalResponse::Photo )
+  {
+    m_data[m_idx].t += dt;
+  }
+  else if ( dialog.getResponse() == CalResponse::Camera )
   {
     for ( size_t i = 0 ; i < m_data.size() ; ++i )
       if ( m_data[i].camera == m_data[m_idx].camera )
@@ -1104,7 +1108,11 @@ void MainWindow::on_tV_pushButton_fromJpeg_clicked()
   if ( dialog.getResponse() == CalResponse::Cancel ) return;
 
   // apply time shift to all (relevant) photos
-  if ( dialog.getResponse() == CalResponse::Camera )
+  if ( dialog.getResponse() == CalResponse::Photo )
+  {
+    m_data[m_idx].t += dt;
+  }
+  else if ( dialog.getResponse() == CalResponse::Camera )
   {
     for ( size_t i = 0 ; i < m_data.size() ; ++i )
       if ( m_data[i].camera == m_data[m_idx].camera )
@@ -1904,7 +1912,7 @@ void MainWindow::on_tW_pushButton_write_clicked()
 
     // show progress
     QString text;
-    int     frac = static_cast<int>(static_cast<double>(i+1)/static_cast<double>(m_data.size()));
+    int frac = static_cast<int>(static_cast<double>(i+1)/static_cast<double>(m_data.size())*100.);
     text = QString("Writing, %1\% complete").arg(frac);
     ui->statusBar->showMessage(text);
     qApp->processEvents();
