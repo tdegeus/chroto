@@ -98,7 +98,6 @@ private:
   std::vector<File> m_data;
   size_t            m_ncam=0;
   size_t            m_nfol=0;
-  Thumbnails       *m_thumnails;
 
 public:
 
@@ -119,11 +118,9 @@ public:
   File   take(size_t i);
   size_t sort(size_t idx=0);
   size_t sortName(size_t ifol, size_t idx=0);
-  void   setThumbnailThread(Thumbnails *thread) { m_thumnails = thread; }
   bool   allThumbnailsRead();
   void   setThumbnailResolution(size_t N);
   void   setDispName();
-  void   requestStop();
 
 };
 
@@ -151,7 +148,7 @@ public:
 
 public slots:
 
-  void read(); // read all thumbnails
+  void run(); // read all thumbnails
 
 signals:
 
@@ -203,7 +200,7 @@ private slots:
   // view instruction for the tab, after the tab has been changed
   void instruction();
 
-  // after change in "m_data", clean "m_data", sync with "m_thumnails", and update relevant view
+  // after change in "m_data", clean "m_data", sync with "m_thumbnails", and update relevant view
   void dataUpdate();
 
   // control the view and buttons in each of the tabs
@@ -291,7 +288,7 @@ private:
   std::vector<size_t> m_selPrev;    // previous selection (in "tab::Sort")
 
   // data
-  Thumbnails         *m_thumnails;  // class containing all thumbnails
+  Thumbnails         *m_thumbnails;  // class containing all thumbnails
   Files               m_data;       // array with photos + information
   Files               m_dataDel;    // deleted photos
   std::list<QString>  m_cleanPaths; // list with input paths (checked to clean later on)

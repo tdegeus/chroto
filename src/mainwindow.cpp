@@ -17,11 +17,10 @@ MainWindow::MainWindow(QWidget *parent) :
   ui->setupUi(this);
 
   // class to read/store list of thumbnails; assign to worker-thread
-  m_thumnails = new Thumbnails(m_data.ptr());
-  m_thumnails->moveToThread(&m_thread);
-  m_data.setThumbnailThread(m_thumnails);
+  m_thumbnails = new Thumbnails(m_data.ptr());
+  m_thumbnails->moveToThread(&m_thread);
   // list of thumbnails is deleted only when the worker-thread is deleted (in destructor below)
-  connect(&m_thread,&QThread::finished,m_thumnails,&QObject::deleteLater);
+  connect(&m_thread,&QThread::finished,m_thumbnails,&QObject::deleteLater);
 
   // set basic colormap (dynamically extended below, if needed)
   m_col.push_back(QColor(  72,   8,   7 ));
@@ -139,8 +138,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(this, SIGNAL( dataChanged() ), this, SLOT( dataUpdate() ) );
 
   // signals and slots to "read" thumbnails and to refresh thumbnails
-  connect(this       , SIGNAL( thumbnailRead() ), m_thumnails , SLOT( read      () ) );
-  connect(m_thumnails, SIGNAL( completed    () ), this        , SLOT( dataUpdate() ) );
+  connect(this        , SIGNAL( thumbnailRead() ), m_thumbnails , SLOT( run       () ) );
+  connect(m_thumbnails, SIGNAL( completed    () ), this         , SLOT( dataUpdate() ) );
 
   // Tab::Sort : manually refresh view to show the latest thumbnails
   connect(ui->tS_pushButton_refresh, SIGNAL( clicked(bool) ), SLOT( tS_view() ) );
@@ -212,7 +211,7 @@ MainWindow::MainWindow(QWidget *parent) :
   // initialize clear application
   resetApp();
 
-  // start worker-thread (to which "m_thumnails" is assigned)
+  // start worker-thread (to which "m_thumbnails" is assigned)
   m_thread.start();
 
   // set style, due to : "https://github.com/ColinDuquesnoy/QDarkStyleSheet"
@@ -320,7 +319,7 @@ void MainWindow::resetApp(bool prompt)
       return;
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // Tab::Write : (re)set all widgets to default
   ui->tW_lineEdit_date     -> setText("");
@@ -389,7 +388,7 @@ void MainWindow::instruction()
 void MainWindow::dataUpdate()
 {
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // initialize counters
   m_ncam = 0;
@@ -745,7 +744,7 @@ void MainWindow::tF_excludeSel(size_t ifol)
   if ( index.size() <= 0 ) return;
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // remove indices which are not part of the current folder
   {
@@ -768,6 +767,8 @@ void MainWindow::tF_excludeSel(size_t ifol)
   // set number current item to close to the selection
   if ( index[index.size()-1] > 0 ) m_idx = index[index.size()-1]-1;
   else                             m_idx = 0;
+
+  m_idx = std::min( m_idx , m_data.size()-1 );
 
   emit dataChanged();
 }
@@ -888,9 +889,9 @@ void MainWindow::tF_addFiles(size_t ifol)
     // - store in list
     m_data.push_back(file);
 
-    // show progress
+    // - show progress
     QString text;
-    int     frac = static_cast<int>(static_cast<double>(i+1)/static_cast<double>(N));
+    int frac = static_cast<int>(static_cast<double>(i+1)/static_cast<double>(N)*100.);
     text = QString("Reading, %1\% complete").arg(frac);
     ui->statusBar->showMessage(text);
     qApp->processEvents();
@@ -902,7 +903,7 @@ void MainWindow::tF_addFiles(size_t ifol)
   // find the display name
   m_data.setDispName();
 
-  // set the m_thumnails size based on the size of "m_data"
+  // set the m_thumbnails size based on the size of "m_data"
   if      ( m_data.size() <   100 ) { m_npix = 256; m_data.setThumbnailResolution(64); }
   if      ( m_data.size() <   200 ) { m_npix = 128; m_data.setThumbnailResolution(32); }
   else if ( m_data.size() <   500 ) { m_npix =  64; m_data.setThumbnailResolution(32); }
@@ -1191,10 +1192,12 @@ void MainWindow::on_tV_pushButton_excl_clicked()
   assert( m_idx < m_data.size() );
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // erase from "m_data"
   m_data.erase({m_idx});
+
+  m_idx = std::min( m_idx , m_data.size()-1 );
 
   emit dataChanged();
 }
@@ -1208,7 +1211,7 @@ void MainWindow::on_tV_pushButton_del_clicked()
   assert( m_idx < m_data.size() );
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // take from "m_data", insert in "m_dataDel"
   m_dataDel.push_back(m_data.take(m_idx));
@@ -1228,7 +1231,7 @@ void MainWindow::on_tV_pushButton_undoDel_clicked()
   assert( m_dataDel.size() > 0 );
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // take last item from "m_dataDel", insert in "m_data"
   m_data.push_back(m_dataDel.take(m_dataDel.size()-1));
@@ -1249,7 +1252,7 @@ void MainWindow::on_tV_pushButton_rotL_clicked()
   assert( m_data.size() > 0 );
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // rotate, and signal manual rotation
   m_data[m_idx].setRotation(m_data[m_idx].rotation-90);
@@ -1268,7 +1271,7 @@ void MainWindow::on_tV_pushButton_rotR_clicked()
   assert( m_data.size() > 0 );
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // rotate, and signal manual rotation
   m_data[m_idx].setRotation(m_data[m_idx].rotation+90);
@@ -1398,7 +1401,7 @@ void MainWindow::on_tS_pushButton_Iexcl_clicked()
   assert( m_data.size() > 0 );
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // get a list with selected items
   std::vector<size_t> index = selectedItems(ui->tS_listWidget,false);
@@ -1428,7 +1431,7 @@ void MainWindow::on_tS_pushButton_Idel_clicked()
   assert( m_data.size() > 0 );
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // get a list with selected items
   std::vector<size_t> index = selectedItems(ui->tS_listWidget,false);
@@ -1552,10 +1555,50 @@ void MainWindow::on_tS_pushButton_Cup_clicked()
   if ( m_data[row-1].camera==m_data[row].camera )
     return promptWarning("Previous photo is not of another camera, cannot proceed");
 
+  // time difference to apply
+  std::chrono::duration<int> dt = m_data[row].t - m_data[row-1].t + std::chrono::duration<int>(1);
   // apply time difference to all
   for ( auto &i : m_data )
     if ( i.camera == m_data[row].camera )
-      i.t -= m_data[row].t-m_data[row-1].t+std::chrono::duration<int>(1);
+      i.t -= dt;
+
+  // set index
+  m_idx = rows[rows.size()-1];
+
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_tS_pushButton_Fup_clicked()
+{
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
+
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->tS_listWidget);
+
+  // check to continue
+  if ( rows.size() == 0 ) return;
+
+  // top of the list / more then one item: don't know what to do
+  if ( rows[0] == 0 )
+    return promptWarning("Selection includes first photo, cannot proceed");
+  if ( rows.size() > 1 )
+    return promptWarning("Selection contains more than one photo, cannot proceed");
+
+  // get index
+  size_t row = rows[0];
+
+  // not a boundary: don't know what to do
+  if ( m_data[row-1].folder == m_data[row].folder )
+    return promptWarning("Previous photo is not of another folder, cannot proceed");
+
+  // time difference to apply
+  std::chrono::duration<int> dt = m_data[row].t - m_data[row-1].t + std::chrono::duration<int>(1);
+  // apply time difference to all
+  for ( auto &i : m_data )
+    if ( i.folder == m_data[row].folder )
+      i.t -= dt;
 
   // set index
   m_idx = rows[rows.size()-1];
@@ -1588,100 +1631,15 @@ void MainWindow::on_tS_pushButton_Cdown_clicked()
   if ( m_data[row+1].camera == m_data[row].camera )
     return promptWarning("Next photo is not of another camera, cannot proceed");
 
+  // time difference to apply
+  std::chrono::duration<int> dt = m_data[row+1].t - m_data[row].t + std::chrono::duration<int>(1);
   // apply time difference to all
   for ( auto &i : m_data )
     if ( i.camera == m_data[row].camera )
-      i.t += m_data[row+1].t-m_data[row].t+std::chrono::duration<int>(1);
+      i.t += dt;
 
   // set index
   m_idx = rows[0];
-
-  emit dataChanged();
-}
-
-// =================================================================================================
-
-void MainWindow::on_tS_pushButton_Csync_clicked()
-{
-  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
-
-  // check if there is a destination: the last selected image
-  if ( m_selLast==-1 )
-  {
-    return promptWarning(
-      "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
-    );
-  }
-
-  // get sorted list of selected items
-  std::vector<size_t> rows = selectedItems(ui->tS_listWidget);
-
-  // check to continue
-  if ( rows.size() == 0 ) return;
-
-  // check if one camera occurs more than once
-  // - logical list
-  std::vector<int> check(m_ncam,0);
-  // - check
-  for ( auto &row : rows )
-  {
-    if ( check[m_data[row].camera] )
-      return promptWarning("Selection includes several photos from the same camera, cannot proceed");
-
-    check[m_data[row].camera] = 1;
-  }
-
-  // sync
-  size_t ref = m_selLast;
-
-  for ( auto &row : rows )
-  {
-    if ( row != ref )
-    {
-      for ( auto &i : m_data )
-        if ( i.camera == m_data[row].camera )
-          i.t -= m_data[row].t-m_data[ref].t;
-    }
-  }
-
-  // set index
-  m_idx = rows[rows.size()-1];
-
-  emit dataChanged();
-}
-
-// =================================================================================================
-
-void MainWindow::on_tS_pushButton_Fup_clicked()
-{
-  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
-
-  // get sorted list of selected items
-  std::vector<size_t> rows = selectedItems(ui->tS_listWidget);
-
-  // check to continue
-  if ( rows.size() == 0 ) return;
-
-  // top of the list / more then one item: don't know what to do
-  if ( rows[0]==0 )
-    return promptWarning("Selection includes first photo, cannot proceed");
-  if ( rows.size() > 1 )
-    return promptWarning("Selection contains more than one photo, cannot proceed");
-
-  // get index
-  size_t row = rows[0];
-
-  // not a boundary: don't know what to do
-  if ( m_data[row-1].folder == m_data[row].folder )
-    return promptWarning("Previous photo is not of another folder, cannot proceed");
-
-  // apply time difference to all
-  for ( auto &i : m_data )
-    if ( i.folder == m_data[row].folder )
-      i.t -= m_data[row].t - m_data[row-1].t + std::chrono::duration<int>(1);
-
-  // set index
-  m_idx = rows[rows.size()-1];
 
   emit dataChanged();
 }
@@ -1711,10 +1669,12 @@ void MainWindow::on_tS_pushButton_Fdown_clicked()
   if ( m_data[row+1].folder == m_data[row].folder )
     return promptWarning("Next photo is not of another folder, cannot proceed");
 
+  // time difference to apply
+  std::chrono::duration<int> dt = m_data[row+1].t - m_data[row].t + std::chrono::duration<int>(1);
   // apply time difference to all
   for ( auto &i : m_data )
     if ( i.folder == m_data[row].folder )
-      i.t += m_data[row+1].t - m_data[row].t + std::chrono::duration<int>(1);
+      i.t += dt;
 
   // set index
   m_idx = rows[0];
@@ -1722,6 +1682,60 @@ void MainWindow::on_tS_pushButton_Fdown_clicked()
   emit dataChanged();
 }
 
+// =================================================================================================
+
+void MainWindow::on_tS_pushButton_Csync_clicked()
+{
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
+
+  // check if there is a destination: the last selected image
+  if ( m_selLast == -1 )
+  {
+    return promptWarning(
+      "Specify the 'destination' explicitly by selecting it last (using Crtl/Cmd + Click)"
+    );
+  }
+
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->tS_listWidget);
+
+  // check to continue
+  if ( rows.size() == 0 ) return;
+
+  // check if one camera occurs more than once
+  // - logical list
+  std::vector<int> check(m_ncam,0);
+  // - check
+  for ( auto &row : rows )
+  {
+    if ( check[m_data[row].camera] )
+      return promptWarning("Selection includes several photos from the same camera, cannot proceed");
+
+    check[m_data[row].camera] = 1;
+  }
+
+  // get reference index
+  size_t ref = static_cast<size_t>( m_selLast );
+
+  // sync
+  for ( auto &row : rows )
+  {
+    if ( row != ref )
+    {
+      // - time difference between the selected photos that are synced
+      std::chrono::duration<int> dt = m_data[row].t - m_data[ref].t;
+      // - apply time difference to all photos
+      for ( auto &i : m_data )
+        if ( i.camera == m_data[row].camera )
+          i.t -= dt;
+    }
+  }
+
+  // set index
+  m_idx = rows[rows.size()-1];
+
+  emit dataChanged();
+}
 
 // =================================================================================================
 
@@ -1755,16 +1769,20 @@ void MainWindow::on_tS_pushButton_Fsync_clicked()
     check[m_data[row].folder] = 1;
   }
 
-  // sync
-  size_t ref = m_selLast;
+  // get reference index
+  size_t ref = static_cast<size_t>( m_selLast );
 
+  // sync
   for ( auto &row : rows )
   {
     if ( row != ref )
     {
+      // - time difference between the selected photos that are synced
+      std::chrono::duration<int> dt = m_data[row].t - m_data[ref].t;
+      // - apply time difference to all photos
       for ( auto &i : m_data )
         if ( i.folder == m_data[row].folder )
-          i.t -= m_data[row].t - m_data[ref].t;
+          i.t -= dt;
     }
   }
 
@@ -1815,7 +1833,7 @@ void MainWindow::on_tW_pushButton_write_clicked()
   assert( m_data.size() > 0 );
 
   // stop reading thumbnails (in thread)
-  m_data.requestStop();
+  m_thumbnails->requestStop();
 
   // number of characters needed the fit the photos
   // (ignore that the removed image might reduce N)
@@ -2191,17 +2209,8 @@ bool File::writeEXIF()
 // Files class - functions
 // =================================================================================================
 
-void Files::requestStop()
-{
-  if ( m_data.size() > 0 ) m_thumnails->requestStop();
-}
-
-// =================================================================================================
-
 void Files::push_back(File file)
 {
-  requestStop();
-
   m_data.push_back(file);
 
   m_ncam = std::max(m_ncam,file.camera+1);
@@ -2214,8 +2223,6 @@ void Files::pop_back()
 {
   assert( m_data.size() > 0 );
 
-  requestStop();
-
   m_data.pop_back();
 }
 
@@ -2223,8 +2230,6 @@ void Files::pop_back()
 
 void Files::empty()
 {
-  requestStop();
-
   while ( m_data.size() > 0 ) m_data.pop_back();
 }
 
@@ -2232,8 +2237,6 @@ void Files::empty()
 
 void Files::erase(std::vector<File>::iterator i)
 {
-  requestStop();
-
   m_data.erase(i);
 }
 
@@ -2245,8 +2248,6 @@ void Files::erase(std::vector<size_t> index)
   for ( auto &i : index ) assert( i < m_data.size() );
   #endif
 
-  requestStop();
-
   std::sort(index.begin(),index.end(),[](size_t i,size_t j){return i>j;});
 
   for ( auto &i : index ) m_data.erase(m_data.begin()+i);
@@ -2257,8 +2258,6 @@ void Files::erase(std::vector<size_t> index)
 File Files::take(size_t i)
 {
   assert( i < m_data.size() );
-
-  requestStop();
 
   File out = m_data[i];
 
@@ -2274,8 +2273,6 @@ size_t Files::sort(size_t idx)
   if ( m_data.size() == 0 ) return 0;
 
   assert( idx < m_data.size() );
-
-  requestStop();
 
   // store current order, to retrieve the new position of "idx" (also used to convert selection)
   for ( size_t i = 0 ; i < m_data.size() ; ++i ) m_data[i].index = i;
@@ -2307,8 +2304,6 @@ size_t Files::sortName(size_t ifol, size_t idx)
   if ( m_data.size() == 0 ) return 0;
 
   assert( idx < m_data.size() );
-
-  requestStop();
 
   // only sort for specified folder, "ifol"
   for ( auto &i : m_data ) {
@@ -2354,8 +2349,6 @@ bool Files::allThumbnailsRead()
 
 void Files::setThumbnailResolution(size_t N)
 {
-  requestStop();
-
   for ( auto &i : m_data ) {
     if ( i.thumb_pix != N ) {
       i.thumb_pix = N;
@@ -2382,13 +2375,13 @@ void Files::setDispName()
 // Thumbnails class - functions
 // =================================================================================================
 
-void Thumbnails::read()
+void Thumbnails::run()
 {
   m_busy = true ;
   m_stop = false;
 
   // loop over all photos
-  for ( auto &i : (*m_data) )
+  for ( size_t i = 0 ; i < (*m_data).size() ; ++i )
   {
     // - break the loop if requested externally
     if ( m_stop || QThread::currentThread()->isInterruptionRequested() )
@@ -2398,8 +2391,11 @@ void Thumbnails::read()
       return;
     }
 
+    // - get file
+    File file = (*m_data)[i];
+
     // - read if not read before
-    if ( !i.thumb_r )
+    if ( !file.thumb_r )
     {
       if ( m_stop )
       {
@@ -2409,12 +2405,15 @@ void Thumbnails::read()
       }
 
       QMatrix rot;
-      rot.rotate(i.rotation);
+      rot.rotate(file.rotation);
 
-      QPixmap pix(i.path);
-      pix.scaled(i.thumb_pix,i.thumb_pix,Qt::KeepAspectRatio, Qt::FastTransformation);
+      QPixmap pix(file.path);
+      pix.scaled(file.thumb_pix,file.thumb_pix,Qt::KeepAspectRatio, Qt::FastTransformation);
 
       QIcon icon = QIcon(QPixmap(pix.transformed(rot)));
+
+      file.thumb   = icon;
+      file.thumb_r = true;
 
       if ( m_stop )
       {
@@ -2423,8 +2422,24 @@ void Thumbnails::read()
         return;
       }
 
-      i.thumb   = icon;
-      i.thumb_r = true;
+      if ( i >= (*m_data).size() )
+      {
+        m_busy = false;
+        m_stop = false;
+        return;
+      }
+
+      if ( file.path == (*m_data)[i].path )
+      {
+        (*m_data)[i].thumb   = file.thumb;
+        (*m_data)[i].thumb_r = true;
+      }
+      else
+      {
+        m_busy = false;
+        m_stop = false;
+        return;
+      }
     }
   }
 
