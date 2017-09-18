@@ -1088,6 +1088,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tV_pushButton_rotL">
+            <property name="toolTip">
+             <string>Rotate photo counter-clockwise [Ctrl + Left</string>
+            </property>
             <property name="text">
              <string>Rotate L</string>
             </property>
@@ -1095,6 +1098,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="tV_pushButton_rotR">
+            <property name="toolTip">
+             <string>Rotate photo clockwise [Ctrl + Right]</string>
+            </property>
             <property name="text">
              <string>Rotate R</string>
             </property>
