@@ -182,6 +182,10 @@ MainWindow::MainWindow(QWidget *parent) :
   QShortcut *short_del3  = new QShortcut(QKeySequence(Qt::Key_D                       ), this);
   QShortcut *short_undo  = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z            ), this);
   QShortcut *short_full  = new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_F), this);
+  QShortcut *short_full2 = new QShortcut(QKeySequence(Qt::Key_F5                      ), this);
+  QShortcut *short_full3 = new QShortcut(QKeySequence(Qt::Key_F11                     ), this);
+  QShortcut *short_rotl  = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Left         ), this);
+  QShortcut *short_rotr  = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Right        ), this);
   // - enable in full screen
   short_esc  ->setContext(Qt::ApplicationShortcut);
   short_next1->setContext(Qt::ApplicationShortcut);
@@ -192,9 +196,13 @@ MainWindow::MainWindow(QWidget *parent) :
   short_del2 ->setContext(Qt::ApplicationShortcut);
   short_del3 ->setContext(Qt::ApplicationShortcut);
   short_undo ->setContext(Qt::ApplicationShortcut);
+  short_rotl ->setContext(Qt::ApplicationShortcut);
+  short_rotr ->setContext(Qt::ApplicationShortcut);
   // - connect shortcuts
   connect(short_esc  , SIGNAL( activated() ), this, SLOT( tV_stopFullScreen                () ));
   connect(short_full , SIGNAL( activated() ), this, SLOT( tV_startFullScreen               () ));
+  connect(short_full2, SIGNAL( activated() ), this, SLOT( tV_startFullScreen               () ));
+  connect(short_full3, SIGNAL( activated() ), this, SLOT( tV_startFullScreen               () ));
   connect(short_next1, SIGNAL( activated() ), this, SLOT( on_tV_pushButton_next_clicked    () ));
   connect(short_next2, SIGNAL( activated() ), this, SLOT( on_tV_pushButton_next_clicked    () ));
   connect(short_left , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_prev_clicked    () ));
@@ -207,6 +215,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(short_del2 , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_del_clicked     () ));
   connect(short_del3 , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_del_clicked     () ));
   connect(short_undo , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_undoDel_clicked () ));
+  connect(short_rotl , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_rotL_clicked    () ));
+  connect(short_rotr , SIGNAL( activated() ), this, SLOT( on_tV_pushButton_rotR_clicked    () ));
 
   // initialize clear application
   resetApp();
@@ -400,8 +410,8 @@ void MainWindow::dataUpdate()
     // - logical list
     std::vector<int> idx( m_data.size() + m_dataDel.size() , 0 );
     // - fill
-    for ( auto &i : m_data    ) idx[i.camera] = -1;
-    for ( auto &i : m_dataDel ) idx[i.camera] = -2;
+    for ( auto &i : m_data    ) if ( idx[i.camera] == 0 ) idx[i.camera] = -1;
+    for ( auto &i : m_dataDel ) if ( idx[i.camera] == 0 ) idx[i.camera] = -2;
     // - counter
     int j = 0;
     // - convert to renumbering list: data first
@@ -420,8 +430,8 @@ void MainWindow::dataUpdate()
     // - logical list
     std::vector<int> idx( m_data.size() + m_dataDel.size() , 0 );
     // - fill
-    for ( auto &i : m_data    ) idx[i.folder] = -1;
-    for ( auto &i : m_dataDel ) idx[i.folder] = -2;
+    for ( auto &i : m_data    ) if ( idx[i.folder] == 0 ) idx[i.folder] = -1;
+    for ( auto &i : m_dataDel ) if ( idx[i.folder] == 0 ) idx[i.folder] = -2;
     // - counter
     int j = 0;
     // - convert to renumbering list: data first
@@ -916,7 +926,10 @@ void MainWindow::tF_addFiles(size_t ifol)
   // write to status-bar
   // - initialize message
   QString text;
-  text = QString("Read %1 photos").arg(N) + QString(" (total %1 photos).").arg(m_data.size());
+  if ( N == 1 )             text  = QString("Read 1 photo");
+  else                      text  = QString("Read %1 photos").arg(N);
+  if ( m_data.size() == 1 ) text += QString(" (total 1 photo).");
+  else                      text += QString(" (total %1 photos).").arg(m_data.size());
   // - add message to warn the user
   if ( m_nfol == m_max_fol-1 )
     text += " The next folder is the last folder. Just sort and write, then read and add more!";
@@ -1938,7 +1951,8 @@ void MainWindow::on_tW_pushButton_write_clicked()
 
   // write message
   QString text;
-  text = QString("Written %1 files").arg(m_data.size());
+  if ( m_data.size() == 1 ) text = QString("Written 1 file");
+  else                      text = QString("Written %1 files").arg(m_data.size());
   ui->statusBar->showMessage(text);
 
   // store "PATH/chroto.json"
@@ -2001,7 +2015,8 @@ void MainWindow::on_tW_pushButton_clean_clicked()
 
   // write message
   QString text;
-  text = QString("Deleted %1 files").arg(m_dataDel.size());
+  if ( m_dataDel.size() == 1 ) text = QString("Deleted 1 file");
+  else                         text = QString("Deleted %1 files").arg(m_dataDel.size());
   ui->statusBar->showMessage(text);
 
   // clear lists
