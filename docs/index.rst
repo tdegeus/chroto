@@ -19,6 +19,10 @@ Contents
 
    develop.rst
 
+
+for i in *.jpg; do exiv2 $i > test.log; if grep -q "Camera model    : Canon EOS DIGITAL REBEL" test.log; then mv $i cam0/; else mv $i cam1/; fi; done; rm test.log
+
+
 Indices and tables
 ==================
 

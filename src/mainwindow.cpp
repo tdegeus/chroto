@@ -114,6 +114,19 @@ MainWindow::MainWindow(QWidget *parent) :
   m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_9 );
   m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_10);
   m_tF_pushButtons_nameSort.push_back(ui->tF_pushButton_nameSort_11);
+  // --
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_0 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_1 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_2 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_3 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_4 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_5 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_6 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_7 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_8 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_9 );
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_10);
+  m_tF_pushButtons_autoSplit.push_back(ui->tF_pushButton_autoSplit_11);
 
   // Tab::Files : link scroll position listWidgets
   for ( auto &i: m_tF_listWidgets )
@@ -128,9 +141,10 @@ MainWindow::MainWindow(QWidget *parent) :
   // Tab::Files : select folder / remove selected files / sort by name / sync selection
   for ( size_t i = 0 ; i < m_tF_pushButtons_select.size() ; ++i )
   {
-    connect(m_tF_pushButtons_select  [i], &QPushButton::clicked, [=](){ tF_addFiles  (i); } );
-    connect(m_tF_pushButtons_nameSort[i], &QPushButton::clicked, [=](){ tF_nameSort  (i); } );
-    connect(m_tF_pushButtons_excl    [i], &QPushButton::clicked, [=](){ tF_excludeSel(i); } );
+    connect(m_tF_pushButtons_select   [i], &QPushButton::clicked, [=](){ tF_addFiles  (i); } );
+    connect(m_tF_pushButtons_nameSort [i], &QPushButton::clicked, [=](){ tF_nameSort  (i); } );
+    connect(m_tF_pushButtons_autoSplit[i], &QPushButton::clicked, [=](){ tF_autoSplit (i); } );
+    connect(m_tF_pushButtons_excl     [i], &QPushButton::clicked, [=](){ tF_excludeSel(i); } );
     connect(m_tF_listWidgets[i], &QListWidget::itemSelectionChanged, [=](){tF_unifySelection(i);});
   }
 
@@ -320,7 +334,11 @@ void MainWindow::resetApp(bool prompt)
 {
   // hide button if compiled without exiv2
   #ifndef WITHEXIV2
-  ui->tW_checkBox_exif->setVisible(false);
+
+    ui->tW_checkBox_exif->setVisible(false);
+
+    for ( auto &i : m_tF_pushButtons_autoSplit ) i->setVisible(false);
+
   #endif
 
   // prompt user for confirmation
@@ -477,37 +495,40 @@ void MainWindow::tF_view()
   // handle visibility: only the first "m_nfol + 1" folders will be visible
   for ( size_t ifol = 0 ; ifol < m_max_fol ; ++ifol )
   {
-    m_tF_listWidgets         [ifol]->setVisible(ifol<=m_nfol);
-    m_tF_labels_N            [ifol]->setVisible(ifol<=m_nfol);
-    m_tF_lineEdits           [ifol]->setVisible(ifol<=m_nfol);
-    m_tF_pushButtons_select  [ifol]->setVisible(ifol<=m_nfol);
-    m_tF_pushButtons_excl    [ifol]->setVisible(ifol<=m_nfol);
-    m_tF_pushButtons_nameSort[ifol]->setVisible(ifol<=m_nfol);
+    m_tF_listWidgets          [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_labels_N             [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_lineEdits            [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_pushButtons_select   [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_pushButtons_excl     [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_pushButtons_nameSort [ifol]->setVisible(ifol<=m_nfol);
+    m_tF_pushButtons_autoSplit[ifol]->setVisible(ifol<=m_nfol);
   }
 
   // enable all buttons of folders containing photos, rename selection button
   for ( size_t ifol = 0 ; ifol < m_nfol ; ++ifol )
   {
-    m_tF_listWidgets         [ifol]->setEnabled(true);
-    m_tF_labels_N            [ifol]->setEnabled(true);
-    m_tF_lineEdits           [ifol]->setEnabled(true);
-    m_tF_pushButtons_select  [ifol]->setEnabled(true);
-    m_tF_pushButtons_excl    [ifol]->setEnabled(true);
-    m_tF_pushButtons_nameSort[ifol]->setEnabled(true);
-    m_tF_pushButtons_select  [ifol]->setText("Exclude folder");
+    m_tF_listWidgets          [ifol]->setEnabled(true);
+    m_tF_labels_N             [ifol]->setEnabled(true);
+    m_tF_lineEdits            [ifol]->setEnabled(true);
+    m_tF_pushButtons_select   [ifol]->setEnabled(true);
+    m_tF_pushButtons_excl     [ifol]->setEnabled(true);
+    m_tF_pushButtons_nameSort [ifol]->setEnabled(true);
+    m_tF_pushButtons_autoSplit[ifol]->setEnabled(true);
+    m_tF_pushButtons_select   [ifol]->setText("Exclude folder");
   }
 
   // enable selection button of the next folder and rename it, disable all other widgets
   for ( size_t ifol = m_nfol ; ifol < m_max_fol ; ++ifol )
   {
-    m_tF_listWidgets         [ifol]->setEnabled(false);
-    m_tF_labels_N            [ifol]->setEnabled(false);
-    m_tF_lineEdits           [ifol]->setEnabled(false);
-    m_tF_pushButtons_select  [ifol]->setEnabled(true );
-    m_tF_pushButtons_excl    [ifol]->setEnabled(false);
-    m_tF_pushButtons_nameSort[ifol]->setEnabled(false);
-    m_tF_labels_N            [ifol]->setText("");
-    m_tF_pushButtons_select  [ifol]->setText("Select folder");
+    m_tF_listWidgets          [ifol]->setEnabled(false);
+    m_tF_labels_N             [ifol]->setEnabled(false);
+    m_tF_lineEdits            [ifol]->setEnabled(false);
+    m_tF_pushButtons_select   [ifol]->setEnabled(true );
+    m_tF_pushButtons_excl     [ifol]->setEnabled(false);
+    m_tF_pushButtons_nameSort [ifol]->setEnabled(false);
+    m_tF_pushButtons_autoSplit[ifol]->setEnabled(false);
+    m_tF_labels_N             [ifol]->setText("");
+    m_tF_pushButtons_select   [ifol]->setText("Select folder");
   }
 
   // empty storage paths
@@ -948,6 +969,97 @@ void MainWindow::tF_nameSort(size_t ifol)
   m_idx = m_data.sortName(ifol,m_idx);
 
   emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::tF_autoSplit(size_t ifol)
+{
+  #ifdef WITHEXIV2
+    try
+    {
+      // lists with camera information
+      std::vector<std::string> Make;
+      std::vector<std::string> Model;
+      // corresponding strings
+      std::string make;
+      std::string model;
+
+      // loop over all files
+      for ( auto &file : m_data )
+      {
+        // - only check current folder
+        if ( file.folder != ifol ) continue;
+
+        // - get information
+        {
+          Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(file.path.toStdString().c_str());
+
+          if ( image.get() == 0 ) return;
+
+          image->readMetadata();
+
+          Exiv2::ExifData &exifData = image->exifData();
+
+          if ( exifData.empty() ) return;
+
+          {
+            Exiv2::Exifdatum& tag = exifData["Exif.Image.Make"];
+            make = tag.toString();
+          }
+
+          {
+            Exiv2::Exifdatum& tag = exifData["Exif.Image.Model"];
+            model = tag.toString();
+          }
+        }
+
+        // - start lists with camera information
+        if ( Make.size() == 0 ) {
+          Make .push_back(make );
+          Model.push_back(model);
+        }
+
+       // - logical
+       bool   found = false;
+       size_t i;
+
+       // - find the camera
+       for ( i = 0 ; i < Make.size() ; ++i ) {
+         if ( Make[i] == make and Model[i] == model ) {
+           found = true;
+           break;
+         }
+       }
+
+       // - add to lists with camera information
+       if ( !found ) {
+         Make .push_back(make );
+         Model.push_back(model);
+       }
+
+       // - convert camera index
+       if ( i > 0 ) file.camera = m_ncam + i;
+
+      }
+
+      // no changes: quit
+      if ( Make.size() <= 1 ) return;
+
+      // write to status-bar
+      // - initialize message
+      QString text = QString("Split into %1 cameras").arg(Make.size());
+      ui->statusBar->showMessage(text);
+
+      // signal to process changes
+      emit dataChanged();
+
+    }
+    catch ( ... )
+    {
+      return;
+    }
+  #endif
 }
 
 // =================================================================================================
@@ -1401,6 +1513,41 @@ void MainWindow::on_tS_pushButton_split_clicked()
 
   // change camera index
   for ( auto &i : rows ) m_data[i].camera = m_ncam;
+
+  emit dataChanged();
+}
+
+// =================================================================================================
+
+void MainWindow::on_tS_pushButton_merge_clicked()
+{
+  if ( ui->tabWidget->currentIndex() != Tab::Sort ) return;
+
+  // get sorted list of selected items
+  std::vector<size_t> rows = selectedItems(ui->tS_listWidget);
+
+  // check to continue
+  if ( rows.size() == 0 ) return;
+
+  // select new camera
+  size_t ref     = rows[0];
+  size_t new_cam = m_data[ref].camera;
+
+  // merge cameras in the selection
+  // - loop over selection
+  for ( auto &row : rows )
+  {
+    // - skip trivial case of the reference image (as file.camera == cam)
+    if ( row != ref )
+    {
+      // - store old camera
+      size_t cam = m_data[row].camera;
+      // - change all relevant photos
+      for ( auto &file : m_data )
+        if ( file.camera == cam )
+          file.camera = new_cam;
+    }
+  }
 
   emit dataChanged();
 }
@@ -2589,4 +2736,3 @@ std::string removePath(const std::string &path, const std::string &name)
   // return
   return out;
 }
-

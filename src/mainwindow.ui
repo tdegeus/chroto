@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>889</width>
-    <height>646</height>
+    <width>856</width>
+    <height>671</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,7 @@
        <enum>Qt::ClickFocus</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_files">
        <attribute name="title">
@@ -39,7 +39,7 @@
              <x>0</x>
              <y>0</y>
              <width>1910</width>
-             <height>509</height>
+             <height>534</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -114,6 +114,19 @@
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_0">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>Split cameras</string>
                 </property>
                </widget>
               </item>
@@ -202,6 +215,19 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -278,6 +304,19 @@
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
                 </property>
                </widget>
               </item>
@@ -360,6 +399,19 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -436,6 +488,19 @@
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
                 </property>
                </widget>
               </item>
@@ -518,6 +583,19 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -594,6 +672,19 @@
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
                 </property>
                </widget>
               </item>
@@ -676,6 +767,19 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -752,6 +856,19 @@
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
                 </property>
                </widget>
               </item>
@@ -834,6 +951,19 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -913,6 +1043,19 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </item>
             <item>
@@ -989,6 +1132,19 @@
                 </property>
                 <property name="text">
                  <string>Sort by name</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="tF_pushButton_autoSplit_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Automatically split cameras in this folder</string>
+                </property>
+                <property name="text">
+                 <string>PushButton</string>
                 </property>
                </widget>
               </item>
@@ -1388,7 +1544,14 @@
              <string>Move selected photo(s) to separate camera</string>
             </property>
             <property name="text">
-             <string>Split set</string>
+             <string>Split selection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="tS_pushButton_merge">
+            <property name="text">
+             <string>Merge selection</string>
             </property>
            </widget>
           </item>
@@ -1770,7 +1933,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>889</width>
+     <width>856</width>
      <height>22</height>
     </rect>
    </property>

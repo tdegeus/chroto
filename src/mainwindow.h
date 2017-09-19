@@ -214,6 +214,7 @@ private slots:
   void tF_addFiles      (size_t ifol); // add files for the selected folder
   void tF_excludeSel    (size_t ifol); // exclude selected files of that folder
   void tF_nameSort      (size_t ifol); // sort photos in the folder by name (time modified)
+  void tF_autoSplit     (size_t ifol); // automatically split cameras in folder
 
   // Tab::View : full screen control
   void tV_startFullScreen();
@@ -257,6 +258,7 @@ private slots:
   void on_tS_pushButton_Fdown_clicked(); // move image(s) down (apply for all images in folder)
   void on_tS_pushButton_Fsync_clicked(); // sync image(s)      (apply for all images in folder)
   void on_tS_pushButton_split_clicked(); // split selected images to new 'camera'
+  void on_tS_pushButton_merge_clicked(); // merge cameras in selected images
 
   // Tab::Write
   void on_tW_pushButton_path_clicked      (); // select output path
@@ -300,6 +302,7 @@ private:
   std::vector<QPushButton*> m_tF_pushButtons_select;   // to select (or exclude) a folder
   std::vector<QPushButton*> m_tF_pushButtons_excl;     // to remove selected files
   std::vector<QPushButton*> m_tF_pushButtons_nameSort; // to sort folder by name
+  std::vector<QPushButton*> m_tF_pushButtons_autoSplit;// to automatically split cameras
 
   // colormap to highlight cameras
   std::vector<QColor> m_col;
