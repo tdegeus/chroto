@@ -391,14 +391,14 @@ void MainWindow::instruction()
   switch( ui->tabWidget->currentIndex() )
   {
     case Tab::Files:
-      text  = "Store the photos of each camera in a separate folder. Select each folder here.";
+      text  = "Select each folder containing the photos of each camera.";
       break;
     case Tab::View:
-      text  = "Check out your great photos! Also time to delete less successful experiments.";
+      text  = "Check out your great photos! Also time to delete less successful attempts.";
       break;
     case Tab::Sort:
       text  = "Correct the order of photos if needed. Strategy: move entire folders/cameras first.";
-      text += " Try to move towards a correct reference.";
+      text += " Lastly correct time in the View tab.";
       break;
     case Tab::Write:
       text  = "Write the sorted photos. Use clean-up to actually remove all 'deleted' photos.";
@@ -921,9 +921,8 @@ void MainWindow::tF_addFiles(size_t ifol)
     m_data.push_back(file);
 
     // - show progress
-    QString text;
-    int frac = static_cast<int>(static_cast<double>(i+1)/static_cast<double>(N)*100.);
-    text = QString("Reading, %1\% complete").arg(frac);
+    int     frac = static_cast<int>(static_cast<double>(i+1)/static_cast<double>(N)*100.);
+    QString text = QString("Reading, %1\% complete").arg(frac);
     ui->statusBar->showMessage(text);
     qApp->processEvents();
   }
@@ -978,6 +977,11 @@ void MainWindow::tF_autoSplit(size_t ifol)
   #ifdef WITHEXIV2
     try
     {
+      // count the number of photos (to print progress)
+      size_t ipic = 0;
+      size_t npic = 0;
+      for ( auto &file : m_data ) if ( file.folder == ifol ) ++npic;
+
       // lists with camera information
       std::vector<std::string> Make;
       std::vector<std::string> Model;
@@ -990,6 +994,17 @@ void MainWindow::tF_autoSplit(size_t ifol)
       {
         // - only check current folder
         if ( file.folder != ifol ) continue;
+
+        // - print status
+        {
+          ++ipic;
+
+          int     frac = static_cast<int>(static_cast<double>(ipic)/static_cast<double>(npic)*100.);
+          QString text = QString("Analyzing photos, %1\% complete").arg(frac);
+
+          ui->statusBar->showMessage(text);
+          qApp->processEvents();
+        }
 
         // - get information
         {

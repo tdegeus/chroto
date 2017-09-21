@@ -52,7 +52,7 @@ class Files;
 class Thumbnails;
 
 // =================================================================================================
-// File : class containing all information of one image
+// class containing all information of one image
 // =================================================================================================
 
 class File
@@ -67,8 +67,8 @@ public:
   size_t  folder    = 0    ; // folder-index (corresponds to "m_tF_listWidgets")
   size_t  camera    = 0    ; // camera-index (allows several cameras in one folder)
   int     rotation  = 0    ; // rotation in degrees
-  size_t  index     = 0    ; // for sorting: position in list -> locate where "m_idx" went
-  bool    sort      = true ; // for sorting: selectively sort subset
+  size_t  index     = 0    ; // for sorting: position in list -> locate where the image went
+  bool    sort      = true ; // for sorting: signal selective sort of subset
   bool    rot_mod   = false; // signal if the photo has been manually rotated
   QIcon   thumb            ; // thumbnail
   bool    thumb_r   = false; // signal if thumbnail has been read
@@ -87,7 +87,7 @@ public:
 };
 
 // =================================================================================================
-// Files : class with a list of "File"
+// class with a list of "File"
 // =================================================================================================
 
 class Files
@@ -125,7 +125,7 @@ public:
 };
 
 // =================================================================================================
-// Thumbnails : class to read thumbnails in the background (m_data points to m_data in MainWindow)
+// class to read thumbnails in the background (m_data points to m_data in MainWindow)
 // =================================================================================================
 
 class Thumbnails: public QObject
