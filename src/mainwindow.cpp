@@ -635,7 +635,13 @@ void MainWindow::tV_view()
   // - convert the Qt format
   QDateTime t;
   t.setTimeSpec(Qt::UTC);
-  t.setSecsSinceEpoch(m_data[m_idx].t.time_since_epoch().count());
+
+  #if(QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+    t.setSecsSinceEpoch(m_data[m_idx].t.time_since_epoch().count());
+  #else
+    t.setMSecsSinceEpoch(m_data[m_idx].t.time_since_epoch().count()*1000);
+  #endif
+
   // - store to widget
   ui->tV_dateTimeEdit->setDateTime(t);
 
@@ -1128,7 +1134,11 @@ void MainWindow::on_tV_dateTimeEdit_editingFinished()
   tm.setTimeSpec(Qt::UTC);
   // - convert to correct format
   date::sys_seconds t = date::sys_seconds(
-    std::chrono::duration<qint64>(tm.toSecsSinceEpoch())
+    #if(QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+        std::chrono::duration<qint64>(tm.toSecsSinceEpoch())
+    #else
+        std::chrono::duration<qint64>(tm.toMSecsSinceEpoch()/1000)
+    #endif
   );
   // - convert to time shift
   std::chrono::duration<int> dt = t - m_data[m_idx].t;
